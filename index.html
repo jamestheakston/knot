@@ -1525,10 +1525,13 @@
       }
 
       try{
+        // Remove hash from redirect URL to avoid double hashes
+        var redirectUrl = window.location.origin + window.location.pathname;
+        
         var { data, error } = await client.auth.signInWithOAuth({
           provider: 'github',
           options: {
-            redirectTo: window.location.href,
+            redirectTo: redirectUrl,
             queryParams: {
               flow: flow
             }
