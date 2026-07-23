@@ -402,10 +402,26 @@
     .pod-card{ grid-template-columns: 1fr; }
     .nav-links .text-link{ display:none; }
   }
+  @media (max-width: 640px){
+    .modal-panel{
+      width: 100%;
+      max-width: 100%;
+      border-radius: 0;
+      height: 100%;
+      max-height: 100%;
+    }
+    .modal-close{
+      top: 16px;
+      right: 16px;
+    }
+  }
   @media (max-width: 560px){
     .hero{ padding: 72px 20px 40px; }
     section{ padding: 64px 0; }
     .step{ grid-template-columns: 1fr; gap: 8px; }
+    .hero h1{ font-size: 28px; }
+    .hero-ctas{ flex-direction: column; }
+    .hero-ctas .btn{ width: 100%; }
   }
 
   @media (prefers-reduced-motion: reduce){
@@ -500,6 +516,11 @@
     grid-template-columns: 1fr 1fr;
     gap: 14px;
     margin-top: 30px;
+  }
+  @media (max-width: 640px){
+    .modal-cards{
+      grid-template-columns: 1fr;
+    }
   }
   .option-card{
     position: relative;

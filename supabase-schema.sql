@@ -86,6 +86,7 @@ ALTER TABLE check_ins ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Users can view pods they are members of"
   ON pods FOR SELECT
   USING (
+    created_by = auth.uid() OR
     id IN (
       SELECT pod_id FROM pod_members WHERE user_id = auth.uid()
     )
@@ -98,10 +99,7 @@ CREATE POLICY "Users can insert pods they create"
 CREATE POLICY "Pod admins can update pods"
   ON pods FOR UPDATE
   USING (
-    id IN (
-      SELECT pod_id FROM pod_members 
-      WHERE user_id = auth.uid() AND role = 'admin'
-    )
+    created_by = auth.uid()
   );
 
 -- Habits policies
@@ -116,18 +114,22 @@ CREATE POLICY "Users can view habits for pods they are members of"
 CREATE POLICY "Pod admins can insert habits"
   ON habits FOR INSERT
   WITH CHECK (
-    pod_id IN (
-      SELECT pod_id FROM pod_members 
-      WHERE user_id = auth.uid() AND role = 'admin'
+    EXISTS (
+      SELECT 1 FROM pod_members 
+      WHERE pod_id = habits.pod_id 
+      AND user_id = auth.uid() 
+      AND role = 'admin'
     )
   );
 
 CREATE POLICY "Pod admins can update habits"
   ON habits FOR UPDATE
   USING (
-    pod_id IN (
-      SELECT pod_id FROM pod_members 
-      WHERE user_id = auth.uid() AND role = 'admin'
+    EXISTS (
+      SELECT 1 FROM pod_members 
+      WHERE pod_id = habits.pod_id 
+      AND user_id = auth.uid() 
+      AND role = 'admin'
     )
   );
 
@@ -143,9 +145,11 @@ CREATE POLICY "Users can insert themselves into a pod via invite code"
 CREATE POLICY "Pod admins can update member roles"
   ON pod_members FOR UPDATE
   USING (
-    pod_id IN (
-      SELECT pod_id FROM pod_members 
-      WHERE user_id = auth.uid() AND role = 'admin'
+    EXISTS (
+      SELECT 1 FROM pod_members pm
+      WHERE pm.pod_id = pod_members.pod_id 
+      AND pm.user_id = auth.uid() 
+      AND pm.role = 'admin'
     )
   );
 
