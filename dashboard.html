@@ -1577,6 +1577,8 @@
     }
 
     function navigateTo(section){
+      console.log('Navigating to section:', section);
+      
       // Update active nav item
       document.querySelectorAll('.nav-item').forEach(function(item){
         item.classList.remove('is-active');
@@ -1613,37 +1615,41 @@
       var contentArea = document.getElementById('contentArea');
       contentArea.innerHTML = '<div class="loading">Loading...</div>';
 
-      switch(section){
-        case 'overview':
-          loadOverview();
-          break;
-        case 'members':
-          loadMembers();
-          break;
-        case 'check-ins':
-          loadCheckIns();
-          break;
-        case 'streak':
-          loadStreakSection();
-          break;
-        case 'pod-settings':
-          loadPodSettings();
-          break;
-        case 'invite':
-          loadInvite();
-          break;
-        case 'profile':
-          loadProfile();
-          break;
-        case 'account':
-          loadAccountSettings();
-          break;
-        default:
-          loadOverview();
-      }
+      // Use a timeout to ensure the loading state is set before async operations
+      setTimeout(function(){
+        switch(section){
+          case 'overview':
+            loadOverview();
+            break;
+          case 'members':
+            loadMembers();
+            break;
+          case 'check-ins':
+            loadCheckIns();
+            break;
+          case 'streak':
+            loadStreakSection();
+            break;
+          case 'pod-settings':
+            loadPodSettings();
+            break;
+          case 'invite':
+            loadInvite();
+            break;
+          case 'profile':
+            loadProfile();
+            break;
+          case 'account':
+            loadAccountSettings();
+            break;
+          default:
+            loadOverview();
+        }
+      }, 0);
     }
 
     async function loadOverview(){
+      console.log('Loading overview');
       var contentArea = document.getElementById('contentArea');
       var streak = await loadStreakData();
       
@@ -1672,6 +1678,7 @@
     }
 
     async function loadMembers(){
+      console.log('Loading members');
       var contentArea = document.getElementById('contentArea');
       var client = getSupabaseClient();
       
@@ -1725,6 +1732,7 @@
     }
 
     async function loadCheckIns(){
+      console.log('Loading check-ins');
       var contentArea = document.getElementById('contentArea');
       var client = getSupabaseClient();
       
@@ -1825,11 +1833,13 @@
     }
 
     async function loadStreakSection(){
+      console.log('Loading streak section');
       var streak = await loadStreakData();
       displayStreak(streak);
     }
 
     async function loadPodSettings(){
+      console.log('Loading pod settings');
       var contentArea = document.getElementById('contentArea');
       
       if(!isAdmin){
@@ -1891,6 +1901,7 @@
     }
 
     function loadInvite(){
+      console.log('Loading invite');
       var contentArea = document.getElementById('contentArea');
       
       if(!isAdmin){
@@ -1929,6 +1940,7 @@
     }
 
     function loadProfile(){
+      console.log('Loading profile');
       var contentArea = document.getElementById('contentArea');
       var displayName = currentUser.user_metadata?.display_name || currentUser.email?.split('@')[0] || 'User';
       
@@ -1956,6 +1968,7 @@
     }
 
     function loadAccountSettings(){
+      console.log('Loading account settings');
       var contentArea = document.getElementById('contentArea');
       
       contentArea.innerHTML = `
