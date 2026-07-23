@@ -1718,14 +1718,16 @@
     // Check for auth errors in URL
     function checkAuthErrors(){
       var urlParams = new URLSearchParams(window.location.search);
-      var error = urlParams.get('error');
-      var errorDescription = urlParams.get('error_description');
-      var errorType = urlParams.get('error_type');
-      var flow = urlParams.get('flow');
-      var createpod = urlParams.get('createpod');
+      var hashParams = new URLSearchParams(window.location.hash.substring(1));
+      var error = urlParams.get('error') || hashParams.get('error');
+      var errorDescription = urlParams.get('error_description') || hashParams.get('error_description');
+      var errorType = urlParams.get('error_type') || hashParams.get('error_type');
+      var flow = urlParams.get('flow') || hashParams.get('flow');
+      var createpod = urlParams.get('createpod') || hashParams.get('createpod');
+      var accessToken = hashParams.get('access_token');
 
       // Handle successful GitHub auth redirect
-      if(flow && !error){
+      if(accessToken && !error){
         if(createpod === 'true' && flow === 'start'){
           // Redirect to dashboard with createpod parameter
           window.location.href = 'dashboard.html?createpod=true';
