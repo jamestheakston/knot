@@ -446,6 +446,9 @@
     padding: 24px;
     background: rgba(21,25,34,0.5);
     backdrop-filter: blur(6px);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.28s ease, visibility 0s linear 0.28s;
   }
   .modal-overlay.is-open{
     display: flex;
@@ -1525,12 +1528,29 @@
         // Remove hash from redirect URL to avoid double hashes
         var redirectUrl = window.location.origin + window.location.pathname;
         
+        // Store pod data if in start flow for post-auth redirect
+        if(flow === 'start'){
+          var podName = document.getElementById('podName').value;
+          var habitName = document.getElementById('habitName').value;
+          var habitDescription = document.getElementById('habitDescription').value;
+          var frequency = document.getElementById('frequency').value;
+          
+          var podDataToStore = {
+            podName: podName,
+            habitName: habitName,
+            habitDescription: habitDescription,
+            frequency: frequency
+          };
+          localStorage.setItem('pendingPodCreation', JSON.stringify(podDataToStore));
+        }
+        
         var { data, error } = await client.auth.signInWithOAuth({
           provider: 'github',
           options: {
             redirectTo: redirectUrl,
             queryParams: {
-              flow: flow
+              flow: flow,
+              createpod: flow === 'start' ? 'true' : 'false'
             }
           }
         });
@@ -1700,6 +1720,21 @@
       var error = urlParams.get('error');
       var errorDescription = urlParams.get('error_description');
       var errorType = urlParams.get('error_type');
+      var flow = urlParams.get('flow');
+      var createpod = urlParams.get('createpod');
+
+      // Handle successful GitHub auth redirect
+      if(flow && !error){
+        if(createpod === 'true' && flow === 'start'){
+          // Redirect to dashboard with createpod parameter
+          window.location.href = 'dashboard.html?createpod=true';
+          return;
+        } else if(flow === 'join' || flow === 'start'){
+          // Redirect to dashboard normally
+          window.location.href = 'dashboard.html';
+          return;
+        }
+      }
 
       if(error){
         var message = errorDescription || 'Authentication error occurred';
