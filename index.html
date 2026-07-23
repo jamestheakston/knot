@@ -776,6 +776,17 @@
     text-decoration: underline;
   }
 
+  .auth-error{
+    padding: 16px;
+    background: rgba(196, 67, 42, 0.08);
+    border: 1px solid rgba(196, 67, 42, 0.2);
+    border-radius: 10px;
+    margin-bottom: 24px;
+  }
+  .auth-error p{
+    margin: 0;
+  }
+
   /* ---------- TOAST ---------- */
   .toast{
     position: fixed;
@@ -1270,6 +1281,9 @@
       document.removeEventListener('keydown', onKeydown);
       if(lastFocused) lastFocused.focus();
       resetForms();
+      // Remove any auth error messages
+      var authError = overlay.querySelector('.auth-error');
+      if(authError) authError.remove();
     }
 
     function onKeydown(e){
@@ -1670,10 +1684,29 @@
       var urlParams = new URLSearchParams(window.location.search);
       var error = urlParams.get('error');
       var errorDescription = urlParams.get('error_description');
+      var errorType = urlParams.get('error_type');
 
       if(error){
         var message = errorDescription || 'Authentication error occurred';
-        showToast(message.replace(/\+/g, ' '));
+        
+        // Check if user already exists
+        if(errorType === 'user_exists' || message.toLowerCase().includes('already exists') || message.toLowerCase().includes('already registered')){
+          // Open modal and show error with login link
+          openModal();
+          goToStep('choice');
+          setTimeout(function(){
+            var errorDiv = document.createElement('div');
+            errorDiv.className = 'auth-error';
+            errorDiv.innerHTML = '<p style="color: var(--red); margin-bottom: 12px;">This user already exists.</p><p style="color: var(--muted);"><a href="login.html" style="color: var(--blue);">Log in</a> to continue.</p>';
+            var modalPanel = overlay.querySelector('.modal-panel');
+            var existingError = modalPanel.querySelector('.auth-error');
+            if(existingError) existingError.remove();
+            modalPanel.insertBefore(errorDiv, modalPanel.firstChild);
+          }, 100);
+        }else{
+          showToast(message.replace(/\+/g, ' '));
+        }
+        
         // Clean URL
         window.history.replaceState({}, document.title, window.location.pathname);
       }
