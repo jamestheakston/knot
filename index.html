@@ -1432,14 +1432,33 @@
           document.getElementById('join-email-form').classList.remove('is-visible');
         }
         
-        // Save form data
+        // Validate pod name if going from start-name to start-habit
         if(nextStep === 'start-habit'){
-          formData.start.podName = document.getElementById('podName').value;
+          var podNameInput = document.getElementById('podName');
+          var podName = podNameInput.value.trim();
+          if(!podName){
+            podNameInput.style.borderColor = 'var(--red)';
+            podNameInput.focus();
+            return;
+          }
+          podNameInput.style.borderColor = '';
+          formData.start.podName = podName;
         }
+        
+        // Validate habit name if going from start-habit to start-frequency
         if(nextStep === 'start-frequency'){
-          formData.start.habitName = document.getElementById('habitName').value;
-          formData.start.habitDescription = document.getElementById('habitDescription').value;
+          var habitNameInput = document.getElementById('habitName');
+          var habitName = habitNameInput.value.trim();
+          if(!habitName){
+            habitNameInput.style.borderColor = 'var(--red)';
+            habitNameInput.focus();
+            return;
+          }
+          habitNameInput.style.borderColor = '';
+          formData.start.habitName = habitName;
+          formData.start.habitDescription = document.getElementById('habitDescription').value.trim();
         }
+        
         if(nextStep === 'start-signup'){
           formData.start.frequency = document.getElementById('frequency').value;
           // Reset email form visibility
