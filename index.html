@@ -440,18 +440,21 @@
     position: fixed;
     inset: 0;
     z-index: 100;
-    display: flex;
+    display: none;
     align-items: center;
     justify-content: center;
     padding: 24px;
     background: rgba(21,25,34,0.5);
     backdrop-filter: blur(6px);
+  }
+  .modal-overlay.is-open{
+    display: flex;
     opacity: 0;
     visibility: hidden;
     pointer-events: none;
     transition: opacity 0.28s ease, visibility 0s linear 0.28s, pointer-events 0s linear 0.28s;
   }
-  .modal-overlay.is-open{
+  .modal-overlay.is-open.is-visible{
     opacity: 1;
     visibility: visible;
     pointer-events: auto;
@@ -1300,21 +1303,31 @@
       overlay.setAttribute('aria-hidden', 'false');
       document.body.style.overflow = 'hidden';
       goToStep('choice');
+      // Trigger animation after display is set
+      requestAnimationFrame(function(){
+        requestAnimationFrame(function(){
+          overlay.classList.add('is-visible');
+        });
+      });
       setTimeout(function(){ closeBtn.focus(); }, 300);
       document.addEventListener('keydown', onKeydown);
     }
 
     function closeModal(){
-      overlay.classList.remove('is-open');
-      overlay.setAttribute('aria-hidden', 'true');
-      document.body.style.overflow = '';
-      cards.forEach(function(c){ c.classList.remove('is-selected'); });
-      document.removeEventListener('keydown', onKeydown);
-      if(lastFocused) lastFocused.focus();
-      resetForms();
-      // Remove any auth error messages
-      var authError = overlay.querySelector('.auth-error');
-      if(authError) authError.remove();
+      overlay.classList.remove('is-visible');
+      // Wait for animation to complete before hiding
+      setTimeout(function(){
+        overlay.classList.remove('is-open');
+        overlay.setAttribute('aria-hidden', 'true');
+        document.body.style.overflow = '';
+        cards.forEach(function(c){ c.classList.remove('is-selected'); });
+        document.removeEventListener('keydown', onKeydown);
+        if(lastFocused) lastFocused.focus();
+        resetForms();
+        // Remove any auth error messages
+        var authError = overlay.querySelector('.auth-error');
+        if(authError) authError.remove();
+      }, 280);
     }
 
     function onKeydown(e){
