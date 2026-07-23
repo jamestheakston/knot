@@ -440,7 +440,7 @@
     position: fixed;
     inset: 0;
     z-index: 100;
-    display: none;
+    display: flex;
     align-items: center;
     justify-content: center;
     padding: 24px;
@@ -448,13 +448,14 @@
     backdrop-filter: blur(6px);
     opacity: 0;
     visibility: hidden;
-    transition: opacity 0.28s ease, visibility 0s linear 0.28s;
+    pointer-events: none;
+    transition: opacity 0.28s ease, visibility 0s linear 0.28s, pointer-events 0s linear 0.28s;
   }
   .modal-overlay.is-open{
-    display: flex;
     opacity: 1;
     visibility: visible;
-    transition: opacity 0.28s ease;
+    pointer-events: auto;
+    transition: opacity 0.28s ease, visibility 0s linear 0s, pointer-events 0s linear 0s;
   }
   .modal-panel{
     position: relative;
