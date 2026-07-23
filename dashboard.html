@@ -9,6 +9,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Work+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://unpkg.com/lucide@latest"></script>
 <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
 <style>
   :root{
     --bg: #F7F8FB;
@@ -663,6 +664,20 @@
   .invite-card > p{
     color: var(--muted);
     margin-bottom: 24px;
+  }
+  .invite-methods{
+    display: flex;
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+  .invite-methods .btn{
+    flex: 1;
+  }
+  .invite-email-form{
+    margin-top: 24px;
+  }
+  .invite-code-display{
+    margin-top: 24px;
   }
   .invite-code-large{
     display: flex;
@@ -1913,22 +1928,61 @@
         <div class="invite-section">
           <div class="invite-card">
             <h3>Invite Members</h3>
-            <p>Share this invite code with people you want to join your pod:</p>
-            <div class="invite-code-large">
-              <span class="invite-code-text">${currentPod.inviteCode}</span>
-              <button class="btn btn-primary" id="copyInviteLarge">Copy Code</button>
+            <p>You can invite members and send them an email, or you can tell them directly</p>
+            
+            <div class="invite-methods">
+              <button class="btn btn-primary" id="sendEmailBtn">Send via Email</button>
+              <button class="btn btn-ghost" id="showCodeBtn">Show Invite Code</button>
             </div>
-            <div class="invite-instructions">
-              <h4>How to invite:</h4>
-              <ol>
-                <li>Share the invite code above with your friends</li>
-                <li>They can enter it on the landing page to join your pod</li>
-                <li>Once they join, they'll appear in the Members section</li>
-              </ol>
+
+            <div class="invite-email-form" id="inviteEmailForm" style="display: none;">
+              <div class="form-group">
+                <label class="form-label">Email Address</label>
+                <input type="email" class="form-input" id="inviteEmail" placeholder="friend@example.com">
+              </div>
+              <div class="form-actions">
+                <button class="btn btn-primary" id="sendInviteBtn">Send Invite</button>
+                <button class="btn btn-ghost" id="cancelEmailBtn">Cancel</button>
+              </div>
+            </div>
+
+            <div class="invite-code-display" id="inviteCodeDisplay" style="display: none;">
+              <p>Share this invite code with people you want to join your pod:</p>
+              <div class="invite-code-large">
+                <span class="invite-code-text">${currentPod.inviteCode}</span>
+                <button class="btn btn-primary" id="copyInviteLarge">Copy Code</button>
+              </div>
+              <div class="invite-instructions">
+                <h4>How to invite:</h4>
+                <ol>
+                  <li>Share the invite code above with your friends</li>
+                  <li>They can enter it on the landing page to join your pod</li>
+                  <li>Once they join, they'll appear in the Members section</li>
+                </ol>
+              </div>
             </div>
           </div>
         </div>
       `;
+
+      document.getElementById('sendEmailBtn').addEventListener('click', function(){
+        document.getElementById('inviteEmailForm').style.display = 'block';
+        document.getElementById('inviteCodeDisplay').style.display = 'none';
+        document.getElementById('invite-methods').style.display = 'none';
+      });
+
+      document.getElementById('showCodeBtn').addEventListener('click', function(){
+        document.getElementById('inviteCodeDisplay').style.display = 'block';
+        document.getElementById('inviteEmailForm').style.display = 'none';
+        document.getElementById('invite-methods').style.display = 'none';
+      });
+
+      document.getElementById('cancelEmailBtn').addEventListener('click', function(){
+        document.getElementById('inviteEmailForm').style.display = 'none';
+        document.getElementById('invite-methods').style.display = 'flex';
+      });
+
+      document.getElementById('sendInviteBtn').addEventListener('click', sendInviteEmail);
 
       document.getElementById('copyInviteLarge').addEventListener('click', function(){
         navigator.clipboard.writeText(currentPod.inviteCode);
@@ -1937,6 +1991,45 @@
           document.getElementById('copyInviteLarge').textContent = 'Copy Code';
         }, 2000);
       });
+    }
+
+    async function sendInviteEmail(){
+      var email = document.getElementById('inviteEmail').value;
+      var btn = document.getElementById('sendInviteBtn');
+      
+      if(!email || !email.includes('@')){
+        alert('Please enter a valid email address');
+        return;
+      }
+
+      try{
+        btn.disabled = true;
+        btn.textContent = 'Sending...';
+
+        // Initialize EmailJS
+        emailjs.init('uF5gBRgWvS-o3wTjZ');
+
+        var templateParams = {
+          toemail: email,
+          invite_code: currentPod.inviteCode,
+          pod_name: currentPod.name
+        };
+
+        await emailjs.send('service_yn3gq3m', 'template_7xm80oj', templateParams);
+
+        alert('Invite sent successfully to ' + email);
+        
+        // Reset form
+        document.getElementById('inviteEmail').value = '';
+        document.getElementById('inviteEmailForm').style.display = 'none';
+        document.getElementById('invite-methods').style.display = 'flex';
+      }catch(err){
+        console.error('Error sending email:', err);
+        alert('Error sending invite: ' + err.message);
+      }finally{
+        btn.disabled = false;
+        btn.textContent = 'Send Invite';
+      }
     }
 
     function loadProfile(){
