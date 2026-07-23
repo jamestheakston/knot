@@ -481,88 +481,115 @@
 
   /* ---------- OVERVIEW SECTION ---------- */
   .overview-section{
-    padding: 20px 0;
+    padding: 32px 0;
   }
   .overview-header{
-    display: flex;
-    gap: 24px;
-    margin-bottom: 40px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    margin-bottom: 48px;
   }
   .overview-stat{
-    flex: 1;
     background: var(--bg-2);
-    border-radius: 16px;
-    padding: 24px;
+    border-radius: 20px;
+    padding: 32px 24px;
     text-align: center;
     border: 1px solid var(--line);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  .overview-stat:hover{
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
   }
   .stat-label{
-    font-size: 14px;
+    font-size: 13px;
     color: var(--muted);
-    margin-bottom: 8px;
+    margin-bottom: 12px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
   }
   .stat-value{
-    font-size: 36px;
+    font-size: 42px;
     font-weight: 700;
     color: var(--ink);
     font-family: 'Instrument Serif', serif;
+    line-height: 1;
+    margin-bottom: 8px;
   }
   .stat-unit{
     font-size: 14px;
     color: var(--muted);
-    margin-top: 4px;
+    font-weight: 500;
   }
 
   /* ---------- MEMBERS SECTION ---------- */
   .members-section{
-    padding: 20px 0;
+    padding: 32px 0;
   }
   .members-header{
-    margin-bottom: 24px;
+    margin-bottom: 32px;
   }
   .members-header h3{
-    font-size: 24px;
+    font-size: 28px;
     font-weight: 600;
+    color: var(--ink);
+    margin-bottom: 8px;
   }
   .members-list{
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
   }
   .member-card{
     display: flex;
     align-items: center;
     gap: 16px;
     background: var(--bg-2);
-    border-radius: 12px;
-    padding: 16px;
+    border-radius: 16px;
+    padding: 20px;
     border: 1px solid var(--line);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  .member-card:hover{
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
   }
   .member-avatar{
-    width: 48px;
-    height: 48px;
+    width: 56px;
+    height: 56px;
     border-radius: 50%;
-    background: var(--blue);
+    background: linear-gradient(135deg, var(--blue), var(--blue-bright));
     color: #fff;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 18px;
+    font-size: 20px;
     font-weight: 600;
+    flex-shrink: 0;
   }
   .member-info{
     flex: 1;
+    min-width: 0;
   }
   .member-name{
     font-size: 16px;
     font-weight: 600;
     color: var(--ink);
     margin-bottom: 4px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
   .member-email{
-    font-size: 14px;
+    font-size: 13px;
     color: var(--muted);
     margin-bottom: 8px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
   .member-meta{
     display: flex;
@@ -571,7 +598,10 @@
   }
   .member-role{
     color: var(--blue);
-    font-weight: 500;
+    font-weight: 600;
+    background: var(--blue-soft);
+    padding: 4px 8px;
+    border-radius: 6px;
   }
   .member-joined{
     color: var(--muted-2);
@@ -579,106 +609,137 @@
 
   /* ---------- CHECK-INS SECTION ---------- */
   .check-ins-section{
-    padding: 20px 0;
+    padding: 32px 0;
   }
   .check-in-action{
-    margin-bottom: 32px;
+    margin-bottom: 40px;
   }
   .check-in-status{
-    padding: 16px 24px;
-    background: #10B981;
+    padding: 20px 32px;
+    background: linear-gradient(135deg, #10B981, #059669);
     color: #fff;
-    border-radius: 12px;
+    border-radius: 16px;
     font-size: 16px;
-    font-weight: 500;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
   }
   .check-ins-history h3{
-    font-size: 20px;
+    font-size: 24px;
     font-weight: 600;
-    margin-bottom: 16px;
+    color: var(--ink);
+    margin-bottom: 24px;
   }
   .check-ins-list{
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 12px;
   }
   .check-in-item{
     display: flex;
     justify-content: space-between;
-    padding: 12px 16px;
+    align-items: center;
+    padding: 16px 20px;
     background: var(--bg-2);
-    border-radius: 8px;
+    border-radius: 12px;
     border: 1px solid var(--line);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+    transition: transform 0.2s ease;
+  }
+  .check-in-item:hover{
+    transform: translateX(4px);
   }
   .check-in-date{
-    font-size: 14px;
+    font-size: 15px;
     color: var(--ink);
+    font-weight: 500;
   }
   .check-in-time{
     font-size: 14px;
     color: var(--muted);
   }
   .no-check-ins{
-    padding: 24px;
+    padding: 48px 24px;
     text-align: center;
     color: var(--muted);
+    background: var(--bg-2);
+    border-radius: 16px;
+    border: 1px dashed var(--line);
   }
 
   /* ---------- POD SETTINGS SECTION ---------- */
   .pod-settings-section{
-    padding: 20px 0;
+    padding: 32px 0;
   }
   .settings-form{
-    max-width: 500px;
+    max-width: 600px;
+    background: var(--bg-2);
+    border-radius: 20px;
+    padding: 32px;
+    border: 1px solid var(--line);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
   }
   .invite-code-display{
     display: flex;
-    gap: 8px;
+    gap: 12px;
     align-items: center;
   }
   .invite-code-display span{
     flex: 1;
-    padding: 12px 16px;
+    padding: 14px 18px;
     background: var(--bg-3);
     border-radius: 10px;
     font-family: 'IBM Plex Mono', monospace;
-    font-size: 16px;
+    font-size: 15px;
     letter-spacing: 0.05em;
+    color: var(--ink);
+    font-weight: 500;
   }
 
   /* ---------- INVITE SECTION ---------- */
   .invite-section{
-    padding: 20px 0;
+    padding: 32px 0;
   }
   .invite-card{
     background: var(--bg-2);
-    border-radius: 20px;
-    padding: 40px;
-    max-width: 600px;
+    border-radius: 24px;
+    padding: 48px;
+    max-width: 640px;
     border: 1px solid var(--line);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.06);
   }
   .invite-card h3{
-    font-size: 24px;
+    font-size: 28px;
     font-weight: 600;
     margin-bottom: 12px;
+    color: var(--ink);
   }
   .invite-card > p{
     color: var(--muted);
-    margin-bottom: 24px;
+    margin-bottom: 32px;
+    font-size: 16px;
+    line-height: 1.6;
   }
   .invite-methods{
     display: flex;
-    gap: 12px;
-    margin-bottom: 24px;
+    gap: 16px;
+    margin-bottom: 32px;
   }
   .invite-methods .btn{
     flex: 1;
+    padding: 14px 20px;
+    font-size: 15px;
   }
   .invite-email-form{
-    margin-top: 24px;
+    margin-top: 32px;
+    background: var(--bg-3);
+    border-radius: 16px;
+    padding: 24px;
   }
   .hcaptcha-container{
-    margin-top: 16px;
+    margin-top: 20px;
   }
   .hcaptcha-message{
     font-size: 13px;
@@ -695,7 +756,7 @@
     text-align: center;
   }
   .invite-code-display{
-    margin-top: 24px;
+    margin-top: 32px;
   }
   .invite-code-large{
     display: flex;
@@ -705,102 +766,127 @@
   }
   .invite-code-text{
     flex: 1;
-    padding: 20px 24px;
+    padding: 24px 28px;
     background: var(--bg-3);
-    border-radius: 12px;
+    border-radius: 16px;
     font-family: 'IBM Plex Mono', monospace;
-    font-size: 24px;
+    font-size: 28px;
     letter-spacing: 0.1em;
     text-align: center;
     font-weight: 600;
+    color: var(--ink);
+    border: 2px solid var(--line);
   }
   .invite-instructions h4{
-    font-size: 16px;
+    font-size: 18px;
     font-weight: 600;
-    margin-bottom: 12px;
+    margin-bottom: 16px;
+    color: var(--ink);
   }
   .invite-instructions ol{
-    padding-left: 20px;
+    padding-left: 24px;
     color: var(--muted);
-    line-height: 1.6;
+    line-height: 1.8;
+    font-size: 15px;
   }
   .invite-instructions li{
-    margin-bottom: 8px;
+    margin-bottom: 12px;
   }
 
   /* ---------- PROFILE SECTION ---------- */
   .profile-section{
-    padding: 20px 0;
+    padding: 32px 0;
   }
   .profile-header{
     display: flex;
     align-items: center;
-    gap: 20px;
-    margin-bottom: 32px;
+    gap: 24px;
+    margin-bottom: 40px;
+    background: var(--bg-2);
+    border-radius: 20px;
+    padding: 32px;
+    border: 1px solid var(--line);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
   }
   .profile-avatar-large{
-    width: 80px;
-    height: 80px;
+    width: 96px;
+    height: 96px;
     border-radius: 50%;
-    background: var(--blue);
+    background: linear-gradient(135deg, var(--blue), var(--blue-bright));
     color: #fff;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 32px;
+    font-size: 36px;
     font-weight: 600;
+    flex-shrink: 0;
+    box-shadow: 0 4px 12px rgba(42, 75, 215, 0.2);
   }
   .profile-info h3{
-    font-size: 24px;
+    font-size: 28px;
     font-weight: 600;
-    margin-bottom: 4px;
+    margin-bottom: 8px;
+    color: var(--ink);
   }
   .profile-info p{
     color: var(--muted);
+    font-size: 15px;
   }
   .profile-stats{
-    display: flex;
-    gap: 16px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
   }
   .profile-stat{
     background: var(--bg-2);
-    border-radius: 12px;
-    padding: 20px;
-    min-width: 120px;
+    border-radius: 16px;
+    padding: 24px;
     border: 1px solid var(--line);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  .profile-stat:hover{
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
   }
   .profile-stat .stat-label{
-    font-size: 14px;
+    font-size: 13px;
     color: var(--muted);
-    margin-bottom: 8px;
+    margin-bottom: 12px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
   }
   .profile-stat .stat-value{
-    font-size: 24px;
+    font-size: 32px;
     font-weight: 700;
     color: var(--ink);
+    font-family: 'Instrument Serif', serif;
   }
 
   /* ---------- ACCOUNT SETTINGS SECTION ---------- */
   .account-settings-section{
-    padding: 20px 0;
+    padding: 32px 0;
   }
   .settings-card{
     background: var(--bg-2);
-    border-radius: 20px;
-    padding: 40px;
-    max-width: 600px;
+    border-radius: 24px;
+    padding: 48px;
+    max-width: 640px;
     border: 1px solid var(--line);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.06);
   }
   .settings-card h3{
-    font-size: 24px;
+    font-size: 28px;
     font-weight: 600;
-    margin-bottom: 24px;
+    margin-bottom: 32px;
+    color: var(--ink);
   }
   .settings-item{
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 16px 0;
+    padding: 20px 0;
     border-bottom: 1px solid var(--line);
   }
   .settings-item:last-child{
@@ -809,22 +895,69 @@
   .settings-item-label{
     font-size: 14px;
     color: var(--muted);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
   }
   .settings-item-value{
     font-size: 16px;
     color: var(--ink);
-    font-weight: 500;
+    font-weight: 600;
   }
   .settings-actions{
-    margin-top: 32px;
+    margin-top: 40px;
+    padding-top: 32px;
+    border-top: 1px solid var(--line);
   }
 
   /* ---------- ERROR STATE ---------- */
   .error{
-    padding: 40px;
+    padding: 48px 24px;
     text-align: center;
     color: var(--red);
     font-size: 16px;
+    background: var(--bg-2);
+    border-radius: 16px;
+    border: 1px solid rgba(196, 67, 42, 0.2);
+  }
+
+  /* ---------- FORM ELEMENTS ---------- */
+  .form-group{
+    margin-bottom: 20px;
+  }
+  .form-label{
+    display: block;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--ink);
+    margin-bottom: 8px;
+  }
+  .form-input{
+    width: 100%;
+    padding: 12px 16px;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    font-size: 15px;
+    font-family: 'Work Sans', sans-serif;
+    background: var(--bg-2);
+    color: var(--ink);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  }
+  .form-input:focus{
+    outline: none;
+    border-color: var(--blue);
+    box-shadow: 0 0 0 3px var(--blue-soft);
+  }
+  .form-input::placeholder{
+    color: var(--muted-2);
+  }
+  .form-actions{
+    display: flex;
+    gap: 12px;
+    margin-top: 24px;
+  }
+  .form-actions .btn{
+    flex: 1;
   }
 
   /* ---------- RESPONSIVE ---------- */
