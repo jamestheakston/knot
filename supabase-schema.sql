@@ -65,12 +65,15 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Create triggers for updated_at
+DROP TRIGGER IF EXISTS update_pods_updated_at ON pods;
 CREATE TRIGGER update_pods_updated_at BEFORE UPDATE ON pods
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
+DROP TRIGGER IF EXISTS update_habits_updated_at ON habits;
 CREATE TRIGGER update_habits_updated_at BEFORE UPDATE ON habits
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
+DROP TRIGGER IF EXISTS update_check_ins_updated_at ON check_ins;
 CREATE TRIGGER update_check_ins_updated_at BEFORE UPDATE ON check_ins
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
