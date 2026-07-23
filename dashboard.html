@@ -392,6 +392,40 @@
     color: var(--muted);
   }
 
+  /* ---------- NO PODS PLACEHOLDER ---------- */
+  .no-pods-placeholder{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 400px;
+    text-align: center;
+    padding: 40px 20px;
+  }
+  .no-pods-icon{
+    margin-bottom: 24px;
+    opacity: 0.5;
+  }
+  .no-pods-placeholder h2{
+    font-size: 24px;
+    font-weight: 600;
+    margin-bottom: 12px;
+    color: var(--ink);
+  }
+  .no-pods-placeholder p{
+    font-size: 16px;
+    color: var(--muted);
+    margin-bottom: 32px;
+    max-width: 400px;
+    line-height: 1.5;
+  }
+  .no-pods-actions{
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
   /* ---------- RESPONSIVE ---------- */
   @media (max-width: 768px){
     .mobile-menu-toggle{
@@ -797,10 +831,9 @@
         isAdmin = currentPod.role === 'admin';
         updatePodSelector();
         updateAdminVisibility();
-      }else if(shouldCreatePod !== 'true'){
-        // Only redirect if there are no pods AND we're not about to create one
-        console.log('No pods found and no pending creation, redirecting to index.html');
-        window.location.href = 'index.html';
+      }else{
+        // Show no pods placeholder
+        showNoPodsPlaceholder();
       }
 
       // Check for pending pod creation
@@ -1030,6 +1063,28 @@
         code += chars.charAt(Math.floor(Math.random() * chars.length));
       }
       return code;
+    }
+
+    function showNoPodsPlaceholder(){
+      var contentArea = document.getElementById('contentArea');
+      contentArea.innerHTML = `
+        <div class="no-pods-placeholder">
+          <div class="no-pods-icon">
+            <i data-lucide="users" style="width: 48px; height: 48px; color: var(--muted);"></i>
+          </div>
+          <h2>You're not in any pods yet</h2>
+          <p>Join an existing pod with an invite code, or start your own pod to begin tracking habits together.</p>
+          <div class="no-pods-actions">
+            <a href="index.html?openmodal=true" class="btn btn-primary">Start a pod</a>
+            <a href="index.html?openmodal=true" class="btn btn-ghost">Join with invite code</a>
+          </div>
+        </div>
+      `;
+      
+      // Initialize Lucide icons
+      if(typeof lucide !== 'undefined'){
+        lucide.createIcons();
+      }
     }
 
     function showUpgradeModal(){
