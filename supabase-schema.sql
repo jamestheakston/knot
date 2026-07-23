@@ -86,6 +86,7 @@ ALTER TABLE pod_members ENABLE ROW LEVEL SECURITY;
 ALTER TABLE check_ins ENABLE ROW LEVEL SECURITY;
 
 -- Pods policies
+DROP POLICY IF EXISTS "Users can view pods they are members of" ON pods;
 CREATE POLICY "Users can view pods they are members of"
   ON pods FOR SELECT
   USING (
@@ -95,10 +96,12 @@ CREATE POLICY "Users can view pods they are members of"
     )
   );
 
+DROP POLICY IF EXISTS "Users can insert pods they create" ON pods;
 CREATE POLICY "Users can insert pods they create"
   ON pods FOR INSERT
   WITH CHECK (created_by = auth.uid());
 
+DROP POLICY IF EXISTS "Pod admins can update pods" ON pods;
 CREATE POLICY "Pod admins can update pods"
   ON pods FOR UPDATE
   USING (
@@ -106,6 +109,7 @@ CREATE POLICY "Pod admins can update pods"
   );
 
 -- Habits policies
+DROP POLICY IF EXISTS "Users can view habits for pods they are members of" ON habits;
 CREATE POLICY "Users can view habits for pods they are members of"
   ON habits FOR SELECT
   USING (
@@ -114,6 +118,7 @@ CREATE POLICY "Users can view habits for pods they are members of"
     )
   );
 
+DROP POLICY IF EXISTS "Pod admins can insert habits" ON habits;
 CREATE POLICY "Pod admins can insert habits"
   ON habits FOR INSERT
   WITH CHECK (
@@ -125,6 +130,7 @@ CREATE POLICY "Pod admins can insert habits"
     )
   );
 
+DROP POLICY IF EXISTS "Pod admins can update habits" ON habits;
 CREATE POLICY "Pod admins can update habits"
   ON habits FOR UPDATE
   USING (
@@ -137,14 +143,17 @@ CREATE POLICY "Pod admins can update habits"
   );
 
 -- Pod members policies
+DROP POLICY IF EXISTS "Users can view pod members for pods they are in" ON pod_members;
 CREATE POLICY "Users can view pod members for pods they are in"
   ON pod_members FOR SELECT
   USING (user_id = auth.uid());
 
+DROP POLICY IF EXISTS "Users can insert themselves into a pod via invite code" ON pod_members;
 CREATE POLICY "Users can insert themselves into a pod via invite code"
   ON pod_members FOR INSERT
   WITH CHECK (user_id = auth.uid());
 
+DROP POLICY IF EXISTS "Pod admins can update member roles" ON pod_members;
 CREATE POLICY "Pod admins can update member roles"
   ON pod_members FOR UPDATE
   USING (
@@ -157,6 +166,7 @@ CREATE POLICY "Pod admins can update member roles"
   );
 
 -- Check-ins policies
+DROP POLICY IF EXISTS "Users can view check-ins for their pods" ON check_ins;
 CREATE POLICY "Users can view check-ins for their pods"
   ON check_ins FOR SELECT
   USING (
@@ -165,10 +175,12 @@ CREATE POLICY "Users can view check-ins for their pods"
     )
   );
 
+DROP POLICY IF EXISTS "Users can insert their own check-ins" ON check_ins;
 CREATE POLICY "Users can insert their own check-ins"
   ON check_ins FOR INSERT
   WITH CHECK (user_id = auth.uid());
 
+DROP POLICY IF EXISTS "Users can update their own check-ins" ON check_ins;
 CREATE POLICY "Users can update their own check-ins"
   ON check_ins FOR UPDATE
   USING (user_id = auth.uid());
