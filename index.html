@@ -761,6 +761,30 @@
   .social-only.is-hidden{
     display: none;
   }
+
+  /* ---------- TOAST ---------- */
+  .toast{
+    position: fixed;
+    bottom: 32px;
+    left: 50%;
+    transform: translateX(-50%) translateY(100px);
+    background: var(--red);
+    color: #fff;
+    padding: 14px 24px;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 500;
+    box-shadow: 0 8px 24px rgba(196, 67, 42, 0.3);
+    opacity: 0;
+    transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.4s ease;
+    z-index: 1000;
+    max-width: 400px;
+    text-align: center;
+  }
+  .toast.is-visible{
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+  }
 </style>
 </head>
 <body>
@@ -1515,8 +1539,36 @@
     if(typeof lucide !== 'undefined'){
       lucide.createIcons();
     }
+
+    // Check for auth errors in URL
+    function checkAuthErrors(){
+      var urlParams = new URLSearchParams(window.location.search);
+      var error = urlParams.get('error');
+      var errorDescription = urlParams.get('error_description');
+
+      if(error){
+        var message = errorDescription || 'Authentication error occurred';
+        showToast(message.replace(/\+/g, ' '));
+        // Clean URL
+        window.history.replaceState({}, document.title, window.location.pathname);
+      }
+    }
+
+    function showToast(message){
+      var toast = document.getElementById('toast');
+      toast.textContent = message;
+      toast.classList.add('is-visible');
+      setTimeout(function(){
+        toast.classList.remove('is-visible');
+      }, 5000);
+    }
+
+    // Run auth error check on page load
+    checkAuthErrors();
   })();
 </script>
+
+<div class="toast" id="toast"></div>
 
 </body>
 </html>
