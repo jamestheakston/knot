@@ -1496,11 +1496,9 @@
       if(!client) return false;
 
       try{
+        // Use the security definer function to check invite code
         var { data, error } = await client
-          .from('pods')
-          .select('id, name')
-          .eq('invite_code', code)
-          .maybeSingle();
+          .rpc('check_invite_code_exists', { invite_code_param: code });
 
         if(error){
           console.error('Supabase error checking invite code:', error);
@@ -1508,7 +1506,7 @@
         }
         
         console.log('Invite code check result:', data);
-        return !!data;
+        return data === true;
       }catch(err){
         console.error('Error checking invite code:', err);
         return false;

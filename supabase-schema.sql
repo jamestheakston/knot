@@ -148,6 +148,23 @@ CREATE POLICY "Pod admins can update pods"
     created_by = auth.uid()
   );
 
+-- Function to check if invite code exists (for public use before signup)
+CREATE OR REPLACE FUNCTION public.check_invite_code_exists(invite_code_param TEXT)
+RETURNS BOOLEAN
+SECURITY DEFINER
+SET search_path = public
+AS $$
+BEGIN
+  RETURN EXISTS (
+    SELECT 1 FROM pods WHERE invite_code = invite_code_param
+  );
+END;
+$$ LANGUAGE plpgsql;
+
+-- Grant execute permission to public (including unauthenticated users)
+GRANT EXECUTE ON FUNCTION public.check_invite_code_exists TO anon;
+GRANT EXECUTE ON FUNCTION public.check_invite_code_exists TO authenticated;
+
 -- Habits policies
 DROP POLICY IF EXISTS "Users can view habits for pods they are members of" ON habits;
 CREATE POLICY "Users can view habits for pods they are members of"

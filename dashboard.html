@@ -3427,7 +3427,16 @@
 
         var client = getSupabaseClient();
         
-        // Verify the invite code exists
+        // Verify the invite code exists using the security definer function
+        var { data: exists, error: checkError } = await client
+          .rpc('check_invite_code_exists', { invite_code_param: code });
+
+        if(checkError || !exists){
+          alert('Invalid invite code. Please check and try again.');
+          return;
+        }
+        
+        // Get the pod details
         var { data: pod, error: podError } = await client
           .from('pods')
           .select('*')
