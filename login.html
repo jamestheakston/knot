@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Knot — Log In</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Work+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@latest"></script>
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+<style>
+  :root{
+    --bg: #F7F8FB;
+    --bg-2: #FFFFFF;
+    --bg-3: #EEF1F6;
+    --ink: #151922;
+    --muted: #5B6472;
+    --muted-2: #8890A0;
+    --blue: #2A4BD7;
+    --blue-bright: #1B37AE;
+    --blue-soft: #EAEFFF;
+    --red: #C4432A;
+    --line: rgba(21,25,34,0.10);
+    --line-strong: rgba(21,25,34,0.18);
+  }
+
+  *{ box-sizing: border-box; }
+  html{ scroll-behavior: smooth; }
+  body{
+    margin:0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'Work Sans', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    line-height: 1.5;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+  h1,h2,h3{
+    font-family: 'Instrument Serif', serif;
+    font-weight: 400;
+    margin: 0;
+    letter-spacing: -0.01em;
+  }
+  a{ color: inherit; text-decoration: none; }
+  .mono{ font-family: 'IBM Plex Mono', monospace; }
+
+  ::selection{ background: var(--blue); color: #fff; }
+
+  :focus-visible{
+    outline: 2px solid var(--blue);
+    outline-offset: 3px;
+    border-radius: 4px;
+  }
+
+  /* ---------- NAV ---------- */
+  nav{
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    background: var(--bg-2);
+    border-bottom: 1px solid var(--line);
+    z-index: 100;
+  }
+  .nav-inner{
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 16px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .logo{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: 'Instrument Serif', serif;
+    font-size: 22px;
+    font-weight: 400;
+  }
+  .logo-mark{
+    width: 20px;
+    height: 20px;
+  }
+  .nav-links{
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .text-link{
+    font-size: 14px;
+    color: var(--muted);
+    transition: color 0.2s ease;
+  }
+  .text-link:hover{
+    color: var(--ink);
+  }
+
+  /* ---------- BUTTONS ---------- */
+  .btn{
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px 20px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 500;
+    font-family: 'Work Sans', sans-serif;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s ease;
+  }
+  .btn:disabled{
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+  .btn-primary{
+    background: var(--blue);
+    color: #fff;
+  }
+  .btn-primary:hover:not(:disabled){
+    background: var(--blue-bright);
+  }
+  .btn-ghost{
+    background: transparent;
+    color: var(--ink);
+    border: 1px solid var(--line-strong);
+  }
+  .btn-ghost:hover:not(:disabled){
+    background: var(--bg-3);
+  }
+
+  /* ---------- LOGIN PAGE ---------- */
+  .login-page{
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 120px 24px 40px;
+  }
+  .login-container{
+    width: 100%;
+    max-width: 420px;
+  }
+  .login-header{
+    text-align: center;
+    margin-bottom: 32px;
+  }
+  .login-header h1{
+    font-size: 36px;
+    margin-bottom: 12px;
+  }
+  .login-header p{
+    color: var(--muted);
+    font-size: 15px;
+  }
+  .login-header a{
+    color: var(--blue);
+  }
+  .login-header a:hover{
+    text-decoration: underline;
+  }
+
+  /* ---------- SOCIAL BUTTONS ---------- */
+  .social-btn{
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    width: 100%;
+    padding: 12px 20px;
+    border-radius: 10px;
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    border: 1px solid var(--line-strong);
+    background: var(--bg-2);
+    color: var(--ink);
+    transition: border-color 0.2s ease, background 0.2s ease, transform 0.15s ease;
+    font-family: 'Work Sans', sans-serif;
+  }
+  .social-btn:hover{
+    border-color: var(--blue);
+    background: var(--blue-soft);
+  }
+  .social-btn:active{
+    transform: scale(0.98);
+  }
+  .social-btn svg{
+    width: 20px;
+    height: 20px;
+  }
+  .social-btn.github-btn{
+    background: #24292f;
+    border-color: #24292f;
+    color: #fff;
+  }
+  .social-btn.github-btn:hover{
+    background: #1a1e22;
+    border-color: #1a1e22;
+  }
+  .divider{
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin: 24px 0;
+  }
+  .divider-line{
+    flex: 1;
+    height: 1px;
+    background: var(--line);
+  }
+  .divider-text{
+    font-size: 13px;
+    color: var(--muted-2);
+    font-weight: 500;
+  }
+
+  /* ---------- FORM ---------- */
+  .form-group{
+    margin-bottom: 20px;
+  }
+  .form-label{
+    display: block;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--ink);
+    margin-bottom: 8px;
+  }
+  .form-input{
+    width: 100%;
+    padding: 12px 16px;
+    border: 1px solid var(--line-strong);
+    border-radius: 10px;
+    font-size: 15px;
+    font-family: 'Work Sans', sans-serif;
+    color: var(--ink);
+    background: var(--bg-2);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  }
+  .form-input:focus{
+    outline: none;
+    border-color: var(--blue);
+    box-shadow: 0 0 0 3px var(--blue-soft);
+  }
+  .form-input::placeholder{
+    color: var(--muted-2);
+  }
+  .form-actions{
+    margin-top: 24px;
+  }
+  .form-actions .btn{
+    width: 100%;
+  }
+
+  /* ---------- TERMS TEXT ---------- */
+  .terms-text{
+    font-size: 12px;
+    color: var(--muted-2);
+    text-align: center;
+    margin-top: 24px;
+    line-height: 1.6;
+  }
+  .terms-text a{
+    color: var(--blue);
+  }
+  .terms-text a:hover{
+    text-decoration: underline;
+  }
+
+  /* ---------- TOAST ---------- */
+  .toast{
+    position: fixed;
+    bottom: 32px;
+    left: 50%;
+    transform: translateX(-50%) translateY(100px);
+    background: var(--red);
+    color: #fff;
+    padding: 14px 24px;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 500;
+    box-shadow: 0 8px 24px rgba(196, 67, 42, 0.3);
+    opacity: 0;
+    transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.4s ease;
+    z-index: 1000;
+    max-width: 400px;
+    text-align: center;
+  }
+  .toast.is-visible{
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+  }
+
+  /* ---------- RESPONSIVE ---------- */
+  @media (max-width: 640px){
+    .login-page{
+      padding: 100px 20px 40px;
+    }
+    .login-header h1{
+      font-size: 28px;
+    }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <div class="logo">
+      <i data-lucide="link" class="logo-mark" style="color: #2A4BD7;"></i>
+      Knot
+    </div>
+    <div class="nav-links">
+      <a class="text-link" href="index.html">Back to home</a>
+    </div>
+  </div>
+</nav>
+
+<div class="login-page">
+  <div class="login-container">
+    <div class="login-header">
+      <h1>Welcome back</h1>
+      <p>Don't have an account? <a href="index.html">Start a pod</a></p>
+    </div>
+
+    <button class="social-btn github-btn" id="githubLoginBtn">
+      <svg xmlns="http://www.w3.org/2000/svg" shape-rendering="geometricPrecision" text-rendering="geometricPrecision" image-rendering="optimizeQuality" fill-rule="evenodd" clip-rule="evenodd" viewBox="0 0 512 499.368"><path fill="#fff" fill-rule="nonzero" d="M256.003 0C114.555 0 0 114.555 0 256.003c0 113.286 73.28 208.961 175.038 242.865 12.796 2.247 17.586-5.433 17.586-12.153 0-6.077-.309-26.225-.309-47.686-64.313 11.844-80.941-15.674-86.058-30.055-2.896-7.37-15.359-30.1-26.269-36.177-8.948-4.808-21.752-16.652-.31-16.961 20.168-.309 34.574 18.564 39.382 26.244 23.038 38.732 59.839 27.828 74.555 21.101 2.227-16.627 8.947-27.828 16.318-34.239-56.968-6.386-116.467-28.471-116.467-126.399 0-27.827 9.907-50.866 26.225-68.787-2.562-6.41-11.51-32.655 2.562-67.853 0 0 21.436-6.72 70.409 26.244 20.483-5.767 42.227-8.638 63.998-8.638 21.751 0 43.52 2.896 63.997 8.638 48.973-33.279 70.39-26.244 70.39-26.244 14.09 35.192 5.117 61.443 2.562 67.853 16.318 17.921 26.244 40.625 26.244 68.787 0 98.237-59.84 119.988-116.801 126.399 9.282 8.014 17.277 23.373 17.277 47.371 0 34.238-.309 61.751-.309 70.389 0 6.721 4.808 14.735 17.586 12.179C438.739 464.964 512 368.955 512 256.003 512 114.555 397.445 0 256.003 0z"/></svg>
+      Continue with GitHub
+    </button>
+
+    <div class="divider">
+      <div class="divider-line"></div>
+      <span class="divider-text">or</span>
+      <div class="divider-line"></div>
+    </div>
+
+    <form id="loginForm">
+      <div class="form-group">
+        <label class="form-label" for="email">Email</label>
+        <input type="email" id="email" class="form-input" placeholder="you@example.com" required>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="password">Password</label>
+        <input type="password" id="password" class="form-input" placeholder="••••••••" required>
+      </div>
+      <div class="form-actions">
+        <button type="submit" class="btn btn-primary" id="loginBtn">Log in</button>
+      </div>
+    </form>
+
+    <div class="terms-text">
+      By continuing, you agree to our <a href="terms.html">Terms of Service</a> and <a href="privacy.html">Privacy Policy</a>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function(){
+    var SupabaseClient = null;
+
+    function getSupabaseClient(){
+      if(SupabaseClient) return SupabaseClient;
+      
+      try{
+        if(typeof supabase === 'undefined'){
+          throw new Error('Supabase not loaded');
+        }
+        SupabaseClient = supabase.createClient(
+          'https://mfjtdrqvmuwtoarkiezi.supabase.co',
+          'sb_publishable_SPhsUI31nYbrrLjPBAaRBw_OkWQ2_Xn'
+        );
+        return SupabaseClient;
+      }catch(err){
+        console.error('Failed to initialize Supabase:', err);
+        return null;
+      }
+    }
+
+    function setButtonLoading(btn, isLoading){
+      if(isLoading){
+        btn.disabled = true;
+        btn.dataset.originalText = btn.textContent;
+        btn.textContent = 'Loading...';
+      }else{
+        btn.disabled = false;
+        btn.textContent = btn.dataset.originalText || btn.textContent;
+      }
+    }
+
+    function showToast(message){
+      var toast = document.getElementById('toast');
+      toast.textContent = message;
+      toast.classList.add('is-visible');
+      setTimeout(function(){
+        toast.classList.remove('is-visible');
+      }, 5000);
+    }
+
+    // GitHub login
+    document.getElementById('githubLoginBtn').addEventListener('click', async function(){
+      var client = getSupabaseClient();
+      if(!client){
+        showToast('Authentication service unavailable. Please try again later.');
+        return;
+      }
+
+      var btn = this;
+      setButtonLoading(btn, true);
+
+      try{
+        var { data, error } = await client.auth.signInWithOAuth({
+          provider: 'github',
+          options: {
+            redirectTo: window.location.origin + '/dashboard.html'
+          }
+        });
+
+        if(error) throw error;
+      }catch(err){
+        console.error('GitHub auth error:', err);
+        showToast('Error connecting to GitHub: ' + err.message);
+        setButtonLoading(btn, false);
+      }
+    });
+
+    // Email/password login
+    document.getElementById('loginForm').addEventListener('submit', async function(e){
+      e.preventDefault();
+      
+      var email = document.getElementById('email').value;
+      var password = document.getElementById('password').value;
+      var btn = document.getElementById('loginBtn');
+
+      var client = getSupabaseClient();
+      if(!client){
+        showToast('Authentication service unavailable. Please try again later.');
+        return;
+      }
+
+      setButtonLoading(btn, true);
+
+      try{
+        var { data, error } = await client.auth.signInWithPassword({
+          email: email,
+          password: password
+        });
+
+        if(error) throw error;
+
+        showToast('Login successful!');
+        setTimeout(function(){
+          window.location.href = 'dashboard.html';
+        }, 500);
+      }catch(err){
+        console.error('Login error:', err);
+        showToast('Error: ' + err.message);
+        setButtonLoading(btn, false);
+      }
+    });
+
+    // Check for auth errors in URL
+    function checkAuthErrors(){
+      var urlParams = new URLSearchParams(window.location.search);
+      var error = urlParams.get('error');
+      var errorDescription = urlParams.get('error_description');
+
+      if(error){
+        var message = errorDescription || 'Authentication error occurred';
+        showToast(message.replace(/\+/g, ' '));
+        window.history.replaceState({}, document.title, window.location.pathname);
+      }
+    }
+
+    // Initialize Lucide icons
+    if(typeof lucide !== 'undefined'){
+      lucide.createIcons();
+    }
+
+    // Run auth error check on page load
+    checkAuthErrors();
+  });
+</script>
+
+</body>
+</html>

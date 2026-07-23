@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Knot — Privacy Policy</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Work+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@latest"></script>
+<style>
+  :root{
+    --bg: #F7F8FB;
+    --bg-2: #FFFFFF;
+    --bg-3: #EEF1F6;
+    --ink: #151922;
+    --muted: #5B6472;
+    --muted-2: #8890A0;
+    --blue: #2A4BD7;
+    --blue-bright: #1B37AE;
+    --blue-soft: #EAEFFF;
+    --line: rgba(21,25,34,0.10);
+    --line-strong: rgba(21,25,34,0.18);
+  }
+
+  *{ box-sizing: border-box; }
+  html{ scroll-behavior: smooth; }
+  body{
+    margin:0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'Work Sans', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    line-height: 1.6;
+  }
+  h1,h2,h3{
+    font-family: 'Instrument Serif', serif;
+    font-weight: 400;
+    margin: 0;
+    letter-spacing: -0.01em;
+  }
+  a{ color: var(--blue); text-decoration: none; }
+  a:hover{ text-decoration: underline; }
+
+  ::selection{ background: var(--blue); color: #fff; }
+
+  :focus-visible{
+    outline: 2px solid var(--blue);
+    outline-offset: 3px;
+    border-radius: 4px;
+  }
+
+  /* ---------- NAV ---------- */
+  nav{
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    background: var(--bg-2);
+    border-bottom: 1px solid var(--line);
+    z-index: 100;
+  }
+  .nav-inner{
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 16px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .logo{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: 'Instrument Serif', serif;
+    font-size: 22px;
+    font-weight: 400;
+  }
+  .logo-mark{
+    width: 20px;
+    height: 20px;
+  }
+  .nav-links{
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .text-link{
+    font-size: 14px;
+    color: var(--muted);
+    transition: color 0.2s ease;
+  }
+  .text-link:hover{
+    color: var(--ink);
+  }
+
+  /* ---------- CONTENT ---------- */
+  .page{
+    padding: 120px 24px 60px;
+    max-width: 720px;
+    margin: 0 auto;
+  }
+  .page-header{
+    margin-bottom: 48px;
+  }
+  .page-header h1{
+    font-size: 42px;
+    margin-bottom: 12px;
+  }
+  .page-header p{
+    color: var(--muted);
+    font-size: 16px;
+  }
+  .page-header .last-updated{
+    font-size: 13px;
+    color: var(--muted-2);
+    margin-top: 8px;
+  }
+  .content-section{
+    margin-bottom: 48px;
+  }
+  .content-section h2{
+    font-size: 24px;
+    margin-bottom: 16px;
+  }
+  .content-section h3{
+    font-size: 18px;
+    margin-bottom: 12px;
+    margin-top: 24px;
+  }
+  .content-section p{
+    color: var(--muted);
+    margin-bottom: 16px;
+  }
+  .content-section ul{
+    color: var(--muted);
+    margin-bottom: 16px;
+    padding-left: 24px;
+  }
+  .content-section li{
+    margin-bottom: 8px;
+  }
+  .content-section a{
+    color: var(--blue);
+  }
+  .highlight-box{
+    background: var(--bg-2);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 20px;
+    margin: 24px 0;
+  }
+  .highlight-box p{
+    margin-bottom: 0;
+    color: var(--ink);
+  }
+
+  /* ---------- RESPONSIVE ---------- */
+  @media (max-width: 640px){
+    .page{
+      padding: 100px 20px 40px;
+    }
+    .page-header h1{
+      font-size: 32px;
+    }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <div class="logo">
+      <i data-lucide="link" class="logo-mark" style="color: #2A4BD7;"></i>
+      Knot
+    </div>
+    <div class="nav-links">
+      <a class="text-link" href="index.html">Back to home</a>
+    </div>
+  </div>
+</nav>
+
+<div class="page">
+  <div class="page-header">
+    <h1>Privacy Policy</h1>
+    <p>Your privacy is important to us. This policy explains how we collect, use, and protect your information.</p>
+    <p class="last-updated">Last updated: July 23, 2026</p>
+  </div>
+
+  <div class="content-section">
+    <h2>1. Information We Collect</h2>
+    <h3>1.1 Account Information</h3>
+    <p>When you create an account, we collect:</p>
+    <ul>
+      <li>Email address</li>
+      <li>Display name (optional)</li>
+      <li>Authentication credentials (stored securely via Supabase Auth)</li>
+      <li>GitHub profile information (if you sign up with GitHub)</li>
+    </ul>
+
+    <h3>1.2 Pod and Habit Data</h3>
+    <p>We collect information related to your pod participation:</p>
+    <ul>
+      <li>Pod names and descriptions</li>
+      <li>Habit names and descriptions</li>
+      <li>Check-in status (done, missed, waiting)</li>
+      <li>Check-in dates</li>
+      <li>Pod membership and role (admin/member)</li>
+    </ul>
+
+    <h3>1.3 Usage Data</h3>
+    <p>We may collect information about how you use the service, including:</p>
+    <ul>
+      <li>Pages visited and features used</li>
+      <li>Time spent on the service</li>
+      <li>Device information (browser type, operating system)</li>
+    </ul>
+  </div>
+
+  <div class="content-section">
+    <h2>2. How We Use Your Information</h2>
+    <p>We use your information to:</p>
+    <ul>
+      <li>Provide and maintain the Knot service</li>
+      <li>Process your check-ins and display them to your pod members</li>
+      <li>Send you notifications about pod activity (if enabled)</li>
+      <li>Authenticate your account and secure your data</li>
+      <li>Improve our service and develop new features</li>
+      <li>Communicate with you about service updates</li>
+    </ul>
+  </div>
+
+  <div class="content-section">
+    <h2>3. Information Sharing</h2>
+    <h3>3.1 Within Your Pod</h3>
+    <p>Your check-in status, habit commitments, and display name are visible to other members of your pod. This is a core feature of the service for accountability purposes.</p>
+
+    <h3>3.2 Third-Party Services</h3>
+    <p>We use Supabase for:</p>
+    <ul>
+      <li>Authentication and user management</li>
+      <li>Database storage</li>
+      <li>Real-time data synchronization</li>
+    </ul>
+    <p>We share only the minimum necessary data with Supabase to provide these services. Supabase has its own privacy policy which governs their use of your data.</p>
+
+    <h3>3.3 Legal Requirements</h3>
+    <p>We may disclose your information if required by law or to protect our rights, property, or safety, or that of our users or others.</p>
+
+    <div class="highlight-box">
+      <p><strong>We do not sell your personal information to third parties.</strong></p>
+    </div>
+  </div>
+
+  <div class="content-section">
+    <h2>4. Data Security</h2>
+    <p>We implement appropriate technical and organizational measures to protect your information, including:</p>
+    <ul>
+      <li>Encryption of data in transit and at rest</li>
+      <li>Secure authentication via Supabase Auth</li>
+      <li>Regular security reviews and updates</li>
+      <li>Access controls to limit who can view your data</li>
+    </ul>
+    <p>However, no method of transmission over the internet is 100% secure. While we strive to protect your information, we cannot guarantee absolute security.</p>
+  </div>
+
+  <div class="content-section">
+    <h2>5. Data Retention</h2>
+    <h3>5.1 Account Data</h3>
+    <p>We retain your account information for as long as your account is active. If you delete your account, we will delete your personal information within 30 days, except as required by law.</p>
+
+    <h3>5.2 Pod and Check-in Data</h3>
+    <p>Pod and check-in data is retained to maintain the accountability history of your pod. If you leave a pod, your historical check-in data remains visible to pod members for transparency. You may request deletion of this data by contacting us.</p>
+  </div>
+
+  <div class="content-section">
+    <h2>6. Your Rights</h2>
+    <p>You have the right to:</p>
+    <ul>
+      <li>Access your personal information</li>
+      <li>Correct inaccurate information</li>
+      <li>Request deletion of your account and data</li>
+      <li>Opt out of certain data collection</li>
+      <li>Export your data</li>
+    </ul>
+    <p>To exercise these rights, please contact us through our website or by email.</p>
+  </div>
+
+  <div class="content-section">
+    <h2>7. Children's Privacy</h2>
+    <p>Knot is not intended for children under the age of 13. We do not knowingly collect personal information from children under 13. If we become aware that we have collected such information, we will take steps to delete it.</p>
+  </div>
+
+  <div class="content-section">
+    <h2>8. International Data Transfers</h2>
+    <p>Your information may be transferred to and processed in countries other than your own. We ensure that such transfers comply with applicable data protection laws and that your information remains protected.</p>
+  </div>
+
+  <div class="content-section">
+    <h2>9. Changes to This Privacy Policy</h2>
+    <p>We may update this privacy policy from time to time. We will notify users of significant changes by posting the new policy on this page. Your continued use of the service after such changes constitutes your acceptance of the new policy.</p>
+  </div>
+
+  <div class="content-section">
+    <h2>10. Contact Information</h2>
+    <p>If you have any questions about this Privacy Policy or our data practices, please contact us through our website or by email at the contact information provided on our site.</p>
+  </div>
+</div>
+
+<script>
+  if(typeof lucide !== 'undefined'){
+    lucide.createIcons();
+  }
+</script>
+
+</body>
+</html>
