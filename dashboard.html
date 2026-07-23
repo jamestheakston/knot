@@ -2052,6 +2052,17 @@
       var isLinking = urlParams.get('link');
       var action = urlParams.get('action');
 
+      // Check for pending pod join from URL parameters BEFORE showing no pods placeholder
+      if(shouldJoinPod === 'true' && joinCode){
+        await handlePodJoinFromCode(joinCode);
+      }
+      
+      // Check for pending pod creation
+      await checkPendingPodCreation();
+      
+      // Check for pending pod join from localStorage
+      await checkPendingPodJoin();
+
       if(userPods.length > 0){
         currentPod = userPods[0];
         isAdmin = currentPod.role === 'admin';
@@ -2089,17 +2100,6 @@
           showNoPodsPlaceholder();
         }
       }
-
-      // Check for pending pod creation
-      await checkPendingPodCreation();
-      
-      // Check for pending pod join from URL parameters
-      if(shouldJoinPod === 'true' && joinCode){
-        await handlePodJoinFromCode(joinCode);
-      }
-      
-      // Check for pending pod join from localStorage
-      await checkPendingPodJoin();
       
       // Load user profile
       await loadUserProfile();
