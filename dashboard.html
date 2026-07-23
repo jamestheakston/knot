@@ -1076,7 +1076,7 @@
           <div class="user-name" id="userName">Loading...</div>
           <div class="user-email" id="userEmail">Loading...</div>
         </div>
-        <button class="kebab-btn" id="kebabBtn">
+        <button class="kebab-btn btn-ghost" id="kebabBtn">
           <i data-lucide="more-vertical"></i>
         </button>
         <div class="kebab-menu" id="kebabMenu">
@@ -1100,7 +1100,7 @@
 
   <!-- Main Content -->
   <main class="main-content">
-    <button class="mobile-menu-toggle" id="mobileMenuToggle" style="display: none;">
+    <button class="mobile-menu-toggle btn-ghost" id="mobileMenuToggle" style="display: none;">
       <i data-lucide="menu"></i>
     </button>
     <div class="content-header">
@@ -1715,18 +1715,44 @@
       try{
         var { data: members, error } = await client
           .from('pod_members')
-          .select(`
-            role,
-            joined_at,
-            profiles:auth.users(id, email, user_metadata)
-          `)
+          .select('*')
           .eq('pod_id', currentPod.id);
 
         if(error) throw error;
 
-        var membersHTML = members.map(function(member){
-          var displayName = member.profiles?.user_metadata?.display_name || member.profiles?.email?.split('@')[0] || 'Unknown';
-          var email = member.profiles?.email || '';
+        // Get user profiles for each member
+        var memberData = [];
+        for(var i = 0; i < members.length; i++){
+          var member = members[i];
+          var { data: profile, error: profileError } = await client
+            .from('user_profiles')
+            .select('*')
+            .eq('user_id', member.user_id)
+            .maybeSingle();
+          
+          if(profileError){
+            console.error('Error loading profile for user:', member.user_id, profileError);
+          }
+          
+          memberData.push({
+            role: member.role,
+            joined_at: member.joined_at,
+            user_id: member.user_id,
+            profile: profile
+          });
+        }
+
+        var membersHTML = memberData.map(function(member){
+          var displayName = 'Unknown User';
+          var email = '';
+          
+          if(member.profile){
+            displayName = member.profile.display_name || member.user_id.substring(0, 8);
+            email = member.profile.email || '';
+          }else{
+            displayName = member.user_id.substring(0, 8);
+          }
+          
           var role = member.role || 'member';
           var joinedDate = new Date(member.joined_at).toLocaleDateString();
           
@@ -1735,7 +1761,7 @@
               <div class="member-avatar">${displayName.charAt(0).toUpperCase()}</div>
               <div class="member-info">
                 <div class="member-name">${displayName}</div>
-                <div class="member-email">${email}</div>
+                <div class="member-email">${email || 'User ID: ' + member.user_id.substring(0, 8)}</div>
                 <div class="member-meta">
                   <span class="member-role">${role}</span>
                   <span class="member-joined">Joined ${joinedDate}</span>
@@ -1748,7 +1774,7 @@
         contentArea.innerHTML = `
           <div class="members-section">
             <div class="members-header">
-              <h3>Pod Members (${members.length})</h3>
+              <h3>Pod Members (${memberData.length})</h3>
             </div>
             <div class="members-list">
               ${membersHTML}
@@ -1840,13 +1866,15 @@
         if(habitsError) throw habitsError;
 
         // Create check-in for each habit
+        var today = new Date().toISOString().split('T')[0];
         for(var i = 0; i < habits.length; i++){
           var { error: checkInError } = await client
             .from('check_ins')
             .insert({
               pod_id: currentPod.id,
               user_id: currentUser.id,
-              habit_id: habits[i].id
+              habit_id: habits[i].id,
+              check_in_date: today
             });
           
           if(checkInError) throw checkInError;
