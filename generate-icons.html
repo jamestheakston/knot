@@ -4,6 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Knot Icon Generator</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
   <style>
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -89,6 +91,8 @@
         const svgResponse = await fetch('icon.svg');
         const svgText = await svgResponse.text();
         
+        const zip = new JSZip();
+        
         for (const size of SIZES) {
           const pngUrl = await svgToPng(svgText, size);
           
@@ -101,11 +105,18 @@
           `;
           preview.appendChild(div);
           
-          // Download
-          downloadPng(pngUrl, `icon-${size}x${size}.png`);
+          // Convert data URL to blob and add to zip
+          const response = await fetch(pngUrl);
+          const blob = await response.blob();
+          zip.file(`icon-${size}x${size}.png`, blob);
         }
         
-        status.textContent = 'All icons generated and downloaded successfully!';
+        // Generate zip file
+        status.textContent = 'Creating ZIP file...';
+        const zipBlob = await zip.generateAsync({ type: 'blob' });
+        saveAs(zipBlob, 'knot-icons.zip');
+        
+        status.textContent = 'ZIP file downloaded successfully!';
       } catch (error) {
         status.className = 'error';
         status.textContent = 'Error generating icons: ' + error.message;
