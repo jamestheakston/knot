@@ -476,6 +476,323 @@
     font-weight: 500;
   }
 
+  /* ---------- OVERVIEW SECTION ---------- */
+  .overview-section{
+    padding: 20px 0;
+  }
+  .overview-header{
+    display: flex;
+    gap: 24px;
+    margin-bottom: 40px;
+  }
+  .overview-stat{
+    flex: 1;
+    background: var(--bg-2);
+    border-radius: 16px;
+    padding: 24px;
+    text-align: center;
+    border: 1px solid var(--line);
+  }
+  .stat-label{
+    font-size: 14px;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+  .stat-value{
+    font-size: 36px;
+    font-weight: 700;
+    color: var(--ink);
+    font-family: 'Instrument Serif', serif;
+  }
+  .stat-unit{
+    font-size: 14px;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+
+  /* ---------- MEMBERS SECTION ---------- */
+  .members-section{
+    padding: 20px 0;
+  }
+  .members-header{
+    margin-bottom: 24px;
+  }
+  .members-header h3{
+    font-size: 24px;
+    font-weight: 600;
+  }
+  .members-list{
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .member-card{
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    background: var(--bg-2);
+    border-radius: 12px;
+    padding: 16px;
+    border: 1px solid var(--line);
+  }
+  .member-avatar{
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: var(--blue);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    font-weight: 600;
+  }
+  .member-info{
+    flex: 1;
+  }
+  .member-name{
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: 4px;
+  }
+  .member-email{
+    font-size: 14px;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+  .member-meta{
+    display: flex;
+    gap: 12px;
+    font-size: 12px;
+  }
+  .member-role{
+    color: var(--blue);
+    font-weight: 500;
+  }
+  .member-joined{
+    color: var(--muted-2);
+  }
+
+  /* ---------- CHECK-INS SECTION ---------- */
+  .check-ins-section{
+    padding: 20px 0;
+  }
+  .check-in-action{
+    margin-bottom: 32px;
+  }
+  .check-in-status{
+    padding: 16px 24px;
+    background: #10B981;
+    color: #fff;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 500;
+  }
+  .check-ins-history h3{
+    font-size: 20px;
+    font-weight: 600;
+    margin-bottom: 16px;
+  }
+  .check-ins-list{
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .check-in-item{
+    display: flex;
+    justify-content: space-between;
+    padding: 12px 16px;
+    background: var(--bg-2);
+    border-radius: 8px;
+    border: 1px solid var(--line);
+  }
+  .check-in-date{
+    font-size: 14px;
+    color: var(--ink);
+  }
+  .check-in-time{
+    font-size: 14px;
+    color: var(--muted);
+  }
+  .no-check-ins{
+    padding: 24px;
+    text-align: center;
+    color: var(--muted);
+  }
+
+  /* ---------- POD SETTINGS SECTION ---------- */
+  .pod-settings-section{
+    padding: 20px 0;
+  }
+  .settings-form{
+    max-width: 500px;
+  }
+  .invite-code-display{
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+  .invite-code-display span{
+    flex: 1;
+    padding: 12px 16px;
+    background: var(--bg-3);
+    border-radius: 10px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 16px;
+    letter-spacing: 0.05em;
+  }
+
+  /* ---------- INVITE SECTION ---------- */
+  .invite-section{
+    padding: 20px 0;
+  }
+  .invite-card{
+    background: var(--bg-2);
+    border-radius: 20px;
+    padding: 40px;
+    max-width: 600px;
+    border: 1px solid var(--line);
+  }
+  .invite-card h3{
+    font-size: 24px;
+    font-weight: 600;
+    margin-bottom: 12px;
+  }
+  .invite-card > p{
+    color: var(--muted);
+    margin-bottom: 24px;
+  }
+  .invite-code-large{
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    margin-bottom: 32px;
+  }
+  .invite-code-text{
+    flex: 1;
+    padding: 20px 24px;
+    background: var(--bg-3);
+    border-radius: 12px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 24px;
+    letter-spacing: 0.1em;
+    text-align: center;
+    font-weight: 600;
+  }
+  .invite-instructions h4{
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 12px;
+  }
+  .invite-instructions ol{
+    padding-left: 20px;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+  .invite-instructions li{
+    margin-bottom: 8px;
+  }
+
+  /* ---------- PROFILE SECTION ---------- */
+  .profile-section{
+    padding: 20px 0;
+  }
+  .profile-header{
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    margin-bottom: 32px;
+  }
+  .profile-avatar-large{
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: var(--blue);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 32px;
+    font-weight: 600;
+  }
+  .profile-info h3{
+    font-size: 24px;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+  .profile-info p{
+    color: var(--muted);
+  }
+  .profile-stats{
+    display: flex;
+    gap: 16px;
+  }
+  .profile-stat{
+    background: var(--bg-2);
+    border-radius: 12px;
+    padding: 20px;
+    min-width: 120px;
+    border: 1px solid var(--line);
+  }
+  .profile-stat .stat-label{
+    font-size: 14px;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+  .profile-stat .stat-value{
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--ink);
+  }
+
+  /* ---------- ACCOUNT SETTINGS SECTION ---------- */
+  .account-settings-section{
+    padding: 20px 0;
+  }
+  .settings-card{
+    background: var(--bg-2);
+    border-radius: 20px;
+    padding: 40px;
+    max-width: 600px;
+    border: 1px solid var(--line);
+  }
+  .settings-card h3{
+    font-size: 24px;
+    font-weight: 600;
+    margin-bottom: 24px;
+  }
+  .settings-item{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .settings-item:last-child{
+    border-bottom: none;
+  }
+  .settings-item-label{
+    font-size: 14px;
+    color: var(--muted);
+  }
+  .settings-item-value{
+    font-size: 16px;
+    color: var(--ink);
+    font-weight: 500;
+  }
+  .settings-actions{
+    margin-top: 32px;
+  }
+
+  /* ---------- ERROR STATE ---------- */
+  .error{
+    padding: 40px;
+    text-align: center;
+    color: var(--red);
+    font-size: 16px;
+  }
+
   /* ---------- RESPONSIVE ---------- */
   @media (max-width: 768px){
     .mobile-menu-toggle{
@@ -692,6 +1009,14 @@
         <div class="nav-item admin-only" data-nav="invite">
           <i data-lucide="user-plus"></i>
           Invite Members
+        </div>
+        <div class="nav-item" data-nav="profile">
+          <i data-lucide="user"></i>
+          Profile
+        </div>
+        <div class="nav-item" data-nav="account">
+          <i data-lucide="cog"></i>
+          Account Settings
         </div>
       </div>
     </nav>
@@ -966,6 +1291,8 @@
         // Load and display streak data
         var streak = await loadStreakData();
         displayStreak(streak);
+        // Load overview section by default
+        navigateTo('overview');
       }else{
         // Show no pods placeholder
         showNoPodsPlaceholder();
@@ -1235,6 +1562,416 @@
       }
     }
 
+    function navigateTo(section){
+      // Update active nav item
+      document.querySelectorAll('.nav-item').forEach(function(item){
+        item.classList.remove('is-active');
+      });
+      var activeNav = document.querySelector('.nav-item[data-nav="' + section + '"]');
+      if(activeNav) activeNav.classList.add('is-active');
+
+      // Update page title
+      var titles = {
+        'overview': 'Overview',
+        'members': 'Members',
+        'check-ins': 'Check-ins',
+        'streak': 'Streak',
+        'pod-settings': 'Pod Settings',
+        'invite': 'Invite Members',
+        'profile': 'Profile',
+        'account': 'Account Settings'
+      };
+      var subtitles = {
+        'overview': 'View your pod\'s progress and activity',
+        'members': 'Manage pod members and roles',
+        'check-ins': 'Track daily habit check-ins',
+        'streak': 'View your current streak',
+        'pod-settings': 'Configure pod settings',
+        'invite': 'Invite new members to your pod',
+        'profile': 'View and edit your profile',
+        'account': 'Manage your account settings'
+      };
+      
+      document.getElementById('pageTitle').textContent = titles[section] || 'Overview';
+      document.getElementById('pageSubtitle').textContent = subtitles[section] || '';
+
+      // Load section content
+      var contentArea = document.getElementById('contentArea');
+      contentArea.innerHTML = '<div class="loading">Loading...</div>';
+
+      switch(section){
+        case 'overview':
+          loadOverview();
+          break;
+        case 'members':
+          loadMembers();
+          break;
+        case 'check-ins':
+          loadCheckIns();
+          break;
+        case 'streak':
+          loadStreakSection();
+          break;
+        case 'pod-settings':
+          loadPodSettings();
+          break;
+        case 'invite':
+          loadInvite();
+          break;
+        case 'profile':
+          loadProfile();
+          break;
+        case 'account':
+          loadAccountSettings();
+          break;
+        default:
+          loadOverview();
+      }
+    }
+
+    async function loadOverview(){
+      var contentArea = document.getElementById('contentArea');
+      var streak = await loadStreakData();
+      
+      contentArea.innerHTML = `
+        <div class="overview-section">
+          <div class="overview-header">
+            <div class="overview-stat">
+              <div class="stat-label">Current Streak</div>
+              <div class="stat-value">${streak}</div>
+              <div class="stat-unit">days</div>
+            </div>
+            <div class="overview-stat">
+              <div class="stat-label">Pod Members</div>
+              <div class="stat-value">${userPods.length}</div>
+              <div class="stat-unit">members</div>
+            </div>
+          </div>
+          <div class="streak-display">
+            ${streak === 0 
+              ? '<img src="/assets/nostreak.png" alt="No streak" class="streak-image nostreak-image"><div class="streak-count">0</div><div class="streak-message">You need to start a streak</div>'
+              : '<img src="/assets/streak.svg" alt="Streak" class="streak-image streak-animated"><div class="streak-count">' + streak + '</div><div class="streak-message">day streak</div>'
+            }
+          </div>
+        </div>
+      `;
+    }
+
+    async function loadMembers(){
+      var contentArea = document.getElementById('contentArea');
+      var client = getSupabaseClient();
+      
+      try{
+        var { data: members, error } = await client
+          .from('pod_members')
+          .select(`
+            role,
+            joined_at,
+            profiles:auth.users(id, email, user_metadata)
+          `)
+          .eq('pod_id', currentPod.id);
+
+        if(error) throw error;
+
+        var membersHTML = members.map(function(member){
+          var displayName = member.profiles?.user_metadata?.display_name || member.profiles?.email?.split('@')[0] || 'Unknown';
+          var email = member.profiles?.email || '';
+          var role = member.role || 'member';
+          var joinedDate = new Date(member.joined_at).toLocaleDateString();
+          
+          return `
+            <div class="member-card">
+              <div class="member-avatar">${displayName.charAt(0).toUpperCase()}</div>
+              <div class="member-info">
+                <div class="member-name">${displayName}</div>
+                <div class="member-email">${email}</div>
+                <div class="member-meta">
+                  <span class="member-role">${role}</span>
+                  <span class="member-joined">Joined ${joinedDate}</span>
+                </div>
+              </div>
+            </div>
+          `;
+        }).join('');
+
+        contentArea.innerHTML = `
+          <div class="members-section">
+            <div class="members-header">
+              <h3>Pod Members (${members.length})</h3>
+            </div>
+            <div class="members-list">
+              ${membersHTML}
+            </div>
+          </div>
+        `;
+      }catch(err){
+        console.error('Error loading members:', err);
+        contentArea.innerHTML = '<div class="error">Error loading members</div>';
+      }
+    }
+
+    async function loadCheckIns(){
+      var contentArea = document.getElementById('contentArea');
+      var client = getSupabaseClient();
+      
+      try{
+        var today = new Date();
+        today.setHours(0, 0, 0, 0);
+        
+        var { data: checkIns, error } = await client
+          .from('check_ins')
+          .select('*')
+          .eq('pod_id', currentPod.id)
+          .eq('user_id', currentUser.id)
+          .order('created_at', { ascending: false })
+          .limit(30);
+
+        if(error) throw error;
+
+        // Check if already checked in today
+        var checkedInToday = checkIns.some(function(ci){
+          var checkInDate = new Date(ci.created_at);
+          checkInDate.setHours(0, 0, 0, 0);
+          return checkInDate.getTime() === today.getTime();
+        });
+
+        var checkInsHTML = checkIns.map(function(ci){
+          var date = new Date(ci.created_at);
+          return `
+            <div class="check-in-item">
+              <div class="check-in-date">${date.toLocaleDateString()}</div>
+              <div class="check-in-time">${date.toLocaleTimeString()}</div>
+            </div>
+          `;
+        }).join('');
+
+        contentArea.innerHTML = `
+          <div class="check-ins-section">
+            <div class="check-in-action">
+              ${checkedInToday 
+                ? '<div class="check-in-status checked-in">✓ Checked in today</div>'
+                : '<button class="btn btn-primary" id="checkInBtn">Check in today</button>'
+              }
+            </div>
+            <div class="check-ins-history">
+              <h3>Recent Check-ins</h3>
+              <div class="check-ins-list">
+                ${checkInsHTML || '<div class="no-check-ins">No check-ins yet</div>'}
+              </div>
+            </div>
+          </div>
+        `;
+
+        if(!checkedInToday){
+          document.getElementById('checkInBtn').addEventListener('click', handleCheckIn);
+        }
+      }catch(err){
+        console.error('Error loading check-ins:', err);
+        contentArea.innerHTML = '<div class="error">Error loading check-ins</div>';
+      }
+    }
+
+    async function handleCheckIn(){
+      var client = getSupabaseClient();
+      var btn = document.getElementById('checkInBtn');
+      
+      try{
+        btn.disabled = true;
+        btn.textContent = 'Checking in...';
+
+        // Get habits for the pod
+        var { data: habits, error: habitsError } = await client
+          .from('habits')
+          .select('*')
+          .eq('pod_id', currentPod.id);
+
+        if(habitsError) throw habitsError;
+
+        // Create check-in for each habit
+        for(var i = 0; i < habits.length; i++){
+          var { error: checkInError } = await client
+            .from('check_ins')
+            .insert({
+              pod_id: currentPod.id,
+              user_id: currentUser.id,
+              habit_id: habits[i].id
+            });
+          
+          if(checkInError) throw checkInError;
+        }
+
+        // Reload check-ins
+        loadCheckIns();
+      }catch(err){
+        console.error('Error checking in:', err);
+        alert('Error checking in: ' + err.message);
+        btn.disabled = false;
+        btn.textContent = 'Check in today';
+      }
+    }
+
+    async function loadStreakSection(){
+      var streak = await loadStreakData();
+      displayStreak(streak);
+    }
+
+    async function loadPodSettings(){
+      var contentArea = document.getElementById('contentArea');
+      
+      if(!isAdmin){
+        contentArea.innerHTML = '<div class="error">You must be an admin to access pod settings</div>';
+        return;
+      }
+
+      contentArea.innerHTML = `
+        <div class="pod-settings-section">
+          <div class="settings-form">
+            <div class="form-group">
+              <label class="form-label">Pod Name</label>
+              <input type="text" class="form-input" id="podNameInput" value="${currentPod.name}">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Invite Code</label>
+              <div class="invite-code-display">
+                <span id="inviteCodeDisplay">${currentPod.inviteCode}</span>
+                <button class="btn btn-ghost" id="copyInviteCode">Copy</button>
+              </div>
+            </div>
+            <div class="form-actions">
+              <button class="btn btn-primary" id="savePodSettings">Save Changes</button>
+            </div>
+          </div>
+        </div>
+      `;
+
+      document.getElementById('copyInviteCode').addEventListener('click', function(){
+        navigator.clipboard.writeText(currentPod.inviteCode);
+        this.textContent = 'Copied!';
+        setTimeout(function(){
+          document.getElementById('copyInviteCode').textContent = 'Copy';
+        }, 2000);
+      });
+
+      document.getElementById('savePodSettings').addEventListener('click', handleSavePodSettings);
+    }
+
+    async function handleSavePodSettings(){
+      var client = getSupabaseClient();
+      var podName = document.getElementById('podNameInput').value;
+      
+      try{
+        var { error } = await client
+          .from('pods')
+          .update({ name: podName })
+          .eq('id', currentPod.id);
+
+        if(error) throw error;
+
+        currentPod.name = podName;
+        document.getElementById('currentPodName').textContent = podName;
+        alert('Pod settings saved successfully');
+      }catch(err){
+        console.error('Error saving pod settings:', err);
+        alert('Error saving pod settings: ' + err.message);
+      }
+    }
+
+    function loadInvite(){
+      var contentArea = document.getElementById('contentArea');
+      
+      if(!isAdmin){
+        contentArea.innerHTML = '<div class="error">You must be an admin to invite members</div>';
+        return;
+      }
+
+      contentArea.innerHTML = `
+        <div class="invite-section">
+          <div class="invite-card">
+            <h3>Invite Members</h3>
+            <p>Share this invite code with people you want to join your pod:</p>
+            <div class="invite-code-large">
+              <span class="invite-code-text">${currentPod.inviteCode}</span>
+              <button class="btn btn-primary" id="copyInviteLarge">Copy Code</button>
+            </div>
+            <div class="invite-instructions">
+              <h4>How to invite:</h4>
+              <ol>
+                <li>Share the invite code above with your friends</li>
+                <li>They can enter it on the landing page to join your pod</li>
+                <li>Once they join, they'll appear in the Members section</li>
+              </ol>
+            </div>
+          </div>
+        </div>
+      `;
+
+      document.getElementById('copyInviteLarge').addEventListener('click', function(){
+        navigator.clipboard.writeText(currentPod.inviteCode);
+        this.textContent = 'Copied!';
+        setTimeout(function(){
+          document.getElementById('copyInviteLarge').textContent = 'Copy Code';
+        }, 2000);
+      });
+    }
+
+    function loadProfile(){
+      var contentArea = document.getElementById('contentArea');
+      var displayName = currentUser.user_metadata?.display_name || currentUser.email?.split('@')[0] || 'User';
+      
+      contentArea.innerHTML = `
+        <div class="profile-section">
+          <div class="profile-header">
+            <div class="profile-avatar-large">${displayName.charAt(0).toUpperCase()}</div>
+            <div class="profile-info">
+              <h3>${displayName}</h3>
+              <p>${currentUser.email}</p>
+            </div>
+          </div>
+          <div class="profile-stats">
+            <div class="profile-stat">
+              <div class="stat-label">Pods</div>
+              <div class="stat-value">${userPods.length}</div>
+            </div>
+            <div class="profile-stat">
+              <div class="stat-label">Role</div>
+              <div class="stat-value">${isAdmin ? 'Admin' : 'Member'}</div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function loadAccountSettings(){
+      var contentArea = document.getElementById('contentArea');
+      
+      contentArea.innerHTML = `
+        <div class="account-settings-section">
+          <div class="settings-card">
+            <h3>Account Settings</h3>
+            <div class="settings-item">
+              <div class="settings-item-label">Email</div>
+              <div class="settings-item-value">${currentUser.email}</div>
+            </div>
+            <div class="settings-item">
+              <div class="settings-item-label">Account Created</div>
+              <div class="settings-item-value">${new Date(currentUser.created_at).toLocaleDateString()}</div>
+            </div>
+            <div class="settings-actions">
+              <button class="btn btn-ghost" id="logoutBtn">Log Out</button>
+            </div>
+          </div>
+        </div>
+      `;
+
+      document.getElementById('logoutBtn').addEventListener('click', handleLogout);
+    }
+
+    async function handleLogout(){
+      var client = getSupabaseClient();
+      await client.auth.signOut();
+      window.location.href = 'index.html';
+    }
+
     function showUpgradeModal(){
       var modal = document.getElementById('upgradeModal');
       modal.classList.add('is-open');
@@ -1260,6 +1997,14 @@
       if(e.target === this){
         hideNoPodsModal();
       }
+    });
+
+    // Navigation click handlers
+    document.querySelectorAll('.nav-item').forEach(function(item){
+      item.addEventListener('click', function(){
+        var section = this.getAttribute('data-nav');
+        if(section) navigateTo(section);
+      });
     });
 
     function updatePodSelector(){
