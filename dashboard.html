@@ -392,38 +392,53 @@
     color: var(--muted);
   }
 
-  /* ---------- NO PODS PLACEHOLDER ---------- */
-  .no-pods-placeholder{
-    display: flex;
-    flex-direction: column;
+  /* ---------- NO PODS MODAL ---------- */
+  .no-pods-modal-overlay{
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    display: none;
     align-items: center;
     justify-content: center;
-    min-height: 400px;
-    text-align: center;
-    padding: 40px 20px;
+    background: rgba(21, 25, 34, 0.6);
+    backdrop-filter: blur(4px);
   }
-  .no-pods-icon{
-    margin-bottom: 24px;
+  .no-pods-modal-overlay.is-open{
+    display: flex;
+  }
+  .no-pods-modal{
+    background: var(--bg-2);
+    border-radius: 20px;
+    padding: 40px;
+    max-width: 480px;
+    width: 90%;
+    text-align: center;
+  }
+  .no-pods-modal-icon{
+    margin-bottom: 20px;
     opacity: 0.5;
   }
-  .no-pods-placeholder h2{
+  .no-pods-modal h2{
     font-size: 24px;
     font-weight: 600;
     margin-bottom: 12px;
     color: var(--ink);
   }
-  .no-pods-placeholder p{
+  .no-pods-modal p{
     font-size: 16px;
     color: var(--muted);
-    margin-bottom: 32px;
-    max-width: 400px;
+    margin-bottom: 24px;
     line-height: 1.5;
   }
-  .no-pods-actions{
+  .no-pods-modal-actions{
     display: flex;
     gap: 12px;
     flex-wrap: wrap;
     justify-content: center;
+  }
+  .no-pods-modal-actions .btn{
+    flex: 1;
+    min-width: 140px;
   }
 
   /* ---------- RESPONSIVE ---------- */
@@ -730,6 +745,21 @@
     
     <div class="upgrade-modal-actions">
       <button class="btn btn-ghost" id="closeUpgradeModal">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- No Pods Modal -->
+<div class="no-pods-modal-overlay" id="noPodsModal">
+  <div class="no-pods-modal">
+    <div class="no-pods-modal-icon">
+      <i data-lucide="users" style="width: 48px; height: 48px;"></i>
+    </div>
+    <h2>You're not in any pods yet</h2>
+    <p>Join an existing pod with an invite code, or start your own pod to begin tracking habits together.</p>
+    <div class="no-pods-modal-actions">
+      <a href="index.html?openmodal=true" class="btn btn-primary">Start a pod</a>
+      <a href="index.html?openmodal=true" class="btn btn-ghost">Join with invite code</a>
     </div>
   </div>
 </div>
@@ -1066,25 +1096,13 @@
     }
 
     function showNoPodsPlaceholder(){
-      var contentArea = document.getElementById('contentArea');
-      contentArea.innerHTML = `
-        <div class="no-pods-placeholder">
-          <div class="no-pods-icon">
-            <i data-lucide="users" style="width: 48px; height: 48px; color: var(--muted);"></i>
-          </div>
-          <h2>You're not in any pods yet</h2>
-          <p>Join an existing pod with an invite code, or start your own pod to begin tracking habits together.</p>
-          <div class="no-pods-actions">
-            <a href="index.html?openmodal=true" class="btn btn-primary">Start a pod</a>
-            <a href="index.html?openmodal=true" class="btn btn-ghost">Join with invite code</a>
-          </div>
-        </div>
-      `;
-      
-      // Initialize Lucide icons
-      if(typeof lucide !== 'undefined'){
-        lucide.createIcons();
-      }
+      var modal = document.getElementById('noPodsModal');
+      modal.classList.add('is-open');
+    }
+
+    function hideNoPodsModal(){
+      var modal = document.getElementById('noPodsModal');
+      modal.classList.remove('is-open');
     }
 
     function showUpgradeModal(){
@@ -1104,6 +1122,13 @@
     document.getElementById('upgradeModal').addEventListener('click', function(e){
       if(e.target === this){
         hideUpgradeModal();
+      }
+    });
+
+    // No pods modal close on overlay click
+    document.getElementById('noPodsModal').addEventListener('click', function(e){
+      if(e.target === this){
+        hideNoPodsModal();
       }
     });
 

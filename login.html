@@ -496,6 +496,14 @@
 
       if(error){
         var message = errorDescription || 'Authentication error occurred';
+        
+        // Check if error indicates user doesn't exist
+        if(message.toLowerCase().includes('user not found') ||
+           message.toLowerCase().includes('email not confirmed') ||
+           message.toLowerCase().includes('invalid login credentials')){
+          message = 'Account not found. You must create an account to start a pod or join one.';
+        }
+        
         showToast(message.replace(/\+/g, ' '));
         window.history.replaceState({}, document.title, window.location.pathname);
       }
