@@ -2053,14 +2053,28 @@
       var urlParams = new URLSearchParams(window.location.search);
       var shouldCreatePod = urlParams.get('createpod');
       var isLinking = urlParams.get('link');
+      var action = urlParams.get('action');
 
       if(userPods.length > 0){
         currentPod = userPods[0];
         isAdmin = currentPod.role === 'admin';
         updatePodSelector();
         updateAdminVisibility();
-        // Load overview section by default
-        navigateTo('overview');
+        
+        // Handle PWA shortcut actions
+        if(action === 'checkin'){
+          navigateTo('check-ins');
+          // Remove action parameter from URL
+          window.history.replaceState({}, document.title, window.location.pathname);
+        }else if(action === 'streak'){
+          navigateTo('streak');
+          // Remove action parameter from URL
+          window.history.replaceState({}, document.title, window.location.pathname);
+        }else{
+          // Load overview section by default
+          navigateTo('overview');
+        }
+        
         // If linking account, show success message
         if(isLinking){
           alert('Account linked successfully!');
