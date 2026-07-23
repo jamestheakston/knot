@@ -881,10 +881,10 @@
         if(pendingPodData){
           try{
             var podData = JSON.parse(pendingPodData);
+            // Clean URL BEFORE creating pod to prevent loop
+            window.history.replaceState({}, document.title, window.location.pathname);
             await createPodFromSignup(podData);
             localStorage.removeItem('pendingPodCreation');
-            // Clean URL
-            window.history.replaceState({}, document.title, window.location.pathname);
           }catch(err){
             console.error('Error parsing pending pod data:', err);
             localStorage.removeItem('pendingPodCreation');
@@ -986,8 +986,6 @@
           }
         }
 
-        // Reload pods to show the new pod
-        await loadUserPods();
       }catch(err){
         console.error('Error creating pod:', err);
         alert('Error creating pod: ' + err.message);
