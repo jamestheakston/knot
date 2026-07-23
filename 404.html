@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>404 — Page Not Found | Knot</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@latest"></script>
+<style>
+  :root{
+    --bg: #F7F8FB;
+    --bg-2: #FFFFFF;
+    --bg-3: #EEF1F6;
+    --ink: #151922;
+    --muted: #5B6472;
+    --muted-2: #8890A0;
+    --blue: #2A4BD7;
+    --blue-bright: #1B37AE;
+    --blue-soft: #EAEFFF;
+    --line: rgba(21,25,34,0.10);
+    --line-strong: rgba(21,25,34,0.18);
+  }
+
+  *{ box-sizing: border-box; }
+  html{ scroll-behavior: smooth; }
+  body{
+    margin:0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'Work Sans', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    line-height: 1.5;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+  h1,h2{
+    font-family: 'Instrument Serif', serif;
+    font-weight: 400;
+    margin: 0;
+    letter-spacing: -0.01em;
+  }
+  a{ color: inherit; text-decoration: none; }
+
+  ::selection{ background: var(--blue); color: #fff; }
+
+  :focus-visible{
+    outline: 2px solid var(--blue);
+    outline-offset: 3px;
+    border-radius: 4px;
+  }
+
+  /* ---------- 404 PAGE ---------- */
+  .not-found-page{
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 120px 24px 40px;
+  }
+  .not-found-container{
+    text-align: center;
+    max-width: 500px;
+  }
+  .not-found-code{
+    font-size: 120px;
+    font-weight: 700;
+    color: var(--blue);
+    font-family: 'Instrument Serif', serif;
+    line-height: 1;
+    margin-bottom: 24px;
+  }
+  .not-found-title{
+    font-size: 32px;
+    margin-bottom: 16px;
+  }
+  .not-found-description{
+    font-size: 16px;
+    color: var(--muted);
+    margin-bottom: 32px;
+    line-height: 1.6;
+  }
+  .not-found-actions{
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  /* ---------- BUTTONS ---------- */
+  .btn{
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px 20px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 500;
+    font-family: 'Work Sans', sans-serif;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s ease;
+  }
+  .btn-primary{
+    background: var(--blue);
+    color: #fff;
+  }
+  .btn-primary:hover{
+    background: var(--blue-bright);
+  }
+  .btn-ghost{
+    background: transparent;
+    color: var(--ink);
+    border: 1px solid var(--line-strong);
+  }
+  .btn-ghost:hover{
+    background: var(--bg-3);
+  }
+
+  /* ---------- RESPONSIVE ---------- */
+  @media (max-width: 640px){
+    .not-found-page{
+      padding: 100px 20px 40px;
+    }
+    .not-found-code{
+      font-size: 80px;
+    }
+    .not-found-title{
+      font-size: 24px;
+    }
+  }
+</style>
+</head>
+<body>
+
+<div class="not-found-page">
+  <div class="not-found-container">
+    <div class="not-found-code">404</div>
+    <h1 class="not-found-title">Page not found</h1>
+    <p class="not-found-description">The page you're looking for doesn't exist or has been moved. Let's get you back on track.</p>
+    <div class="not-found-actions">
+      <a href="index.html" class="btn btn-primary">Go to Home</a>
+      <a href="dashboard.html" class="btn btn-ghost">Go to Dashboard</a>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Initialize Lucide icons
+  if(typeof lucide !== 'undefined'){
+    lucide.createIcons();
+  }
+</script>
+
+</body>
+</html>
