@@ -1997,11 +1997,11 @@
     function showPWALanding(){
       var body = document.body;
       
-      // Hide main content
-      var mainContent = document.querySelector('nav, .hero, .features, .pod-preview, .cta-band, .pwa-install-section, footer');
-      if(mainContent){
-        mainContent.style.display = 'none';
-      }
+      // Hide all main content
+      var mainContent = document.querySelectorAll('nav, .hero, .features, .pod-preview, .cta-band, .pwa-install-section, footer');
+      mainContent.forEach(function(el){
+        el.style.display = 'none';
+      });
       
       // Create PWA landing
       var pwaLanding = document.createElement('div');
@@ -2013,35 +2013,34 @@
           <h1 style="font-family: 'Instrument Serif', serif; font-size: 48px; font-weight: 400; margin-bottom: 16px; color: var(--ink);">Knot</h1>
           <p style="font-size: 16px; color: var(--muted); margin-bottom: 48px; line-height: 1.6;">A habit, held by your pod</p>
           
-          <button onclick="openCreatePod()" style="width: 100%; padding: 18px 32px; font-size: 16px; font-weight: 500; background: var(--blue); color: white; border: none; border-radius: 12px; cursor: pointer; margin-bottom: 16px; transition: background 0.2s ease;">
+          <button id="pwa-create-pod" style="width: 100%; padding: 18px 32px; font-size: 16px; font-weight: 500; background: var(--blue); color: white; border: none; border-radius: 12px; cursor: pointer; margin-bottom: 16px; transition: background 0.2s ease;">
             Create a Pod
           </button>
           
-          <button onclick="openJoinPod()" style="width: 100%; padding: 18px 32px; font-size: 16px; font-weight: 500; background: var(--bg-2); color: var(--ink); border: 1px solid var(--line); border-radius: 12px; cursor: pointer; transition: background 0.2s ease;">
+          <button id="pwa-join-pod" style="width: 100%; padding: 18px 32px; font-size: 16px; font-weight: 500; background: var(--bg-2); color: var(--ink); border: 1px solid var(--line); border-radius: 12px; cursor: pointer; transition: background 0.2s ease;">
             Join a Pod
           </button>
         </div>
       `;
       
       body.appendChild(pwaLanding);
-    }
-
-    function openCreatePod(){
-      openModal();
-      // Navigate to start flow
-      setTimeout(function(){
-        var startBtn = document.querySelector('[data-step="choice"] .option-card:first-child');
-        if(startBtn) startBtn.click();
-      }, 100);
-    }
-
-    function openJoinPod(){
-      openModal();
-      // Navigate to join flow
-      setTimeout(function(){
-        var joinBtn = document.querySelector('[data-step="choice"] .option-card:last-child');
-        if(joinBtn) joinBtn.click();
-      }, 100);
+      
+      // Add event listeners to buttons
+      document.getElementById('pwa-create-pod').addEventListener('click', function(){
+        openModal();
+        setTimeout(function(){
+          var startBtn = document.querySelector('[data-step="choice"] .option-card:first-child');
+          if(startBtn) startBtn.click();
+        }, 100);
+      });
+      
+      document.getElementById('pwa-join-pod').addEventListener('click', function(){
+        openModal();
+        setTimeout(function(){
+          var joinBtn = document.querySelector('[data-step="choice"] .option-card:last-child');
+          if(joinBtn) joinBtn.click();
+        }, 100);
+      });
     }
 
     // Run checks on page load
