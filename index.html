@@ -1510,10 +1510,26 @@
 
         if(error) throw error;
 
-        showToast('Account created! Joining pod...');
-        setTimeout(function(){
-          window.location.href = 'dashboard.html?joinpod=true&code=' + code;
-        }, 1000);
+        console.log('Sign up result:', data);
+
+        // Check if we have a session (auto-login) or need email confirmation
+        if(data.session){
+          // User is automatically logged in
+          showToast('Account created! Joining pod...');
+          setTimeout(function(){
+            window.location.href = 'dashboard.html?joinpod=true&code=' + code;
+          }, 1000);
+        }else{
+          // User needs to confirm email first
+          showToast('Account created! Please check your email to confirm, then join the pod.');
+          // Store the join code for after email confirmation
+          localStorage.setItem('pendingPodJoin', JSON.stringify({
+            inviteCode: code
+          }));
+          setTimeout(function(){
+            window.location.href = 'dashboard.html';
+          }, 2000);
+        }
       }catch(err){
         console.error('Error:', err);
         showToast('Error: ' + err.message);
