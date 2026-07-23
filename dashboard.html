@@ -944,7 +944,18 @@
 
         if(podError) throw podError;
 
-        // Create habit
+        // Add creator as pod member FIRST (before creating habit for RLS)
+        var { error: memberError } = await client
+          .from('pod_members')
+          .insert({
+            pod_id: podResult.id,
+            user_id: currentUser.id,
+            role: 'admin'
+          });
+
+        if(memberError) throw memberError;
+
+        // Create habit (now that user is pod admin, RLS should allow it)
         var { error: habitError } = await client
           .from('habits')
           .insert({
@@ -955,17 +966,6 @@
           });
 
         if(habitError) throw habitError;
-
-        // Add creator as pod member
-        var { error: memberError } = await client
-          .from('pod_members')
-          .insert({
-            pod_id: podResult.id,
-            user_id: currentUser.id,
-            role: 'admin'
-          });
-
-        if(memberError) throw memberError;
 
         // Create user profile if it doesn't exist
         try{
@@ -1170,7 +1170,7 @@
 
     // Check auth on load
     checkAuth();
-  })();
+  });
 </script>
 
 </body>
