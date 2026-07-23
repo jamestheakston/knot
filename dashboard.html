@@ -1317,9 +1317,6 @@
         isAdmin = currentPod.role === 'admin';
         updatePodSelector();
         updateAdminVisibility();
-        // Load and display streak data
-        var streak = await loadStreakData();
-        displayStreak(streak);
         // Load overview section by default
         navigateTo('overview');
       }else{
@@ -2245,17 +2242,6 @@
         navigateTo(nav);
       });
     });
-
-    function navigateTo(nav){
-      var title = nav.charAt(0).toUpperCase() + nav.slice(1).replace('-', ' ');
-      document.getElementById('pageTitle').textContent = title;
-      document.getElementById('contentArea').innerHTML = '<div class="loading">Loading...</div>';
-      
-      // Load content based on nav
-      setTimeout(function(){
-        document.getElementById('contentArea').innerHTML = '<p style="color: var(--muted);">' + title + ' content coming soon...</p>';
-      }, 300);
-    }
 
     // Kebab menu actions
     document.querySelectorAll('.kebab-option').forEach(function(option){
