@@ -1726,6 +1726,21 @@
 
     // Run auth error check on page load
     checkAuthErrors();
+
+    // Check for openmodal parameter
+    function checkOpenModalParam(){
+      var urlParams = new URLSearchParams(window.location.search);
+      var shouldOpenModal = urlParams.get('openmodal');
+      
+      if(shouldOpenModal === 'true'){
+        openModal();
+        // Clean URL
+        window.history.replaceState({}, document.title, window.location.pathname);
+      }
+    }
+
+    // Run openmodal check on page load
+    checkOpenModalParam();
   })();
 </script>
 
