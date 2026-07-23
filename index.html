@@ -1543,16 +1543,15 @@
             frequency: frequency
           };
           localStorage.setItem('pendingPodCreation', JSON.stringify(podDataToStore));
+          localStorage.setItem('authFlow', 'start');
+        } else if(flow === 'join'){
+          localStorage.setItem('authFlow', 'join');
         }
         
         var { data, error } = await client.auth.signInWithOAuth({
           provider: 'github',
           options: {
-            redirectTo: redirectUrl,
-            queryParams: {
-              flow: flow,
-              createpod: flow === 'start' ? 'true' : 'false'
-            }
+            redirectTo: redirectUrl
           }
         });
 
@@ -1722,18 +1721,19 @@
       var error = urlParams.get('error') || hashParams.get('error');
       var errorDescription = urlParams.get('error_description') || hashParams.get('error_description');
       var errorType = urlParams.get('error_type') || hashParams.get('error_type');
-      var flow = urlParams.get('flow') || hashParams.get('flow');
-      var createpod = urlParams.get('createpod') || hashParams.get('createpod');
       var accessToken = hashParams.get('access_token');
+      var authFlow = localStorage.getItem('authFlow');
 
       // Handle successful GitHub auth redirect
       if(accessToken && !error){
-        if(createpod === 'true' && flow === 'start'){
+        if(authFlow === 'start'){
           // Redirect to dashboard with createpod parameter
+          localStorage.removeItem('authFlow');
           window.location.href = 'dashboard.html?createpod=true';
           return;
-        } else if(flow === 'join' || flow === 'start'){
+        } else if(authFlow === 'join'){
           // Redirect to dashboard normally
+          localStorage.removeItem('authFlow');
           window.location.href = 'dashboard.html';
           return;
         }
