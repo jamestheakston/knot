@@ -1,8 +1,8 @@
 {
-  "name": "Knot — A habit, held by your pod",
+  "name": "Knot",
   "short_name": "Knot",
   "description": "Track daily check-ins and build streaks with your pod",
-  "start_url": "/dashboard.html",
+  "start_url": "/index.html?pwa=true",
   "display": "standalone",
   "background_color": "#F7F8FB",
   "theme_color": "#F7F8FB",

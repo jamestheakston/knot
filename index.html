@@ -1905,8 +1905,72 @@
       }
     }
 
-    // Run openmodal check on page load
+    // Check for PWA mode
+    function checkPWAMode(){
+      var urlParams = new URLSearchParams(window.location.search);
+      var isPWA = urlParams.get('pwa');
+      
+      if(isPWA === 'true'){
+        showPWALanding();
+        // Clean URL
+        window.history.replaceState({}, document.title, window.location.pathname);
+      }
+    }
+
+    // Show simplified PWA landing page
+    function showPWALanding(){
+      var body = document.body;
+      
+      // Hide main content
+      var mainContent = document.querySelector('nav, .hero, .features, .pod-preview, .cta-band, footer');
+      if(mainContent){
+        mainContent.style.display = 'none';
+      }
+      
+      // Create PWA landing
+      var pwaLanding = document.createElement('div');
+      pwaLanding.id = 'pwa-landing';
+      pwaLanding.style.cssText = 'min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px 20px; background: var(--bg);';
+      pwaLanding.innerHTML = `
+        <div style="text-align: center; max-width: 400px; width: 100%;">
+          <img src="/icon-192x192.png" alt="Knot" style="width: 120px; height: 120px; margin-bottom: 32px; border-radius: 24px;">
+          <h1 style="font-family: 'Instrument Serif', serif; font-size: 48px; font-weight: 400; margin-bottom: 16px; color: var(--ink);">Knot</h1>
+          <p style="font-size: 16px; color: var(--muted); margin-bottom: 48px; line-height: 1.6;">A habit, held by your pod</p>
+          
+          <button onclick="openCreatePod()" style="width: 100%; padding: 18px 32px; font-size: 16px; font-weight: 500; background: var(--blue); color: white; border: none; border-radius: 12px; cursor: pointer; margin-bottom: 16px; transition: background 0.2s ease;">
+            Create a Pod
+          </button>
+          
+          <button onclick="openJoinPod()" style="width: 100%; padding: 18px 32px; font-size: 16px; font-weight: 500; background: var(--bg-2); color: var(--ink); border: 1px solid var(--line); border-radius: 12px; cursor: pointer; transition: background 0.2s ease;">
+            Join a Pod
+          </button>
+        </div>
+      `;
+      
+      body.appendChild(pwaLanding);
+    }
+
+    function openCreatePod(){
+      openModal();
+      // Navigate to start flow
+      setTimeout(function(){
+        var startBtn = document.querySelector('[data-step="choice"] .option-card:first-child');
+        if(startBtn) startBtn.click();
+      }, 100);
+    }
+
+    function openJoinPod(){
+      openModal();
+      // Navigate to join flow
+      setTimeout(function(){
+        var joinBtn = document.querySelector('[data-step="choice"] .option-card:last-child');
+        if(joinBtn) joinBtn.click();
+      }, 100);
+    }
+
+    // Run checks on page load
     checkOpenModalParam();
+    checkPWAMode();
 
     // Register Service Worker for PWA
     if('serviceWorker' in navigator){
