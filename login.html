@@ -203,6 +203,14 @@
     background: #1a1e22;
     border-color: #1a1e22;
   }
+  .social-btn.microsoft-btn{
+    background: #00a4ef;
+    border-color: #00a4ef;
+  }
+  .social-btn.microsoft-btn:hover{
+    background: #0084c7;
+    border-color: #0084c7;
+  }
   .divider{
     display: flex;
     align-items: center;
@@ -347,6 +355,11 @@
       Continue with GitHub
     </button>
 
+    <button class="social-btn microsoft-btn" id="microsoftLoginBtn">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 23 23" fill="#fff"><path d="M0 0h10.9v10.9H0V0zm11.9 0H23v10.9H11.9V0zM0 11.9h10.9V23H0V11.9zm11.9 0H23V23H11.9V11.9z"/></svg>
+      Continue with Microsoft
+    </button>
+
     <div class="divider">
       <div class="divider-line"></div>
       <span class="divider-text">or</span>
@@ -440,6 +453,33 @@
       }catch(err){
         console.error('GitHub auth error:', err);
         showToast('Error connecting to GitHub: ' + err.message);
+        setButtonLoading(btn, false);
+      }
+    });
+
+    // Microsoft login
+    document.getElementById('microsoftLoginBtn').addEventListener('click', async function(){
+      var client = getSupabaseClient();
+      if(!client){
+        showToast('Authentication service unavailable. Please try again later.');
+        return;
+      }
+
+      var btn = this;
+      setButtonLoading(btn, true);
+
+      try{
+        var { data, error } = await client.auth.signInWithOAuth({
+          provider: 'microsoft',
+          options: {
+            redirectTo: window.location.origin + '/dashboard.html'
+          }
+        });
+
+        if(error) throw error;
+      }catch(err){
+        console.error('Microsoft auth error:', err);
+        showToast('Error connecting to Microsoft: ' + err.message);
         setButtonLoading(btn, false);
       }
     });

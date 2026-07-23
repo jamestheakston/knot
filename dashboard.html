@@ -593,6 +593,65 @@
     letter-spacing: 0.05em;
   }
 
+  /* ---------- HABITS MANAGEMENT SECTION ---------- */
+  .habits-section{
+    padding: 32px 0;
+  }
+  .habits-header{
+    margin-bottom: 32px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .habit-row{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 24px;
+    background: var(--bg-2);
+    border-radius: 12px;
+    border: 1px solid var(--line);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+    transition: all 0.2s ease;
+  }
+  .habit-row:hover{
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    transform: translateY(-2px);
+  }
+  .habit-info-row{
+    flex: 1;
+  }
+  .habit-name-row{
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: 6px;
+  }
+  .habit-desc-row{
+    font-size: 14px;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+  .habit-freq-row{
+    font-size: 12px;
+    color: var(--muted-2);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+  .habit-actions{
+    display: flex;
+    gap: 8px;
+  }
+  .no-habits{
+    padding: 48px 24px;
+    text-align: center;
+    color: var(--muted);
+    background: var(--bg-2);
+    border-radius: 16px;
+    border: 1px dashed var(--line);
+  }
+
   /* ---------- MEMBERS SECTION ---------- */
   .members-section{
     padding: 32px 0;
@@ -1054,6 +1113,62 @@
     margin-top: 40px;
     padding-top: 32px;
     border-top: 1px solid var(--line);
+  }
+
+  /* ---------- SOCIAL CONNECTIONS ---------- */
+  .social-connections{
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .social-connection{
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px 20px;
+    background: var(--bg-3);
+    border-radius: 12px;
+    border: 1px solid var(--line);
+    transition: all 0.2s ease;
+  }
+  .social-connection:hover{
+    border-color: var(--blue);
+    background: var(--blue-soft);
+  }
+  .social-connection.is-connected{
+    border-color: var(--green);
+    background: rgba(16, 185, 129, 0.05);
+  }
+  .social-connection-icon{
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: var(--bg-2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--ink);
+    flex-shrink: 0;
+  }
+  .social-connection-info{
+    flex: 1;
+  }
+  .social-connection-name{
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: 4px;
+  }
+  .social-connection-status{
+    font-size: 13px;
+    color: var(--muted);
+  }
+  .social-connection.is-connected .social-connection-status{
+    color: var(--green);
+  }
+  .social-connection-btn{
+    padding: 8px 16px;
+    font-size: 13px;
   }
 
   /* ---------- ERROR STATE ---------- */
@@ -1540,6 +1655,10 @@
         <div class="nav-item admin-only" data-nav="pod-settings">
           <i data-lucide="settings"></i>
           Pod Settings
+        </div>
+        <div class="nav-item admin-only" data-nav="habits">
+          <i data-lucide="list-checks"></i>
+          Habits
         </div>
         <div class="nav-item admin-only" data-nav="invite">
           <i data-lucide="user-plus"></i>
@@ -2177,6 +2296,7 @@
         'check-ins': 'Check-ins',
         'streak': 'Streak',
         'pod-settings': 'Pod Settings',
+        'habits': 'Habits',
         'invite': 'Invite Members',
         'profile': 'Profile',
         'account': 'Account Settings'
@@ -2187,6 +2307,7 @@
         'check-ins': 'Track daily habit check-ins',
         'streak': 'View your current streak',
         'pod-settings': 'Configure pod settings',
+        'habits': 'Manage pod habits',
         'invite': 'Invite new members to your pod',
         'profile': 'View and edit your profile',
         'account': 'Manage your account settings'
@@ -2216,6 +2337,9 @@
             break;
           case 'pod-settings':
             loadPodSettings();
+            break;
+          case 'habits':
+            loadHabits();
             break;
           case 'invite':
             loadInvite();
@@ -2774,6 +2898,244 @@
       document.getElementById('savePodSettings').addEventListener('click', handleSavePodSettings);
     }
 
+    async function loadHabits(){
+      console.log('Loading habits');
+      var contentArea = document.getElementById('contentArea');
+      var client = getSupabaseClient();
+      
+      if(!isAdmin){
+        contentArea.innerHTML = '<div class="error">You must be an admin to manage habits</div>';
+        return;
+      }
+
+      try{
+        var { data: habits, error } = await client
+          .from('habits')
+          .select('*')
+          .eq('pod_id', currentPod.id)
+          .order('created_at', { ascending: true });
+
+        if(error) throw error;
+
+        var habitsHTML = habits.map(function(habit){
+          return `
+            <div class="habit-row" data-habit-id="${habit.id}">
+              <div class="habit-info-row">
+                <div class="habit-name-row">${habit.name}</div>
+                <div class="habit-desc-row">${habit.description || ''}</div>
+                <div class="habit-freq-row">${habit.frequency || 'Daily'}</div>
+              </div>
+              <div class="habit-actions">
+                <button class="btn btn-ghost btn-sm edit-habit-btn" data-id="${habit.id}">
+                  <i data-lucide="edit-2" style="width: 16px; height: 16px;"></i>
+                </button>
+                <button class="btn btn-ghost btn-sm delete-habit-btn" data-id="${habit.id}">
+                  <i data-lucide="trash-2" style="width: 16px; height: 16px;"></i>
+                </button>
+              </div>
+            </div>
+          `;
+        }).join('');
+
+        contentArea.innerHTML = `
+          <div class="habits-section">
+            <div class="habits-header">
+              <button class="btn btn-primary" id="addHabitBtn">
+                <i data-lucide="plus" style="width: 16px; height: 16px; margin-right: 8px;"></i>
+                Add Habit
+              </button>
+            </div>
+            <div class="habits-list">
+              ${habits.length > 0 ? habitsHTML : '<div class="no-habits">No habits yet. Click "Add Habit" to create one.</div>'}
+            </div>
+          </div>
+        `;
+
+        if(typeof lucide !== 'undefined'){
+          lucide.createIcons();
+        }
+
+        // Add event listeners
+        document.getElementById('addHabitBtn').addEventListener('click', showAddHabitModal);
+        
+        document.querySelectorAll('.edit-habit-btn').forEach(function(btn){
+          btn.addEventListener('click', function(){
+            var habitId = this.dataset.id;
+            showEditHabitModal(habitId);
+          });
+        });
+
+        document.querySelectorAll('.delete-habit-btn').forEach(function(btn){
+          btn.addEventListener('click', function(){
+            var habitId = this.dataset.id;
+            if(confirm('Are you sure you want to delete this habit?')){
+              deleteHabit(habitId);
+            }
+          });
+        });
+      }catch(err){
+        console.error('Error loading habits:', err);
+        contentArea.innerHTML = '<div class="error">Error loading habits</div>';
+      }
+    }
+
+    function showAddHabitModal(){
+      var modal = document.createElement('div');
+      modal.className = 'modal-overlay is-open';
+      modal.id = 'habitModal';
+      modal.innerHTML = `
+        <div class="modal">
+          <div class="modal-header">
+            <h2>Add Habit</h2>
+          </div>
+          <div class="modal-body">
+            <div class="form-group">
+              <label class="form-label">Habit Name</label>
+              <input type="text" class="form-input" id="habitName" placeholder="e.g., Exercise">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Description</label>
+              <input type="text" class="form-input" id="habitDescription" placeholder="e.g., 30 minutes of cardio">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Frequency</label>
+              <select class="form-input" id="habitFrequency">
+                <option value="Daily">Daily</option>
+                <option value="Weekly">Weekly</option>
+                <option value="Monthly">Monthly</option>
+              </select>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button class="btn btn-ghost" id="cancelHabitBtn">Cancel</button>
+            <button class="btn btn-primary" id="saveHabitBtn">Save Habit</button>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(modal);
+
+      document.getElementById('cancelHabitBtn').addEventListener('click', function(){
+        document.body.removeChild(modal);
+      });
+
+      document.getElementById('saveHabitBtn').addEventListener('click', function(){
+        saveHabit(null, modal);
+      });
+
+      modal.addEventListener('click', function(e){
+        if(e.target === modal) document.body.removeChild(modal);
+      });
+    }
+
+    function showEditHabitModal(habitId){
+      var client = getSupabaseClient();
+      client.from('habits').select('*').eq('id', habitId).single().then(function({ data: habit, error }){
+        if(error || !habit){
+          console.error('Error loading habit:', error);
+          return;
+        }
+
+        var modal = document.createElement('div');
+        modal.className = 'modal-overlay is-open';
+        modal.id = 'habitModal';
+        modal.innerHTML = `
+          <div class="modal">
+            <div class="modal-header">
+              <h2>Edit Habit</h2>
+            </div>
+            <div class="modal-body">
+              <div class="form-group">
+                <label class="form-label">Habit Name</label>
+                <input type="text" class="form-input" id="habitName" value="${habit.name}">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Description</label>
+                <input type="text" class="form-input" id="habitDescription" value="${habit.description || ''}">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Frequency</label>
+                <select class="form-input" id="habitFrequency">
+                  <option value="Daily" ${habit.frequency === 'Daily' ? 'selected' : ''}>Daily</option>
+                  <option value="Weekly" ${habit.frequency === 'Weekly' ? 'selected' : ''}>Weekly</option>
+                  <option value="Monthly" ${habit.frequency === 'Monthly' ? 'selected' : ''}>Monthly</option>
+                </select>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button class="btn btn-ghost" id="cancelHabitBtn">Cancel</button>
+              <button class="btn btn-primary" id="saveHabitBtn">Save Changes</button>
+            </div>
+          </div>
+        `;
+        document.body.appendChild(modal);
+
+        document.getElementById('cancelHabitBtn').addEventListener('click', function(){
+          document.body.removeChild(modal);
+        });
+
+        document.getElementById('saveHabitBtn').addEventListener('click', function(){
+          saveHabit(habitId, modal);
+        });
+
+        modal.addEventListener('click', function(e){
+          if(e.target === modal) document.body.removeChild(modal);
+        });
+      });
+    }
+
+    async function saveHabit(habitId, modal){
+      var name = document.getElementById('habitName').value;
+      var description = document.getElementById('habitDescription').value;
+      var frequency = document.getElementById('habitFrequency').value;
+
+      if(!name){
+        alert('Please enter a habit name');
+        return;
+      }
+
+      var client = getSupabaseClient();
+      try{
+        if(habitId){
+          var { error } = await client
+            .from('habits')
+            .update({ name: name, description: description, frequency: frequency })
+            .eq('id', habitId);
+          if(error) throw error;
+        }else{
+          var { error } = await client
+            .from('habits')
+            .insert({
+              pod_id: currentPod.id,
+              name: name,
+              description: description,
+              frequency: frequency
+            });
+          if(error) throw error;
+        }
+
+        document.body.removeChild(modal);
+        loadHabits();
+      }catch(err){
+        console.error('Error saving habit:', err);
+        alert('Error saving habit: ' + err.message);
+      }
+    }
+
+    async function deleteHabit(habitId){
+      var client = getSupabaseClient();
+      try{
+        var { error } = await client
+          .from('habits')
+          .delete()
+          .eq('id', habitId);
+        if(error) throw error;
+        loadHabits();
+      }catch(err){
+        console.error('Error deleting habit:', err);
+        alert('Error deleting habit: ' + err.message);
+      }
+    }
+
     async function handleSavePodSettings(){
       var client = getSupabaseClient();
       var podName = document.getElementById('podNameInput').value;
@@ -3113,7 +3475,14 @@
     function loadAccountSettings(){
       console.log('Loading account settings');
       var contentArea = document.getElementById('contentArea');
+      var client = getSupabaseClient();
       
+      // Get user's identities (social connections)
+      var identities = currentUser.user_metadata?.identities || currentUser.identities || [];
+      var hasGitHub = identities.some(function(id){ return id.provider === 'github'; });
+      var hasMicrosoft = identities.some(function(id){ return id.provider === 'microsoft'; });
+      var hasEmail = identities.some(function(id){ return id.provider === 'email'; });
+
       contentArea.innerHTML = `
         <div class="account-settings-section">
           <div class="settings-card">
@@ -3126,6 +3495,41 @@
               <div class="settings-item-label">Account Created</div>
               <div class="settings-item-value">${new Date(currentUser.created_at).toLocaleDateString()}</div>
             </div>
+          </div>
+
+          <div class="settings-card">
+            <h3>Connected Accounts</h3>
+            <div class="social-connections">
+              <div class="social-connection ${hasGitHub ? 'is-connected' : ''}">
+                <div class="social-connection-icon">
+                  <i data-lucide="github" style="width: 24px; height: 24px;"></i>
+                </div>
+                <div class="social-connection-info">
+                  <div class="social-connection-name">GitHub</div>
+                  <div class="social-connection-status">${hasGitHub ? 'Connected' : 'Not connected'}</div>
+                </div>
+                <button class="btn ${hasGitHub ? 'btn-ghost' : 'btn-primary'} social-connection-btn" data-provider="github">
+                  ${hasGitHub ? 'Disconnect' : 'Connect'}
+                </button>
+              </div>
+
+              <div class="social-connection ${hasMicrosoft ? 'is-connected' : ''}">
+                <div class="social-connection-icon">
+                  <i data-lucide="monitor" style="width: 24px; height: 24px;"></i>
+                </div>
+                <div class="social-connection-info">
+                  <div class="social-connection-name">Microsoft</div>
+                  <div class="social-connection-status">${hasMicrosoft ? 'Connected' : 'Not connected'}</div>
+                </div>
+                <button class="btn ${hasMicrosoft ? 'btn-ghost' : 'btn-primary'} social-connection-btn" data-provider="microsoft">
+                  ${hasMicrosoft ? 'Disconnect' : 'Connect'}
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="settings-card">
+            <h3>Danger Zone</h3>
             <div class="settings-actions">
               <button class="btn btn-ghost" id="logoutBtn">Log Out</button>
             </div>
@@ -3133,7 +3537,58 @@
         </div>
       `;
 
+      if(typeof lucide !== 'undefined'){
+        lucide.createIcons();
+      }
+
       document.getElementById('logoutBtn').addEventListener('click', handleLogout);
+
+      // Social connection buttons
+      document.querySelectorAll('.social-connection-btn').forEach(function(btn){
+        btn.addEventListener('click', function(){
+          var provider = this.dataset.provider;
+          var isConnected = this.closest('.social-connection').classList.contains('is-connected');
+          
+          if(isConnected){
+            // Disconnect
+            if(confirm('Are you sure you want to disconnect your ' + provider + ' account? You may lose access if this is your only login method.')){
+              disconnectSocialProvider(provider);
+            }
+          }else{
+            // Connect
+            connectSocialProvider(provider);
+          }
+        });
+      });
+    }
+
+    async function connectSocialProvider(provider){
+      var client = getSupabaseClient();
+      try{
+        var { error } = await client.auth.signInWithOAuth({
+          provider: provider,
+          options: {
+            redirectTo: window.location.origin + '/dashboard.html?link=true'
+          }
+        });
+        if(error) throw error;
+      }catch(err){
+        console.error('Error connecting social provider:', err);
+        alert('Error connecting account: ' + err.message);
+      }
+    }
+
+    async function disconnectSocialProvider(provider){
+      var client = getSupabaseClient();
+      try{
+        var { error } = await client.auth.unlinkIdentity({ provider: provider });
+        if(error) throw error;
+        alert('Successfully disconnected ' + provider);
+        loadAccountSettings();
+      }catch(err){
+        console.error('Error disconnecting social provider:', err);
+        alert('Error disconnecting account: ' + err.message);
+      }
     }
 
     async function handleLogout(){
