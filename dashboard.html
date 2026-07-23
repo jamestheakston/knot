@@ -380,20 +380,33 @@
   }
 
   .content-header{
-    margin-bottom: 40px;
+    margin-bottom: 48px;
+  }
+
+  .section-eyebrow{
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--blue);
+    display: block;
+    margin-bottom: 14px;
   }
 
   .content-header h1{
-    font-size: 36px;
+    font-family: 'Instrument Serif', serif;
+    font-size: clamp(32px, 5.5vw, 48px);
     font-weight: 400;
-    margin-bottom: 12px;
-    letter-spacing: -0.02em;
+    margin-bottom: 14px;
+    letter-spacing: -0.01em;
+    line-height: 1.15;
   }
 
   .content-header p{
     color: var(--muted);
     font-size: 16px;
     line-height: 1.6;
+    max-width: 600px;
   }
 
   /* ---------- LOADING ---------- */
@@ -506,32 +519,36 @@
     text-align: center;
     border: 1px solid var(--line);
     box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.3s cubic-bezier(0.22, 1, 0.36, 1);
   }
   .overview-stat:hover{
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.12);
   }
   .stat-label{
-    font-size: 13px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11.5px;
     color: var(--muted);
     margin-bottom: 12px;
-    font-weight: 500;
+    font-weight: 400;
     text-transform: uppercase;
-    letter-spacing: 0.05em;
+    letter-spacing: 0.06em;
   }
   .stat-value{
-    font-size: 42px;
-    font-weight: 700;
+    font-size: 48px;
+    font-weight: 400;
     color: var(--ink);
     font-family: 'Instrument Serif', serif;
     line-height: 1;
     margin-bottom: 8px;
   }
   .stat-unit{
-    font-size: 14px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
     color: var(--muted);
-    font-weight: 500;
+    font-weight: 400;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
   }
   .habits-section{
     margin-top: 48px;
@@ -586,11 +603,15 @@
     color: var(--muted);
   }
   .habit-frequency{
-    font-size: 12px;
-    color: var(--muted-2);
-    font-weight: 500;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11.5px;
+    padding: 3px 9px;
+    border-radius: 100px;
+    display: inline-block;
+    background: rgba(21,25,34,0.06);
+    color: var(--muted);
     text-transform: uppercase;
-    letter-spacing: 0.05em;
+    letter-spacing: 0.06em;
   }
 
   /* ---------- HABITS MANAGEMENT SECTION ---------- */
@@ -654,16 +675,17 @@
 
   /* ---------- MEMBERS SECTION ---------- */
   .members-section{
-    padding: 32px 0;
+    padding: 48px 0;
   }
   .members-header{
-    margin-bottom: 32px;
+    margin-bottom: 40px;
   }
   .members-header h3{
+    font-family: 'Instrument Serif', serif;
     font-size: 28px;
-    font-weight: 600;
+    font-weight: 400;
     color: var(--ink);
-    margin-bottom: 8px;
+    margin: 0;
   }
   .members-list{
     display: grid;
@@ -679,23 +701,24 @@
     padding: 20px;
     border: 1px solid var(--line);
     box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.3s cubic-bezier(0.22, 1, 0.36, 1);
   }
   .member-card:hover{
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(0,0,0,0.08);
   }
   .member-avatar{
-    width: 56px;
-    height: 56px;
+    width: 30px;
+    height: 30px;
     border-radius: 50%;
     background: linear-gradient(135deg, var(--blue), var(--blue-bright));
     color: #fff;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 20px;
-    font-weight: 600;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    font-weight: 500;
     flex-shrink: 0;
   }
   .member-info{
@@ -703,16 +726,16 @@
     min-width: 0;
   }
   .member-name{
-    font-size: 16px;
-    font-weight: 600;
+    font-size: 14px;
+    font-weight: 500;
     color: var(--ink);
-    margin-bottom: 4px;
+    margin-bottom: 2px;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
   }
   .member-email{
-    font-size: 13px;
+    font-size: 12px;
     color: var(--muted);
     margin-bottom: 8px;
     overflow: hidden;
@@ -725,11 +748,19 @@
     font-size: 12px;
   }
   .member-role{
-    color: var(--blue);
-    font-weight: 600;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11.5px;
+    padding: 3px 9px;
+    border-radius: 100px;
+    display: inline-block;
+  }
+  .member-role.admin{
     background: var(--blue-soft);
-    padding: 4px 8px;
-    border-radius: 6px;
+    color: var(--blue-bright);
+  }
+  .member-role.member{
+    background: rgba(21,25,34,0.06);
+    color: var(--muted);
   }
   .member-joined{
     color: var(--muted-2);
@@ -737,7 +768,7 @@
 
   /* ---------- CHECK-INS SECTION ---------- */
   .check-ins-section{
-    padding: 32px 0;
+    padding: 48px 0;
   }
   .check-in-action{
     margin-bottom: 40px;
@@ -772,16 +803,16 @@
   .check-in-user-item{
     display: flex;
     align-items: center;
-    gap: 16px;
-    padding: 16px 20px;
+    gap: 12px;
+    padding: 12px 16px;
     background: var(--bg-2);
     border-radius: 12px;
     border: 1px solid var(--line);
     box-shadow: 0 2px 4px rgba(0,0,0,0.02);
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.3s cubic-bezier(0.22, 1, 0.36, 1);
   }
   .check-in-user-item:hover{
-    transform: translateX(4px);
+    transform: translateX(2px);
     box-shadow: 0 4px 12px rgba(0,0,0,0.08);
   }
   .check-in-user-item.is-current-user{
@@ -789,30 +820,32 @@
     background: var(--blue-soft);
   }
   .check-in-user-avatar{
-    width: 44px;
-    height: 44px;
+    width: 30px;
+    height: 30px;
     border-radius: 50%;
     background: var(--blue);
     color: #fff;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 16px;
-    font-weight: 600;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    font-weight: 500;
     flex-shrink: 0;
   }
   .check-in-user-info{
     flex: 1;
   }
   .check-in-user-name{
-    font-size: 15px;
-    font-weight: 600;
+    font-size: 14px;
+    font-weight: 500;
     color: var(--ink);
-    margin-bottom: 4px;
+    margin-bottom: 2px;
   }
   .check-in-user-time{
-    font-size: 13px;
+    font-size: 12px;
     color: var(--muted);
+    font-family: 'IBM Plex Mono', monospace;
   }
   .check-in-item{
     display: flex;
@@ -1405,6 +1438,64 @@
   .modal-overlay.is-open{
     display: flex;
   }
+  .modal-panel{
+    background: var(--bg-2);
+    border-radius: 22px;
+    padding: 40px 40px 36px;
+    max-width: 480px;
+    width: 90%;
+    box-shadow: 0 40px 90px -24px rgba(21,25,34,0.4), 0 0 0 1px rgba(21,25,34,0.06);
+    transform: translateY(28px) scale(0.95);
+    opacity: 0;
+    transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.3s ease;
+  }
+  .modal-overlay.is-open .modal-panel{
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+  .modal-close{
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    border: 1px solid var(--line);
+    background: var(--bg-3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: var(--muted);
+    transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease;
+  }
+  .modal-close:hover{
+    background: var(--blue-soft);
+    color: var(--blue-bright);
+    transform: rotate(90deg);
+  }
+  .modal-eyebrow{
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--blue);
+    display: block;
+    margin-bottom: 14px;
+  }
+  .modal-head h2{
+    font-family: 'Instrument Serif', serif;
+    font-size: clamp(26px, 4vw, 32px);
+    line-height: 1.15;
+    max-width: 420px;
+    font-weight: 400;
+    margin: 0 0 12px;
+  }
+  .modal-head p{
+    color: var(--muted);
+    font-size: 15px;
+    margin: 12px 0 24px;
+  }
   .modal{
     background: var(--bg-2);
     border-radius: 20px;
@@ -1434,6 +1525,21 @@
     gap: 12px;
     justify-content: flex-end;
   }
+
+  /* ---------- STATUS PILLS ---------- */
+  .status-pill{
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11.5px;
+    padding: 3px 9px;
+    border-radius: 100px;
+    display: inline-block;
+  }
+  .status-pill.done{ background: var(--blue-soft); color: var(--blue-bright); }
+  .status-pill.waiting{ background: rgba(21,25,34,0.06); color: var(--muted); }
+  .status-pill.missed{ background: rgba(196,67,42,0.12); color: var(--red); }
+  .status-pill.admin{ background: var(--blue-soft); color: var(--blue-bright); }
+  .status-pill.member{ background: rgba(21,25,34,0.06); color: var(--muted); }
+
   .streak-display-modal{
     display: flex;
     flex-direction: column;
@@ -1711,6 +1817,7 @@
       <i data-lucide="menu"></i>
     </button>
     <div class="content-header">
+      <span class="section-eyebrow" id="pageEyebrow">DASHBOARD</span>
       <h1 id="pageTitle">Overview</h1>
       <p id="pageSubtitle">View your pod's progress and activity</p>
     </div>
@@ -2326,9 +2433,21 @@
         'profile': 'View and edit your profile',
         'account': 'Manage your account settings'
       };
+      var eyebrows = {
+        'overview': 'DASHBOARD',
+        'members': 'POD MEMBERS',
+        'check-ins': 'TODAY\'S CHECK-INS',
+        'streak': 'YOUR STREAK',
+        'pod-settings': 'SETTINGS',
+        'habits': 'HABIT MANAGEMENT',
+        'invite': 'INVITE',
+        'profile': 'YOUR PROFILE',
+        'account': 'ACCOUNT'
+      };
       
       document.getElementById('pageTitle').textContent = titles[section] || 'Overview';
       document.getElementById('pageSubtitle').textContent = subtitles[section] || '';
+      document.getElementById('pageEyebrow').textContent = eyebrows[section] || 'DASHBOARD';
 
       // Load section content
       var contentArea = document.getElementById('contentArea');
@@ -2410,17 +2529,17 @@
         <div class="overview-section">
           <div class="overview-header">
             <div class="overview-stat">
-              <div class="stat-label">Current Streak</div>
+              <div class="stat-label">CURRENT STREAK</div>
               <div class="stat-value">${streak}</div>
               <div class="stat-unit">days</div>
             </div>
             <div class="overview-stat">
-              <div class="stat-label">Pod Members</div>
+              <div class="stat-label">POD MEMBERS</div>
               <div class="stat-value">${userPods.length}</div>
               <div class="stat-unit">members</div>
             </div>
             <div class="overview-stat">
-              <div class="stat-label">Habits</div>
+              <div class="stat-label">HABITS</div>
               <div class="stat-value">${habits.length}</div>
               <div class="stat-unit">active</div>
             </div>
@@ -2503,7 +2622,7 @@
                 <div class="member-name">${displayName}</div>
                 <div class="member-email">${email || 'User ID: ' + member.user_id.substring(0, 8)}</div>
                 <div class="member-meta">
-                  <span class="member-role">${role}</span>
+                  <span class="member-role ${role === 'admin' ? 'admin' : 'member'}">${role}</span>
                   <span class="member-joined">Joined ${joinedDate}</span>
                 </div>
               </div>
