@@ -1510,16 +1510,9 @@
 
         if(error) throw error;
 
-        // Store pending pod join data
-        localStorage.setItem('pendingPodJoin', JSON.stringify({
-          podId: pod.id,
-          podName: pod.name,
-          inviteCode: code
-        }));
-
         showToast('Account created! Joining pod...');
         setTimeout(function(){
-          window.location.href = 'dashboard.html';
+          window.location.href = 'dashboard.html?joinpod=true&code=' + code;
         }, 1000);
       }catch(err){
         console.error('Error:', err);
