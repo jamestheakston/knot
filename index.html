@@ -1437,6 +1437,18 @@
       setButtonLoading(btn, true);
 
       try{
+        // First verify the invite code exists
+        var { data: pod, error: podError } = await client
+          .from('pods')
+          .select('*')
+          .eq('invite_code', code)
+          .maybeSingle();
+
+        if(podError || !pod){
+          showToast('Invalid invite code. Please check and try again.');
+          return;
+        }
+
         // Sign up user
         var { data, error } = await client.auth.signUp({
           email: email,
@@ -1450,10 +1462,14 @@
 
         if(error) throw error;
 
-        // Verify invite code and join pod
-        // This would query your pods table to find the pod with this invite code
-        // Then add the user to the pod_members table
-        showToast('Successfully joined pod!');
+        // Store pending pod join data
+        localStorage.setItem('pendingPodJoin', JSON.stringify({
+          podId: pod.id,
+          podName: pod.name,
+          inviteCode: code
+        }));
+
+        showToast('Account created! Joining pod...');
         setTimeout(function(){
           window.location.href = 'dashboard.html';
         }, 1000);

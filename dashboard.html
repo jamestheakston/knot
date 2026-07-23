@@ -523,6 +523,65 @@
     color: var(--muted);
     font-weight: 500;
   }
+  .habits-section{
+    margin-top: 48px;
+  }
+  .habits-section h3{
+    font-size: 24px;
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: 24px;
+  }
+  .habits-list{
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .habit-item{
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px 20px;
+    background: var(--bg-2);
+    border-radius: 12px;
+    border: 1px solid var(--line);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  .habit-item:hover{
+    transform: translateX(4px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  }
+  .habit-icon{
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: var(--blue-soft);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .habit-info{
+    flex: 1;
+  }
+  .habit-name{
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: 4px;
+  }
+  .habit-description{
+    font-size: 13px;
+    color: var(--muted);
+  }
+  .habit-frequency{
+    font-size: 12px;
+    color: var(--muted-2);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
 
   /* ---------- MEMBERS SECTION ---------- */
   .members-section{
@@ -626,6 +685,10 @@
     gap: 12px;
     box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
   }
+  .check-ins-today{
+    margin-bottom: 40px;
+  }
+  .check-ins-today h3,
   .check-ins-history h3{
     font-size: 24px;
     font-weight: 600;
@@ -636,6 +699,51 @@
     display: flex;
     flex-direction: column;
     gap: 12px;
+  }
+  .check-in-user-item{
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px 20px;
+    background: var(--bg-2);
+    border-radius: 12px;
+    border: 1px solid var(--line);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  .check-in-user-item:hover{
+    transform: translateX(4px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  }
+  .check-in-user-item.is-current-user{
+    border-color: var(--blue);
+    background: var(--blue-soft);
+  }
+  .check-in-user-avatar{
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: var(--blue);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    font-weight: 600;
+    flex-shrink: 0;
+  }
+  .check-in-user-info{
+    flex: 1;
+  }
+  .check-in-user-name{
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: 4px;
+  }
+  .check-in-user-time{
+    font-size: 13px;
+    color: var(--muted);
   }
   .check-in-item{
     display: flex;
@@ -667,6 +775,10 @@
     background: var(--bg-2);
     border-radius: 16px;
     border: 1px dashed var(--line);
+  }
+  .btn-sm{
+    padding: 8px 16px;
+    font-size: 13px;
   }
 
   /* ---------- POD SETTINGS SECTION ---------- */
@@ -1320,6 +1432,52 @@
   </div>
 </div>
 
+<!-- Email Invite Modal -->
+<div class="modal-overlay" id="emailInviteModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h2>Send Invite via Email</h2>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">Email Address</label>
+        <input type="email" class="form-input" id="modalInviteEmail" placeholder="friend@example.com">
+      </div>
+      <div class="form-group">
+        <div class="hcaptcha-container">
+          <div class="hcaptcha-message">We know, inconvenient, but it helps us stop the bots.</div>
+          <div class="hcaptcha-widget" id="modalHcaptchaWidget"></div>
+          <div class="hcaptcha-thanks">Thanks for helping us create a robot-free experience 🙏</div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" id="cancelModalInviteBtn">Cancel</button>
+      <button class="btn btn-primary" id="sendModalInviteBtn">Send Invite</button>
+    </div>
+  </div>
+</div>
+
+<!-- Join Pod Modal -->
+<div class="modal-overlay" id="joinPodModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h2>Join a Pod</h2>
+    </div>
+    <div class="modal-body">
+      <p>Enter the 6-digit invite code to join a pod:</p>
+      <div class="form-group">
+        <label class="form-label">Invite Code</label>
+        <input type="text" class="form-input" id="joinPodCode" placeholder="ABC123" maxlength="6" style="text-transform: uppercase; font-family: 'IBM Plex Mono', monospace; letter-spacing: 0.1em;">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" id="cancelJoinPodBtn">Cancel</button>
+      <button class="btn btn-primary" id="joinPodBtn">Join Pod</button>
+    </div>
+  </div>
+</div>
+
 <div class="dashboard">
   <!-- Sidebar -->
   <aside class="sidebar" id="sidebar">
@@ -1665,6 +1823,9 @@
       // Check for pending pod creation
       await checkPendingPodCreation();
       
+      // Check for pending pod join
+      await checkPendingPodJoin();
+      
       // Load user profile
       await loadUserProfile();
     }
@@ -1782,6 +1943,69 @@
             console.error('Error parsing pending pod data:', err);
             localStorage.removeItem('pendingPodCreation');
           }
+        }
+      }
+    }
+
+    async function checkPendingPodJoin(){
+      var pendingPodJoin = localStorage.getItem('pendingPodJoin');
+      if(pendingPodJoin){
+        try{
+          var podData = JSON.parse(pendingPodJoin);
+          var client = getSupabaseClient();
+          
+          // Verify the pod still exists
+          var { data: pod, error: podError } = await client
+            .from('pods')
+            .select('*')
+            .eq('id', podData.podId)
+            .maybeSingle();
+
+          if(podError || !pod){
+            console.error('Pod not found:', podData.podId);
+            localStorage.removeItem('pendingPodJoin');
+            return;
+          }
+
+          // Check if already a member
+          var { data: existingMember, error: memberError } = await client
+            .from('pod_members')
+            .select('*')
+            .eq('pod_id', pod.id)
+            .eq('user_id', currentUser.id)
+            .maybeSingle();
+
+          if(existingMember){
+            console.log('Already a member of this pod');
+            localStorage.removeItem('pendingPodJoin');
+            return;
+          }
+
+          // Join the pod
+          var { error: joinError } = await client
+            .from('pod_members')
+            .insert({
+              pod_id: pod.id,
+              user_id: currentUser.id,
+              role: 'member'
+            });
+
+          if(joinError) throw joinError;
+
+          localStorage.removeItem('pendingPodJoin');
+          
+          // Reload pods to show the newly joined pod
+          await loadUserPods();
+          if(userPods.length > 0){
+            currentPod = userPods[0];
+            isAdmin = currentPod.role === 'admin';
+            updatePodSelector();
+            updateAdminVisibility();
+            navigateTo('overview');
+          }
+        }catch(err){
+          console.error('Error joining pending pod:', err);
+          localStorage.removeItem('pendingPodJoin');
         }
       }
     }
@@ -2002,7 +2226,38 @@
       console.log('Loading overview');
       var contentArea = document.getElementById('contentArea');
       var streak = await loadStreakData();
+      var client = getSupabaseClient();
       
+      // Get habits for the pod
+      var habits = [];
+      try{
+        var { data: habitsData, error: habitsError } = await client
+          .from('habits')
+          .select('*')
+          .eq('pod_id', currentPod.id);
+        
+        if(!habitsError && habitsData){
+          habits = habitsData;
+        }
+      }catch(err){
+        console.error('Error loading habits:', err);
+      }
+
+      var habitsHTML = habits.map(function(habit){
+        return `
+          <div class="habit-item">
+            <div class="habit-icon">
+              <i data-lucide="check-circle" style="width: 20px; height: 20px; color: var(--blue);"></i>
+            </div>
+            <div class="habit-info">
+              <div class="habit-name">${habit.name}</div>
+              <div class="habit-description">${habit.description || ''}</div>
+            </div>
+            <div class="habit-frequency">${habit.frequency || 'Daily'}</div>
+          </div>
+        `;
+      }).join('');
+
       contentArea.innerHTML = `
         <div class="overview-section">
           <div class="overview-header">
@@ -2016,6 +2271,11 @@
               <div class="stat-value">${userPods.length}</div>
               <div class="stat-unit">members</div>
             </div>
+            <div class="overview-stat">
+              <div class="stat-label">Habits</div>
+              <div class="stat-value">${habits.length}</div>
+              <div class="stat-unit">active</div>
+            </div>
           </div>
           <div class="streak-display">
             ${streak === 0 
@@ -2023,8 +2283,20 @@
               : '<img src="/assets/streak.svg" alt="Streak" class="streak-image streak-animated"><div class="streak-count">' + streak + '</div><div class="streak-message">day streak</div>'
             }
           </div>
+          ${habits.length > 0 ? `
+            <div class="habits-section">
+              <h3>Your Habits</h3>
+              <div class="habits-list">
+                ${habitsHTML}
+              </div>
+            </div>
+          ` : ''}
         </div>
       `;
+
+      if(typeof lucide !== 'undefined'){
+        lucide.createIcons();
+      }
     }
 
     async function loadMembers(){
@@ -2116,7 +2388,18 @@
         var today = new Date();
         today.setHours(0, 0, 0, 0);
         
-        var { data: checkIns, error } = await client
+        // Get all check-ins for the pod today
+        var { data: allCheckIns, error: allError } = await client
+          .from('check_ins')
+          .select('*')
+          .eq('pod_id', currentPod.id)
+          .gte('created_at', today.toISOString())
+          .order('created_at', { ascending: false });
+
+        if(allError) throw allError;
+
+        // Get current user's check-ins
+        var { data: userCheckIns, error: userError } = await client
           .from('check_ins')
           .select('*')
           .eq('pod_id', currentPod.id)
@@ -2124,16 +2407,62 @@
           .order('created_at', { ascending: false })
           .limit(30);
 
-        if(error) throw error;
+        if(userError) throw userError;
 
         // Check if already checked in today
-        var checkedInToday = checkIns.some(function(ci){
+        var checkedInToday = userCheckIns.some(function(ci){
           var checkInDate = new Date(ci.created_at);
           checkInDate.setHours(0, 0, 0, 0);
           return checkInDate.getTime() === today.getTime();
         });
 
-        var checkInsHTML = checkIns.map(function(ci){
+        // Get today's check-ins with user info
+        var todayCheckIns = [];
+        for(var i = 0; i < allCheckIns.length; i++){
+          var ci = allCheckIns[i];
+          var { data: profile, error: profileError } = await client
+            .from('user_profiles')
+            .select('*')
+            .eq('user_id', ci.user_id)
+            .maybeSingle();
+          
+          if(profileError){
+            console.error('Error loading profile for user:', ci.user_id, profileError);
+          }
+          
+          todayCheckIns.push({
+            ...ci,
+            displayName: profile?.display_name || ci.user_id.substring(0, 8),
+            isCurrentUser: ci.user_id === currentUser.id
+          });
+        }
+
+        // Group by user to avoid duplicates
+        var uniqueCheckIns = [];
+        var seenUsers = {};
+        for(var j = 0; j < todayCheckIns.length; j++){
+          var tci = todayCheckIns[j];
+          if(!seenUsers[tci.user_id]){
+            seenUsers[tci.user_id] = true;
+            uniqueCheckIns.push(tci);
+          }
+        }
+
+        var todayCheckInsHTML = uniqueCheckIns.map(function(ci){
+          var time = new Date(ci.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+          return `
+            <div class="check-in-user-item ${ci.isCurrentUser ? 'is-current-user' : ''}">
+              <div class="check-in-user-avatar">${ci.displayName.charAt(0).toUpperCase()}</div>
+              <div class="check-in-user-info">
+                <div class="check-in-user-name">${ci.displayName}${ci.isCurrentUser ? ' (You)' : ''}</div>
+                <div class="check-in-user-time">${time}</div>
+              </div>
+              ${ci.isCurrentUser ? '<button class="btn btn-ghost btn-sm" id="uncheckInBtn">Undo</button>' : ''}
+            </div>
+          `;
+        }).join('');
+
+        var userCheckInsHTML = userCheckIns.map(function(ci){
           var date = new Date(ci.created_at);
           return `
             <div class="check-in-item">
@@ -2151,10 +2480,16 @@
                 : '<button class="btn btn-primary" id="checkInBtn">Check in today</button>'
               }
             </div>
-            <div class="check-ins-history">
-              <h3>Recent Check-ins</h3>
+            <div class="check-ins-today">
+              <h3>Today's Check-ins</h3>
               <div class="check-ins-list">
-                ${checkInsHTML || '<div class="no-check-ins">No check-ins yet</div>'}
+                ${todayCheckInsHTML || '<div class="no-check-ins">No check-ins yet today</div>'}
+              </div>
+            </div>
+            <div class="check-ins-history">
+              <h3>Your Recent Check-ins</h3>
+              <div class="check-ins-list">
+                ${userCheckInsHTML || '<div class="no-check-ins">No check-ins yet</div>'}
               </div>
             </div>
           </div>
@@ -2163,9 +2498,39 @@
         if(!checkedInToday){
           document.getElementById('checkInBtn').addEventListener('click', showCheckInConfirm);
         }
+
+        if(checkedInToday){
+          document.getElementById('uncheckInBtn').addEventListener('click', handleUncheckIn);
+        }
       }catch(err){
         console.error('Error loading check-ins:', err);
         contentArea.innerHTML = '<div class="error">Error loading check-ins</div>';
+      }
+    }
+
+    async function handleUncheckIn(){
+      var client = getSupabaseClient();
+      
+      try{
+        if(!confirm('Are you sure you want to undo your check-in for today?')) return;
+
+        var today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        var { error } = await client
+          .from('check_ins')
+          .delete()
+          .eq('pod_id', currentPod.id)
+          .eq('user_id', currentUser.id)
+          .gte('created_at', today.toISOString());
+
+        if(error) throw error;
+
+        // Reload check-ins
+        loadCheckIns();
+      }catch(err){
+        console.error('Error undoing check-in:', err);
+        alert('Error undoing check-in: ' + err.message);
       }
     }
 
@@ -2454,24 +2819,6 @@
               <button class="btn btn-ghost" id="showCodeBtn">Show Invite Code</button>
             </div>
 
-            <div class="invite-email-form" id="inviteEmailForm" style="display: none;">
-              <div class="form-group">
-                <label class="form-label">Email Address</label>
-                <input type="email" class="form-input" id="inviteEmail" placeholder="friend@example.com">
-              </div>
-              <div class="form-group">
-                <div class="hcaptcha-container">
-                  <div class="hcaptcha-message">We know, inconvenient, but it helps us stop the bots.</div>
-                  <div class="hcaptcha-widget" id="hcaptcha-widget"></div>
-                  <div class="hcaptcha-thanks">Thanks for helping us create a robot-free experience 🙏</div>
-                </div>
-              </div>
-              <div class="form-actions">
-                <button class="btn btn-primary" id="sendInviteBtn">Send Invite</button>
-                <button class="btn btn-ghost" id="cancelEmailBtn">Cancel</button>
-              </div>
-            </div>
-
             <div class="invite-code-display" id="inviteCodeDisplay" style="display: none;">
               <p>Share this invite code with people you want to join your pod:</p>
               <div class="invite-code-large">
@@ -2491,31 +2838,12 @@
         </div>
       `;
 
-      document.getElementById('sendEmailBtn').addEventListener('click', function(){
-        document.getElementById('inviteEmailForm').style.display = 'block';
-        document.getElementById('inviteCodeDisplay').style.display = 'none';
-        document.getElementById('invite-methods').style.display = 'none';
-        
-        // Render hCaptcha widget
-        if(typeof hcaptcha !== 'undefined' && !document.getElementById('hcaptcha-widget').hasChildNodes()){
-          hcaptcha.render('hcaptcha-widget', {
-            sitekey: '6756a528-fd90-49fc-b01e-80e2b896d9b8'
-          });
-        }
-      });
+      document.getElementById('sendEmailBtn').addEventListener('click', showEmailInviteModal);
 
       document.getElementById('showCodeBtn').addEventListener('click', function(){
         document.getElementById('inviteCodeDisplay').style.display = 'block';
-        document.getElementById('inviteEmailForm').style.display = 'none';
         document.getElementById('invite-methods').style.display = 'none';
       });
-
-      document.getElementById('cancelEmailBtn').addEventListener('click', function(){
-        document.getElementById('inviteEmailForm').style.display = 'none';
-        document.getElementById('invite-methods').style.display = 'flex';
-      });
-
-      document.getElementById('sendInviteBtn').addEventListener('click', sendInviteEmail);
 
       document.getElementById('copyInviteLarge').addEventListener('click', function(){
         navigator.clipboard.writeText(currentPod.inviteCode);
@@ -2526,9 +2854,115 @@
       });
     }
 
-    async function sendInviteEmail(){
-      var email = document.getElementById('inviteEmail').value;
-      var btn = document.getElementById('sendInviteBtn');
+    function showEmailInviteModal(){
+      document.getElementById('emailInviteModal').classList.add('is-open');
+      document.getElementById('modalInviteEmail').value = '';
+      
+      // Clear and render hCaptcha widget
+      var widgetContainer = document.getElementById('modalHcaptchaWidget');
+      widgetContainer.innerHTML = '';
+      
+      if(typeof hcaptcha !== 'undefined'){
+        hcaptcha.render('modalHcaptchaWidget', {
+          sitekey: '6756a528-fd90-49fc-b01e-80e2b896d9b8'
+        });
+      }
+    }
+
+    function hideEmailInviteModal(){
+      document.getElementById('emailInviteModal').classList.remove('is-open');
+    }
+
+    function showJoinPodModal(){
+      document.getElementById('joinPodModal').classList.add('is-open');
+      document.getElementById('joinPodCode').value = '';
+    }
+
+    function hideJoinPodModal(){
+      document.getElementById('joinPodModal').classList.remove('is-open');
+    }
+
+    async function handleJoinPod(){
+      var code = document.getElementById('joinPodCode').value.toUpperCase();
+      var btn = document.getElementById('joinPodBtn');
+      
+      if(!code || code.length !== 6){
+        alert('Please enter a valid 6-digit invite code');
+        return;
+      }
+
+      try{
+        btn.disabled = true;
+        btn.textContent = 'Joining...';
+
+        var client = getSupabaseClient();
+        
+        // Verify the invite code exists
+        var { data: pod, error: podError } = await client
+          .from('pods')
+          .select('*')
+          .eq('invite_code', code)
+          .maybeSingle();
+
+        if(podError || !pod){
+          alert('Invalid invite code. Please check and try again.');
+          return;
+        }
+
+        // Check if already a member
+        var { data: existingMember, error: memberError } = await client
+          .from('pod_members')
+          .select('*')
+          .eq('pod_id', pod.id)
+          .eq('user_id', currentUser.id)
+          .maybeSingle();
+
+        if(existingMember){
+          alert('You are already a member of this pod.');
+          return;
+        }
+
+        // Join the pod
+        var { error: joinError } = await client
+          .from('pod_members')
+          .insert({
+            pod_id: pod.id,
+            user_id: currentUser.id,
+            role: 'member'
+          });
+
+        if(joinError) throw joinError;
+
+        // Reload pods
+        await loadUserPods();
+        
+        // Select the new pod
+        var newPod = userPods.find(function(p){
+          return p.id === pod.id;
+        });
+        
+        if(newPod){
+          currentPod = newPod;
+          isAdmin = currentPod.role === 'admin';
+          updatePodSelector();
+          updateAdminVisibility();
+          navigateTo('overview');
+        }
+
+        hideJoinPodModal();
+        alert('Successfully joined ' + pod.name + '!');
+      }catch(err){
+        console.error('Error joining pod:', err);
+        alert('Error joining pod: ' + err.message);
+      }finally{
+        btn.disabled = false;
+        btn.textContent = 'Join Pod';
+      }
+    }
+
+    async function sendModalInviteEmail(){
+      var email = document.getElementById('modalInviteEmail').value;
+      var btn = document.getElementById('sendModalInviteBtn');
       
       if(!email || !email.includes('@')){
         alert('Please enter a valid email address');
@@ -2544,7 +2978,10 @@
 
       try{
         btn.disabled = true;
-        btn.textContent = 'Sending...';
+        btn.innerHTML = '<i data-lucide="loader-2" class="animate-spin"></i> Sending...';
+        if(typeof lucide !== 'undefined'){
+          lucide.createIcons();
+        }
 
         // Initialize EmailJS
         emailjs.init('uF5gBRgWvS-o3wTjZ');
@@ -2560,10 +2997,7 @@
 
         alert('Invite sent successfully to ' + email);
         
-        // Reset form
-        document.getElementById('inviteEmail').value = '';
-        document.getElementById('inviteEmailForm').style.display = 'none';
-        document.getElementById('invite-methods').style.display = 'flex';
+        hideEmailInviteModal();
         
         // Reset hCaptcha
         hcaptcha.reset();
@@ -2575,6 +3009,7 @@
         btn.textContent = 'Send Invite';
       }
     }
+
 
     function loadProfile(){
       console.log('Loading profile');
@@ -2739,12 +3174,26 @@
     // Streak modal handlers
     document.getElementById('closeStreakModal').addEventListener('click', hideStreakModal);
 
+    // Email invite modal handlers
+    document.getElementById('cancelModalInviteBtn').addEventListener('click', hideEmailInviteModal);
+    document.getElementById('sendModalInviteBtn').addEventListener('click', sendModalInviteEmail);
+
+    // Join pod modal handlers
+    document.getElementById('cancelJoinPodBtn').addEventListener('click', hideJoinPodModal);
+    document.getElementById('joinPodBtn').addEventListener('click', handleJoinPod);
+
     // Modal overlay click to close
     document.getElementById('checkInConfirmModal').addEventListener('click', function(e){
       if(e.target === this) hideCheckInConfirm();
     });
     document.getElementById('streakModal').addEventListener('click', function(e){
       if(e.target === this) hideStreakModal();
+    });
+    document.getElementById('emailInviteModal').addEventListener('click', function(e){
+      if(e.target === this) hideEmailInviteModal();
+    });
+    document.getElementById('joinPodModal').addEventListener('click', function(e){
+      if(e.target === this) hideJoinPodModal();
     });
 
     function updatePodSelector(){
@@ -2794,9 +3243,7 @@
       var joinOption = document.createElement('div');
       joinOption.className = 'pod-option join-pod-option';
       joinOption.innerHTML = '<i data-lucide="plus" style="width: 16px; height: 16px;"></i> Join new Pod';
-      joinOption.addEventListener('click', function(){
-        window.location.href = 'index.html?openmodal=true&join=true';
-      });
+      joinOption.addEventListener('click', showJoinPodModal);
       
       menu.appendChild(joinOption);
       
