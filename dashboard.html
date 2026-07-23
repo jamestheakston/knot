@@ -776,6 +776,7 @@
         return;
       }
 
+      console.log('Loaded pods from database:', pods);
       userPods = pods.map(function(p){
         return {
           id: p.pods.id,
@@ -785,17 +786,25 @@
         };
       });
 
+      console.log('User pods array:', userPods);
+
+      // Check for pending pod creation BEFORE redirecting
+      var urlParams = new URLSearchParams(window.location.search);
+      var shouldCreatePod = urlParams.get('createpod');
+      
       if(userPods.length > 0){
         currentPod = userPods[0];
         isAdmin = currentPod.role === 'admin';
         updatePodSelector();
         updateAdminVisibility();
-      }else{
+      }else if(shouldCreatePod !== 'true'){
+        // Only redirect if there are no pods AND we're not about to create one
+        console.log('No pods found and no pending creation, redirecting to index.html');
         window.location.href = 'index.html';
       }
 
       // Check for pending pod creation
-      checkPendingPodCreation();
+      await checkPendingPodCreation();
       
       // Load user profile
       await loadUserProfile();
