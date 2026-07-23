@@ -881,10 +881,41 @@
         if(pendingPodData){
           try{
             var podData = JSON.parse(pendingPodData);
-            // Clean URL BEFORE creating pod to prevent loop
-            window.history.replaceState({}, document.title, window.location.pathname);
             await createPodFromSignup(podData);
             localStorage.removeItem('pendingPodCreation');
+            // Clean URL AFTER successful creation
+            window.history.replaceState({}, document.title, window.location.pathname);
+            // Reload pods to show the newly created pod
+            var { data: pods, error } = await client
+              .from('pod_members')
+              .select(`
+                pod_id,
+                role,
+                pods (
+                  id,
+                  name,
+                  invite_code
+                )
+              `)
+              .eq('user_id', currentUser.id);
+
+            if(!error && pods){
+              userPods = pods.map(function(p){
+                return {
+                  id: p.pods.id,
+                  name: p.pods.name,
+                  inviteCode: p.pods.invite_code,
+                  role: p.role
+                };
+              });
+              
+              if(userPods.length > 0){
+                currentPod = userPods[0];
+                isAdmin = currentPod.role === 'admin';
+                updatePodSelector();
+                updateAdminVisibility();
+              }
+            }
           }catch(err){
             console.error('Error parsing pending pod data:', err);
             localStorage.removeItem('pendingPodCreation');
