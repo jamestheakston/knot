@@ -899,7 +899,7 @@
             if(podError) throw podError;
             break;
           }catch(err){
-            if(err.code === '23505' && retries < maxRetries - 1){
+            if((err.code === '23505' || err.code === '409' || err.code === 'PGRST116') && retries < maxRetries - 1){
               retries++;
               continue;
             }
@@ -933,14 +933,23 @@
         if(memberError) throw memberError;
 
         // Create user profile if it doesn't exist
-        var { error: profileError } = await client
-          .from('user_profiles')
-          .upsert({
-            user_id: currentUser.id,
-            user_upgraded: false
-          }, {
-            onConflict: 'user_id'
-          });
+        try{
+          var { error: profileError } = await client
+            .from('user_profiles')
+            .upsert({
+              user_id: currentUser.id,
+              user_upgraded: false
+            }, {
+              onConflict: 'user_id'
+            });
+          if(profileError && profileError.code !== '23505'){
+            throw profileError;
+          }
+        }catch(err){
+          if(err.code !== '23505'){
+            console.error('Error creating user profile:', err);
+          }
+        }
 
         // Reload pods to show the new pod
         await loadUserPods();
