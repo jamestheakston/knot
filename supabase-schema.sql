@@ -101,6 +101,14 @@ ALTER TABLE habits ENABLE ROW LEVEL SECURITY;
 ALTER TABLE pod_members ENABLE ROW LEVEL SECURITY;
 ALTER TABLE check_ins ENABLE ROW LEVEL SECURITY;
 
+-- Grant table privileges to authenticated users
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.user_profiles TO authenticated;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.pods TO authenticated;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.habits TO authenticated;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.pod_members TO authenticated;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.check_ins TO authenticated;
+GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO authenticated;
+
 -- User profiles policies
 DROP POLICY IF EXISTS "Users can view their own profile" ON user_profiles;
 CREATE POLICY "Users can view their own profile"
@@ -174,15 +182,27 @@ CREATE POLICY "Pod admins can update habits"
     )
   );
 
+-- Security Definer function to check membership safely and avoid recursion
+CREATE OR REPLACE FUNCTION public.check_user_in_pod(p_pod_id UUID, p_user_id UUID)
+RETURNS BOOLEAN
+SECURITY DEFINER
+SET search_path = public
+AS $$
+BEGIN
+  RETURN EXISTS (
+    SELECT 1 FROM pod_members 
+    WHERE pod_id = p_pod_id AND user_id = p_user_id
+  );
+END;
+$$ LANGUAGE plpgsql;
+
 -- Pod members policies
 DROP POLICY IF EXISTS "Users can view pod members for pods they are in" ON pod_members;
 CREATE POLICY "Users can view pod members for pods they are in"
   ON pod_members FOR SELECT
   USING (
     user_id = auth.uid() OR
-    pod_id IN (
-      SELECT pod_id FROM pod_members WHERE user_id = auth.uid()
-    )
+    public.check_user_in_pod(pod_id, auth.uid())
   );
 
 DROP POLICY IF EXISTS "Users can insert themselves into a pod via invite code" ON pod_members;
