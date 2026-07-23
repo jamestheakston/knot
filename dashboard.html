@@ -442,6 +442,112 @@
       font-size: 20px;
     }
   }
+
+  /* ---------- UPGRADE MODAL ---------- */
+  .upgrade-modal-overlay{
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    background: rgba(21, 25, 34, 0.6);
+    backdrop-filter: blur(4px);
+  }
+  .upgrade-modal-overlay.is-open{
+    display: flex;
+  }
+  .upgrade-modal{
+    background: var(--bg-2);
+    border-radius: 20px;
+    padding: 40px;
+    max-width: 480px;
+    width: 90%;
+    box-shadow: 0 20px 60px rgba(21, 25, 34, 0.3);
+  }
+  .upgrade-modal-header{
+    text-align: center;
+    margin-bottom: 32px;
+  }
+  .upgrade-modal-header h2{
+    font-size: 28px;
+    margin-bottom: 8px;
+  }
+  .upgrade-modal-header p{
+    color: var(--muted);
+  }
+  .upgrade-plan-name{
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-size: 32px;
+    font-weight: 600;
+    margin-bottom: 24px;
+  }
+  .upgrade-features{
+    list-style: none;
+    padding: 0;
+    margin: 0 0 32px;
+  }
+  .upgrade-features li{
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--line);
+    color: var(--ink);
+  }
+  .upgrade-features li:last-child{
+    border-bottom: none;
+  }
+  .upgrade-features i{
+    color: #2A4BD7;
+    width: 20px;
+    height: 20px;
+  }
+  .upgrade-contact{
+    background: var(--bg-3);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 24px;
+  }
+  .upgrade-contact p{
+    margin: 0 0 8px;
+    color: var(--muted);
+    font-size: 14px;
+  }
+  .upgrade-contact a{
+    color: var(--blue);
+    font-weight: 500;
+    word-break: break-all;
+  }
+  .upgrade-modal-actions{
+    display: flex;
+    gap: 12px;
+  }
+  .upgrade-modal-actions .btn{
+    flex: 1;
+  }
+
+  .create-pod-option{
+    border-top: 1px solid var(--line);
+    padding-top: 12px;
+    margin-top: 8px;
+    color: var(--blue);
+    font-weight: 500;
+  }
+  .create-pod-option:hover{
+    background: var(--blue-soft);
+  }
+  .create-pod-option.needs-upgrade{
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
 </style>
 </head>
 <body>
@@ -551,6 +657,49 @@
   </main>
 </div>
 
+<!-- Upgrade Modal -->
+<div class="upgrade-modal-overlay" id="upgradeModal">
+  <div class="upgrade-modal">
+    <div class="upgrade-modal-header">
+      <h2>Upgrade Your Account</h2>
+      <p>You've reached your pod creation limit</p>
+    </div>
+    
+    <div class="upgrade-plan-name">
+      <i data-lucide="crown" style="color: #FFD700; width: 24px; height: 24px;"></i>
+      Pod Pro
+    </div>
+    
+    <ul class="upgrade-features">
+      <li>
+        <i data-lucide="check"></i>
+        <span>Create up to 2 pods (instead of 1)</span>
+      </li>
+      <li>
+        <i data-lucide="check"></i>
+        <span>Join unlimited pods</span>
+      </li>
+      <li>
+        <i data-lucide="check"></i>
+        <span>Priority support</span>
+      </li>
+      <li>
+        <i data-lucide="check"></i>
+        <span>Early access to new features</span>
+      </li>
+    </ul>
+    
+    <div class="upgrade-contact">
+      <p>To upgrade your account, contact us at:</p>
+      <a href="mailto:jamestheakston2@gmail.com">jamestheakston2@gmail.com</a>
+    </div>
+    
+    <div class="upgrade-modal-actions">
+      <button class="btn btn-ghost" id="closeUpgradeModal">Close</button>
+    </div>
+  </div>
+</div>
+
 <script>
   document.addEventListener('DOMContentLoaded', function(){
     var SupabaseClient = null;
@@ -558,6 +707,7 @@
     var currentPod = null;
     var userPods = [];
     var isAdmin = false;
+    var userProfile = null;
 
     function getSupabaseClient(){
       if(SupabaseClient) return SupabaseClient;
@@ -643,7 +793,186 @@
       }else{
         window.location.href = 'index.html';
       }
+
+      // Check for pending pod creation
+      checkPendingPodCreation();
+      
+      // Load user profile
+      await loadUserProfile();
     }
+
+    async function loadUserProfile(){
+      var client = getSupabaseClient();
+      if(!client) return;
+
+      try{
+        var { data, error } = await client
+          .from('user_profiles')
+          .select('*')
+          .eq('user_id', currentUser.id)
+          .single();
+
+        if(error && error.code !== 'PGRST116'){
+          // Profile doesn't exist, create it
+          var { data: newProfile, error: createError } = await client
+            .from('user_profiles')
+            .insert({
+              user_id: currentUser.id,
+              user_upgraded: false
+            })
+            .select()
+            .single();
+
+          if(createError) throw createError;
+          userProfile = newProfile;
+        }else{
+          userProfile = data;
+        }
+      }catch(err){
+        console.error('Error loading user profile:', err);
+      }
+    }
+
+    function canCreateMorePods(){
+      if(!userProfile) return false;
+      
+      var createdPods = userPods.filter(function(pod){
+        return pod.role === 'admin';
+      }).length;
+      
+      var limit = userProfile.user_upgraded ? 2 : 1;
+      return createdPods < limit;
+    }
+
+    async function checkPendingPodCreation(){
+      var urlParams = new URLSearchParams(window.location.search);
+      var shouldCreatePod = urlParams.get('createpod');
+      
+      if(shouldCreatePod === 'true'){
+        var pendingPodData = localStorage.getItem('pendingPodCreation');
+        if(pendingPodData){
+          try{
+            var podData = JSON.parse(pendingPodData);
+            await createPodFromSignup(podData);
+            localStorage.removeItem('pendingPodCreation');
+            // Clean URL
+            window.history.replaceState({}, document.title, window.location.pathname);
+          }catch(err){
+            console.error('Error parsing pending pod data:', err);
+            localStorage.removeItem('pendingPodCreation');
+          }
+        }
+      }
+    }
+
+    async function createPodFromSignup(podData){
+      var client = getSupabaseClient();
+      if(!client) return;
+
+      try{
+        // Create pod with retry on invite code collision
+        var podResult, podError;
+        var retries = 0;
+        var maxRetries = 5;
+        
+        while(retries < maxRetries){
+          try{
+            var inviteCode = generateInviteCode();
+            var result = await client
+              .from('pods')
+              .insert({
+                name: podData.podName,
+                created_by: currentUser.id,
+                invite_code: inviteCode
+              })
+              .select()
+              .single();
+            
+            podResult = result.data;
+            podError = result.error;
+            
+            if(podError) throw podError;
+            break;
+          }catch(err){
+            if(err.code === '23505' && retries < maxRetries - 1){
+              retries++;
+              continue;
+            }
+            throw err;
+          }
+        }
+
+        if(podError) throw podError;
+
+        // Create habit
+        var { error: habitError } = await client
+          .from('habits')
+          .insert({
+            pod_id: podResult.id,
+            name: podData.habitName,
+            description: podData.habitDescription,
+            frequency: podData.frequency
+          });
+
+        if(habitError) throw habitError;
+
+        // Add creator as pod member
+        var { error: memberError } = await client
+          .from('pod_members')
+          .insert({
+            pod_id: podResult.id,
+            user_id: currentUser.id,
+            role: 'admin'
+          });
+
+        if(memberError) throw memberError;
+
+        // Create user profile if it doesn't exist
+        var { error: profileError } = await client
+          .from('user_profiles')
+          .upsert({
+            user_id: currentUser.id,
+            user_upgraded: false
+          }, {
+            onConflict: 'user_id'
+          });
+
+        // Reload pods to show the new pod
+        await loadUserPods();
+      }catch(err){
+        console.error('Error creating pod:', err);
+        alert('Error creating pod: ' + err.message);
+      }
+    }
+
+    function generateInviteCode(){
+      var chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+      var code = '';
+      for(var i = 0; i < 6; i++){
+        code += chars.charAt(Math.floor(Math.random() * chars.length));
+      }
+      return code;
+    }
+
+    function showUpgradeModal(){
+      var modal = document.getElementById('upgradeModal');
+      modal.classList.add('is-open');
+    }
+
+    function hideUpgradeModal(){
+      var modal = document.getElementById('upgradeModal');
+      modal.classList.remove('is-open');
+    }
+
+    // Upgrade modal close button
+    document.getElementById('closeUpgradeModal').addEventListener('click', hideUpgradeModal);
+    
+    // Close upgrade modal on overlay click
+    document.getElementById('upgradeModal').addEventListener('click', function(e){
+      if(e.target === this){
+        hideUpgradeModal();
+      }
+    });
 
     function updatePodSelector(){
       document.getElementById('currentPodName').textContent = currentPod.name;
@@ -660,6 +989,39 @@
         });
         menu.appendChild(option);
       });
+
+      // Add "Create new Pod" button
+      var createOption = document.createElement('div');
+      createOption.className = 'pod-option create-pod-option';
+      
+      var canCreate = canCreateMorePods();
+      var createdPods = userPods.filter(function(pod){
+        return pod.role === 'admin';
+      }).length;
+      var limit = userProfile && userProfile.user_upgraded ? 2 : 1;
+      
+      if(!canCreate){
+        createOption.innerHTML = '<i data-lucide="crown" style="color: #FFD700; width: 16px; height: 16px;"></i> Create new Pod';
+        createOption.classList.add('needs-upgrade');
+      }else{
+        createOption.textContent = 'Create new Pod';
+      }
+      
+      createOption.addEventListener('click', function(){
+        if(canCreate){
+          // TODO: Open create pod modal
+          alert('Create pod modal coming soon!');
+        }else{
+          showUpgradeModal();
+        }
+      });
+      
+      menu.appendChild(createOption);
+      
+      // Re-initialize Lucide icons
+      if(typeof lucide !== 'undefined'){
+        lucide.createIcons();
+      }
     }
 
     function updateAdminVisibility(){

@@ -1364,6 +1364,25 @@
       return /^[A-Za-z0-9]{6}$/.test(code);
     }
 
+    async function checkInviteCode(code){
+      var client = getSupabaseClient();
+      if(!client) return false;
+
+      try{
+        var { data, error } = await client
+          .from('pods')
+          .select('id')
+          .eq('invite_code', code)
+          .single();
+
+        if(error) return false;
+        return !!data;
+      }catch(err){
+        console.error('Error checking invite code:', err);
+        return false;
+      }
+    }
+
     function setButtonLoading(btn, isLoading){
       if(isLoading){
         btn.disabled = true;
@@ -1459,67 +1478,18 @@
 
         if(authError) throw authError;
 
-        // Create pod with retry on invite code collision
-        var podData, podError;
-        var retries = 0;
-        var maxRetries = 5;
-        
-        while(retries < maxRetries){
-          try{
-            var inviteCode = generateInviteCode();
-            var result = await client
-              .from('pods')
-              .insert({
-                name: podName,
-                created_by: authData.user.id,
-                invite_code: inviteCode
-              })
-              .select()
-              .single();
-            
-            podData = result.data;
-            podError = result.error;
-            
-            if(podError) throw podError;
-            break; // Success, exit retry loop
-          }catch(err){
-            if(err.code === '23505' && retries < maxRetries - 1){
-              // Unique constraint violation, retry with new code
-              retries++;
-              continue;
-            }
-            throw err;
-          }
-        }
+        // Store pod data in localStorage for dashboard to create
+        var podDataToStore = {
+          podName: podName,
+          habitName: habitName,
+          habitDescription: habitDescription,
+          frequency: frequency
+        };
+        localStorage.setItem('pendingPodCreation', JSON.stringify(podDataToStore));
 
-        if(podError) throw podError;
-
-        // Create habit
-        var { error: habitError } = await client
-          .from('habits')
-          .insert({
-            pod_id: podData.id,
-            name: habitName,
-            description: habitDescription,
-            frequency: frequency
-          });
-
-        if(habitError) throw habitError;
-
-        // Add creator as pod member
-        var { error: memberError } = await client
-          .from('pod_members')
-          .insert({
-            pod_id: podData.id,
-            user_id: authData.user.id,
-            role: 'admin'
-          });
-
-        if(memberError) throw memberError;
-
-        showToast('Pod created successfully! Invite code: ' + podData.invite_code);
+        showToast('Account created! Creating your pod...');
         setTimeout(function(){
-          window.location.href = 'dashboard.html';
+          window.location.href = 'dashboard.html?createpod=true';
         }, 1000);
       }catch(err){
         console.error('Error:', err);
@@ -1595,7 +1565,7 @@
     });
 
     // Handle navigation buttons
-    overlay.addEventListener('click', function(e){
+    overlay.addEventListener('click', async function(e){
       var btn = e.target.closest('button');
       if(!btn) return;
 
@@ -1611,6 +1581,16 @@
             codeInput.focus();
             return;
           }
+          
+          // Check if invite code exists in database
+          var isValid = await checkInviteCode(code);
+          if(!isValid){
+            showToast('Invalid invite code. Please check and try again.');
+            codeInput.style.borderColor = 'var(--red)';
+            codeInput.focus();
+            return;
+          }
+          
           codeInput.value = code;
           codeInput.style.borderColor = '';
           formData.join.code = code;

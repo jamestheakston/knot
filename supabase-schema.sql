@@ -1,6 +1,16 @@
 -- Enable UUID extension
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
+-- Create user_profiles table for additional user data
+CREATE TABLE IF NOT EXISTS user_profiles (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  user_upgraded BOOLEAN DEFAULT FALSE,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL,
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL,
+  UNIQUE(user_id)
+);
+
 -- Create pods table
 CREATE TABLE IF NOT EXISTS pods (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -46,6 +56,7 @@ CREATE TABLE IF NOT EXISTS check_ins (
 );
 
 -- Create indexes for better query performance
+CREATE INDEX IF NOT EXISTS idx_user_profiles_user_id ON user_profiles(user_id);
 CREATE INDEX IF NOT EXISTS idx_pods_invite_code ON pods(invite_code);
 CREATE INDEX IF NOT EXISTS idx_pods_created_by ON pods(created_by);
 CREATE INDEX IF NOT EXISTS idx_habits_pod_id ON habits(pod_id);
@@ -77,13 +88,34 @@ DROP TRIGGER IF EXISTS update_check_ins_updated_at ON check_ins;
 CREATE TRIGGER update_check_ins_updated_at BEFORE UPDATE ON check_ins
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
+DROP TRIGGER IF EXISTS update_user_profiles_updated_at ON user_profiles;
+CREATE TRIGGER update_user_profiles_updated_at BEFORE UPDATE ON user_profiles
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
 -- Row Level Security (RLS) Policies
 
 -- Enable RLS on all tables
+ALTER TABLE user_profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE pods ENABLE ROW LEVEL SECURITY;
 ALTER TABLE habits ENABLE ROW LEVEL SECURITY;
 ALTER TABLE pod_members ENABLE ROW LEVEL SECURITY;
 ALTER TABLE check_ins ENABLE ROW LEVEL SECURITY;
+
+-- User profiles policies
+DROP POLICY IF EXISTS "Users can view their own profile" ON user_profiles;
+CREATE POLICY "Users can view their own profile"
+  ON user_profiles FOR SELECT
+  USING (user_id = auth.uid());
+
+DROP POLICY IF EXISTS "Users can insert their own profile" ON user_profiles;
+CREATE POLICY "Users can insert their own profile"
+  ON user_profiles FOR INSERT
+  WITH CHECK (user_id = auth.uid());
+
+DROP POLICY IF EXISTS "Users can update their own profile" ON user_profiles;
+CREATE POLICY "Users can update their own profile"
+  ON user_profiles FOR UPDATE
+  USING (user_id = auth.uid());
 
 -- Pods policies
 DROP POLICY IF EXISTS "Users can view pods they are members of" ON pods;
