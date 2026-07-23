@@ -2054,7 +2054,12 @@
 
       // Check for pending pod join from URL parameters BEFORE showing no pods placeholder
       if(shouldJoinPod === 'true' && joinCode){
-        await handlePodJoinFromCode(joinCode);
+        try{
+          await handlePodJoinFromCode(joinCode);
+        }catch(err){
+          console.error('Error during pod join from URL:', err);
+          // Don't block initialization if pod join fails
+        }
       }
       
       // Check for pending pod creation
@@ -2241,13 +2246,11 @@
 
         if(checkError){
           console.error('Invite code check error:', checkError);
-          alert('Error checking invite code: ' + checkError.message);
           return;
         }
 
         if(!exists){
           console.error('Invalid invite code:', code);
-          alert('Invalid invite code. Please check and try again.');
           return;
         }
         
@@ -2262,13 +2265,11 @@
 
         if(podError){
           console.error('Pod lookup error:', podError);
-          alert('Error finding pod: ' + podError.message);
           return;
         }
 
         if(!pod){
           console.error('Pod not found for code:', code);
-          alert('Invalid invite code. Please check and try again.');
           return;
         }
 
@@ -2288,7 +2289,6 @@
 
         if(existingMember){
           console.log('Already a member of this pod');
-          alert('You are already a member of this pod.');
           return;
         }
 
@@ -2335,13 +2335,10 @@
           console.error('No pods found after joining');
         }
         
-        alert('Successfully joined ' + pod.name + '!');
-        
         // Clean URL
         window.history.replaceState({}, document.title, window.location.pathname);
       }catch(err){
         console.error('Error joining pod from code:', err);
-        alert('Error joining pod: ' + (err.message || 'Please try again.'));
       }
     }
 
