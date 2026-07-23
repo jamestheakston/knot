@@ -201,39 +201,42 @@
   }
 
   .nav-section-title{
-    font-size: 11.5px;
-    font-weight: 500;
+    font-size: 11px;
+    font-weight: 600;
     color: var(--muted-2);
     text-transform: uppercase;
-    letter-spacing: 0.06em;
-    padding: 0 20px;
-    margin-bottom: 8px;
+    letter-spacing: 0.08em;
+    padding: 0 24px;
+    margin-bottom: 12px;
   }
 
   .nav-item{
     display: flex;
     align-items: center;
     gap: 12px;
-    padding: 10px 20px;
-    font-size: 14px;
+    padding: 12px 24px;
+    font-size: 15px;
     color: var(--muted);
     cursor: pointer;
-    transition: color 0.2s ease, background 0.15s ease;
+    transition: all 0.2s ease;
+    position: relative;
   }
 
   .nav-item:hover{
     color: var(--ink);
     background: var(--bg-3);
+    transform: translateX(2px);
   }
 
   .nav-item.is-active{
     color: var(--blue);
     background: var(--blue-soft);
+    font-weight: 600;
   }
 
   .nav-item i{
-    width: 18px;
-    height: 18px;
+    width: 20px;
+    height: 20px;
   }
 
   .nav-item.admin-only{
@@ -246,7 +249,7 @@
 
   /* ---------- USER PROFILE ---------- */
   .sidebar-footer{
-    padding: 16px 20px;
+    padding: 20px 24px;
     border-top: 1px solid var(--line);
   }
 
@@ -258,18 +261,18 @@
   }
 
   .user-avatar{
-    width: 36px;
-    height: 36px;
+    width: 44px;
+    height: 44px;
     border-radius: 50%;
-    background: var(--blue);
+    background: linear-gradient(135deg, var(--blue), var(--blue-bright));
     color: #fff;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 13px;
-    font-weight: 500;
+    font-size: 18px;
+    font-weight: 600;
     flex-shrink: 0;
+    box-shadow: 0 2px 8px rgba(42, 75, 215, 0.2);
   }
 
   .user-info{
@@ -278,16 +281,17 @@
   }
 
   .user-name{
-    font-size: 14px;
-    font-weight: 500;
+    font-size: 15px;
+    font-weight: 600;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    color: var(--ink);
   }
 
   .user-email{
-    font-size: 12px;
-    color: var(--muted-2);
+    font-size: 13px;
+    color: var(--muted);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -371,21 +375,25 @@
   .main-content{
     flex: 1;
     margin-left: 280px;
-    padding: 32px 40px;
+    padding: 48px;
+    background: var(--bg);
   }
 
   .content-header{
-    margin-bottom: 32px;
+    margin-bottom: 40px;
   }
 
   .content-header h1{
-    font-size: 32px;
-    margin-bottom: 8px;
+    font-size: 36px;
+    font-weight: 400;
+    margin-bottom: 12px;
+    letter-spacing: -0.02em;
   }
 
   .content-header p{
     color: var(--muted);
-    font-size: 15px;
+    font-size: 16px;
+    line-height: 1.6;
   }
 
   /* ---------- LOADING ---------- */
