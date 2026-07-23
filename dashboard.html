@@ -173,6 +173,7 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    border-radius: 8px;
   }
 
   .pod-option:hover{
@@ -948,6 +949,19 @@
     display: flex;
     align-items: center;
     gap: 8px;
+  }
+  .join-pod-option{
+    border-top: 1px solid var(--line);
+    padding-top: 12px;
+    margin-top: 8px;
+    color: var(--blue);
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .join-pod-option:hover{
+    background: var(--blue-soft);
   }
 </style>
 </head>
@@ -2049,6 +2063,16 @@
       });
       
       menu.appendChild(createOption);
+
+      // Add "Join new Pod" button (available on all plans)
+      var joinOption = document.createElement('div');
+      joinOption.className = 'pod-option join-pod-option';
+      joinOption.innerHTML = '<i data-lucide="plus" style="width: 16px; height: 16px;"></i> Join new Pod';
+      joinOption.addEventListener('click', function(){
+        window.location.href = 'index.html?openmodal=true&join=true';
+      });
+      
+      menu.appendChild(joinOption);
       
       // Re-initialize Lucide icons
       if(typeof lucide !== 'undefined'){
