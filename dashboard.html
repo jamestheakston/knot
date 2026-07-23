@@ -63,7 +63,8 @@
   /* ---------- SIDEBAR ---------- */
   .sidebar{
     width: 280px;
-    background: var(--bg-2);
+    background: rgba(255,255,255,0.95);
+    backdrop-filter: blur(20px);
     border-right: 1px solid var(--line);
     display: flex;
     flex-direction: column;
@@ -75,38 +76,39 @@
   }
 
   .sidebar-header{
-    padding: 24px 20px;
+    padding: 28px 24px;
     border-bottom: 1px solid var(--line);
   }
 
   .sidebar-logo{
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 12px;
     font-family: 'Instrument Serif', serif;
-    font-size: 22px;
+    font-size: 26px;
     font-weight: 400;
+    letter-spacing: -0.02em;
   }
 
   .sidebar-logo i{
-    width: 20px;
-    height: 20px;
+    width: 24px;
+    height: 24px;
     color: var(--blue);
   }
 
   /* ---------- POD SELECTOR ---------- */
   .pod-selector{
-    padding: 20px;
+    padding: 20px 24px;
     border-bottom: 1px solid var(--line);
   }
 
   .pod-selector-label{
-    font-size: 11.5px;
-    font-weight: 500;
+    font-size: 11px;
+    font-weight: 600;
     color: var(--muted-2);
     text-transform: uppercase;
-    letter-spacing: 0.06em;
-    margin-bottom: 8px;
+    letter-spacing: 0.08em;
+    margin-bottom: 10px;
     display: block;
   }
 
