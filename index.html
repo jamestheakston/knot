@@ -406,6 +406,57 @@
     margin:0;
   }
 
+  /* ---------- PWA INSTALL SECTION ---------- */
+  .pwa-install-section{
+    padding: 80px 32px;
+    background: var(--bg-2);
+    border-top: 1px solid var(--line);
+  }
+  .pwa-install-content{
+    display: flex;
+    align-items: center;
+    gap: 32px;
+    max-width: 800px;
+    margin: 0 auto;
+  }
+  .pwa-install-icon{
+    width: 80px;
+    height: 80px;
+    background: var(--blue-soft);
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--blue-bright);
+    flex-shrink: 0;
+  }
+  .pwa-install-icon svg{
+    width: 40px;
+    height: 40px;
+  }
+  .pwa-install-text span.mono{
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11.5px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--blue);
+    display: block;
+    margin-bottom: 12px;
+  }
+  .pwa-install-text h3{
+    font-family: 'Instrument Serif', serif;
+    font-size: 28px;
+    font-weight: 400;
+    margin-bottom: 12px;
+    color: var(--ink);
+  }
+  .pwa-install-text p{
+    color: var(--muted);
+    font-size: 15px;
+    margin-bottom: 20px;
+    max-width: 500px;
+  }
+
   /* ---------- RESPONSIVE ---------- */
   @media (max-width: 860px){
     .feature-grid{ grid-template-columns: 1fr; }
@@ -1024,6 +1075,23 @@
   <h2>Find your five. Pick the habit. Hold the line together.</h2>
   <p>Free to start. No card required to make a pod.</p>
   <a class="btn btn-primary" href="#" style="padding:14px 28px; font-size:15px;" data-modal-open>Start a pod — free</a>
+</div>
+
+<div class="pwa-install-section">
+  <div class="wrap">
+    <div class="pwa-install-content">
+      <div class="pwa-install-icon">
+        <i data-lucide="smartphone"></i>
+      </div>
+      <div class="pwa-install-text">
+        <span class="mono">INSTALL AS APP</span>
+        <h3>Get Knot on your phone</h3>
+        <p>Install Knot as a progressive web app for the best experience. Works offline, sends reminders, and feels like a native app.</p>
+        <button id="pwaInstallBtn" class="btn btn-primary" style="display: none;">Install Knot</button>
+        <p id="pwaInstallInstructions" style="display: none; font-size: 14px; color: var(--muted); margin-top: 12px;"></p>
+      </div>
+    </div>
+  </div>
 </div>
 
 <footer>
@@ -1907,13 +1975,21 @@
 
     // Check for PWA mode
     function checkPWAMode(){
-      var urlParams = new URLSearchParams(window.location.search);
-      var isPWA = urlParams.get('pwa');
+      // Check if running in standalone mode (PWA)
+      var isStandalone = window.matchMedia('(display-mode: standalone)').matches || 
+                          window.navigator.standalone === true ||
+                          document.referrer.includes('android-app://');
       
-      if(isPWA === 'true'){
+      // Also check URL parameter
+      var urlParams = new URLSearchParams(window.location.search);
+      var isPWAParam = urlParams.get('pwa') === 'true';
+      
+      if(isStandalone || isPWAParam){
         showPWALanding();
-        // Clean URL
-        window.history.replaceState({}, document.title, window.location.pathname);
+        // Clean URL if parameter was used
+        if(isPWAParam){
+          window.history.replaceState({}, document.title, window.location.pathname);
+        }
       }
     }
 
@@ -1922,7 +1998,7 @@
       var body = document.body;
       
       // Hide main content
-      var mainContent = document.querySelector('nav, .hero, .features, .pod-preview, .cta-band, footer');
+      var mainContent = document.querySelector('nav, .hero, .features, .pod-preview, .cta-band, .pwa-install-section, footer');
       if(mainContent){
         mainContent.style.display = 'none';
       }
@@ -1971,6 +2047,76 @@
     // Run checks on page load
     checkOpenModalParam();
     checkPWAMode();
+
+    // PWA Install Handler
+    var deferredPrompt;
+    var installBtn = document.getElementById('pwaInstallBtn');
+    var installInstructions = document.getElementById('pwaInstallInstructions');
+
+    // Listen for install prompt
+    window.addEventListener('beforeinstallprompt', function(e){
+      e.preventDefault();
+      deferredPrompt = e;
+      
+      // Show install button
+      if(installBtn){
+        installBtn.style.display = 'inline-block';
+      }
+    });
+
+    // Handle install button click
+    if(installBtn){
+      installBtn.addEventListener('click', function(){
+        if(deferredPrompt){
+          deferredPrompt.prompt();
+          deferredPrompt.userChoice.then(function(choiceResult){
+            if(choiceResult.outcome === 'accepted'){
+              console.log('User accepted PWA install');
+            }
+            deferredPrompt = null;
+            installBtn.style.display = 'none';
+          });
+        }
+      });
+    }
+
+    // Check if PWA is already installed
+    window.addEventListener('appinstalled', function(){
+      if(installBtn){
+        installBtn.style.display = 'none';
+      }
+      if(installInstructions){
+        installInstructions.style.display = 'none';
+      }
+    });
+
+    // Show platform-specific install instructions if no prompt available
+    function showInstallInstructions(){
+      if(installInstructions){
+        var userAgent = navigator.userAgent || navigator.vendor || window.opera;
+        var instructions = '';
+        
+        if(/iPad|iPhone|iPod/.test(userAgent) && !window.MSStream){
+          instructions = 'To install: Tap the Share button, then "Add to Home Screen"';
+        }else if(/Android/.test(userAgent)){
+          instructions = 'To install: Tap the menu button (⋮), then "Add to Home Screen"';
+        }else if(/Chrome/.test(userAgent)){
+          instructions = 'Click the install icon in the address bar to install';
+        }else{
+          instructions = 'Look for the install option in your browser menu';
+        }
+        
+        installInstructions.textContent = instructions;
+        installInstructions.style.display = 'block';
+      }
+    }
+
+    // Show instructions after a delay if no install prompt appears
+    setTimeout(function(){
+      if(!deferredPrompt && installBtn && installBtn.style.display === 'none'){
+        showInstallInstructions();
+      }
+    }, 2000);
 
     // Register Service Worker for PWA
     if('serviceWorker' in navigator){
