@@ -441,6 +441,41 @@
     min-width: 140px;
   }
 
+  /* ---------- STREAK DISPLAY ---------- */
+  .streak-display{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 400px;
+    text-align: center;
+    padding: 40px 20px;
+  }
+  .streak-image{
+    max-width: 300px;
+    height: auto;
+    margin-bottom: 24px;
+  }
+  .nostreak-image{
+    max-width: 400px;
+    opacity: 0.6;
+  }
+  .streak-animated{
+    max-width: 250px;
+  }
+  .streak-count{
+    font-size: 72px;
+    font-weight: 700;
+    color: var(--ink);
+    margin-bottom: 8px;
+    font-family: 'Instrument Serif', serif;
+  }
+  .streak-message{
+    font-size: 18px;
+    color: var(--muted);
+    font-weight: 500;
+  }
+
   /* ---------- RESPONSIVE ---------- */
   @media (max-width: 768px){
     .mobile-menu-toggle{
@@ -819,6 +854,73 @@
       document.getElementById('userAvatar').textContent = displayName.charAt(0).toUpperCase();
     }
 
+    async function loadStreakData(){
+      var client = getSupabaseClient();
+      if(!client || !currentPod) return 0;
+
+      try{
+        // Get check-ins for the current pod and user
+        var { data: checkIns, error } = await client
+          .from('check_ins')
+          .select('*')
+          .eq('pod_id', currentPod.id)
+          .eq('user_id', currentUser.id)
+          .order('created_at', { ascending: false });
+
+        if(error) throw error;
+
+        if(!checkIns || checkIns.length === 0){
+          return 0;
+        }
+
+        // Calculate current streak
+        var streak = 0;
+        var today = new Date();
+        today.setHours(0, 0, 0, 0);
+        
+        var checkInDates = checkIns.map(function(ci){
+          return new Date(ci.created_at);
+        }).sort(function(a, b){
+          return b - a;
+        });
+
+        // Check if there's a check-in today or yesterday to start counting
+        var lastCheckIn = checkInDates[0];
+        var lastCheckInDate = new Date(lastCheckIn);
+        lastCheckInDate.setHours(0, 0, 0, 0);
+        
+        var dayDiff = Math.floor((today - lastCheckInDate) / (1000 * 60 * 60 * 24));
+        
+        if(dayDiff > 1){
+          // Streak broken
+          return 0;
+        }
+
+        // Count consecutive days
+        streak = 1;
+        var currentDate = lastCheckInDate;
+        
+        for(var i = 1; i < checkInDates.length; i++){
+          var prevDate = new Date(checkInDates[i]);
+          prevDate.setHours(0, 0, 0, 0);
+          var prevDay = new Date(currentDate);
+          prevDay.setDate(prevDay.getDate() - 1);
+          
+          if(prevDate.getTime() === prevDay.getTime()){
+            streak++;
+            currentDate = prevDate;
+          }else{
+            break;
+          }
+        }
+
+        return streak;
+      }catch(err){
+        console.error('Error loading streak data:', err);
+        return 0;
+      }
+    }
+
     async function loadUserPods(){
       var client = getSupabaseClient();
       
@@ -861,6 +963,9 @@
         isAdmin = currentPod.role === 'admin';
         updatePodSelector();
         updateAdminVisibility();
+        // Load and display streak data
+        var streak = await loadStreakData();
+        displayStreak(streak);
       }else{
         // Show no pods placeholder
         showNoPodsPlaceholder();
@@ -977,6 +1082,9 @@
                 isAdmin = currentPod.role === 'admin';
                 updatePodSelector();
                 updateAdminVisibility();
+                // Display streak for the newly created pod
+                var streak = await loadStreakData();
+                displayStreak(streak);
               }
             }
           }catch(err){
@@ -1105,6 +1213,28 @@
       modal.classList.remove('is-open');
     }
 
+    function displayStreak(streak){
+      var contentArea = document.getElementById('contentArea');
+      
+      if(streak === 0){
+        contentArea.innerHTML = `
+          <div class="streak-display">
+            <img src="/assets/nostreak.png" alt="No streak" class="streak-image nostreak-image">
+            <div class="streak-count">0</div>
+            <div class="streak-message">You need to start a streak</div>
+          </div>
+        `;
+      }else{
+        contentArea.innerHTML = `
+          <div class="streak-display">
+            <img src="/assets/streak.svg" alt="Streak" class="streak-image streak-animated">
+            <div class="streak-count">${streak}</div>
+            <div class="streak-message">day streak</div>
+          </div>
+        `;
+      }
+    }
+
     function showUpgradeModal(){
       var modal = document.getElementById('upgradeModal');
       modal.classList.add('is-open');
@@ -1198,6 +1328,9 @@
       updatePodSelector();
       updateAdminVisibility();
       document.getElementById('podDropdown').classList.remove('is-open');
+      // Update streak display for new pod
+      var streak = await loadStreakData();
+      displayStreak(streak);
     }
 
     // Dropdown toggles
