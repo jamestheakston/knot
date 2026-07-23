@@ -1197,7 +1197,7 @@
 </div>
 
 <script>
-  (function(){
+  document.addEventListener('DOMContentLoaded', function(){
     var overlay = document.getElementById('podModal');
     var closeBtn = document.getElementById('modalClose');
     var openers = document.querySelectorAll('[data-modal-open]');
@@ -1257,14 +1257,41 @@
     }
 
     function goToStep(stepName){
+      var currentActive = overlay.querySelector('.modal-step.is-active');
+      var targetStep = null;
+      
       steps.forEach(function(step){
-        step.classList.remove('is-active');
         if(step.dataset.step === stepName){
-          setTimeout(function(){
-            step.classList.add('is-active');
-          }, 50);
+          targetStep = step;
         }
       });
+
+      if(!targetStep) return;
+
+      // If there's a current active step, animate it out
+      if(currentActive && currentActive !== targetStep){
+        currentActive.style.transform = 'translateY(-20px)';
+        currentActive.style.opacity = '0';
+        
+        setTimeout(function(){
+          currentActive.classList.remove('is-active');
+          currentActive.style.transform = '';
+          currentActive.style.opacity = '';
+          
+          // Animate in the new step
+          targetStep.classList.add('is-active');
+          targetStep.style.transform = 'translateY(20px)';
+          targetStep.style.opacity = '0';
+          
+          setTimeout(function(){
+            targetStep.style.transform = 'translateY(0)';
+            targetStep.style.opacity = '1';
+          }, 50);
+        }, 300);
+      }else{
+        // No current step or same step, just show it
+        targetStep.classList.add('is-active');
+      }
     }
 
     function resetForms(){
