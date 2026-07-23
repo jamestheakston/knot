@@ -1999,7 +1999,13 @@
       
       // Hide all main content
       var mainContent = document.querySelectorAll('nav, .hero, .features, .pod-preview, #how, .cta-band, .pwa-install-section, footer');
+      var allSections = document.querySelectorAll('section');
+      
       mainContent.forEach(function(el){
+        el.style.display = 'none';
+      });
+      
+      allSections.forEach(function(el){
         el.style.display = 'none';
       });
       
