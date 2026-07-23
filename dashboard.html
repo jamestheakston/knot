@@ -2046,6 +2046,8 @@
       // Check for pending pod creation BEFORE redirecting
       var urlParams = new URLSearchParams(window.location.search);
       var shouldCreatePod = urlParams.get('createpod');
+      var shouldJoinPod = urlParams.get('joinpod');
+      var joinCode = urlParams.get('code');
       var isLinking = urlParams.get('link');
       var action = urlParams.get('action');
 
@@ -2090,7 +2092,12 @@
       // Check for pending pod creation
       await checkPendingPodCreation();
       
-      // Check for pending pod join
+      // Check for pending pod join from URL parameters
+      if(shouldJoinPod === 'true' && joinCode){
+        await handlePodJoinFromCode(joinCode);
+      }
+      
+      // Check for pending pod join from localStorage
       await checkPendingPodJoin();
       
       // Load user profile
@@ -2211,6 +2218,87 @@
             localStorage.removeItem('pendingPodCreation');
           }
         }
+      }
+    }
+
+    async function handlePodJoinFromCode(code){
+      var client = getSupabaseClient();
+      if(!client) return;
+
+      try{
+        // Verify the invite code exists using the security definer function
+        var { data: exists, error: checkError } = await client
+          .rpc('check_invite_code_exists', { invite_code_param: code });
+
+        if(checkError || !exists){
+          console.error('Invalid invite code:', code);
+          alert('Invalid invite code. Please check and try again.');
+          return;
+        }
+        
+        // Get the pod details
+        var { data: pod, error: podError } = await client
+          .from('pods')
+          .select('*')
+          .eq('invite_code', code)
+          .maybeSingle();
+
+        if(podError || !pod){
+          console.error('Pod not found for code:', code);
+          alert('Invalid invite code. Please check and try again.');
+          return;
+        }
+
+        // Check if already a member
+        var { data: existingMember, error: memberError } = await client
+          .from('pod_members')
+          .select('*')
+          .eq('pod_id', pod.id)
+          .eq('user_id', currentUser.id)
+          .maybeSingle();
+
+        if(existingMember){
+          console.log('Already a member of this pod');
+          alert('You are already a member of this pod.');
+          return;
+        }
+
+        // Join the pod
+        var { error: joinError } = await client
+          .from('pod_members')
+          .insert({
+            pod_id: pod.id,
+            user_id: currentUser.id,
+            role: 'member'
+          });
+
+        if(joinError) throw joinError;
+
+        console.log('Successfully joined pod:', pod.name);
+        
+        // Reload pods to show the newly joined pod
+        await loadUserPods();
+        
+        if(userPods.length > 0){
+          currentPod = userPods.find(function(p){
+            return p.id === pod.id;
+          });
+          
+          if(currentPod){
+            isAdmin = currentPod.role === 'admin';
+            updatePodSelector();
+            updateAdminVisibility();
+            navigateTo('overview');
+          }
+        }
+        
+        alert('Successfully joined ' + pod.name + '!');
+        
+        // Clean URL
+        window.history.replaceState({}, document.title, window.location.pathname);
+      }catch(err){
+        console.error('Error joining pod from code:', err);
+        alert('Error joining pod: ' + (err.message || 'Please try again.'));
       }
     }
 
