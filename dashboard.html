@@ -10,6 +10,7 @@
 <script src="https://unpkg.com/lucide@latest"></script>
 <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+<script src="https://js.hcaptcha.com/1/api.js" async defer></script>
 <style>
   :root{
     --bg: #F7F8FB;
@@ -675,6 +676,23 @@
   }
   .invite-email-form{
     margin-top: 24px;
+  }
+  .hcaptcha-container{
+    margin-top: 16px;
+  }
+  .hcaptcha-message{
+    font-size: 13px;
+    color: var(--muted);
+    margin-bottom: 12px;
+    font-style: italic;
+  }
+  .hcaptcha-widget{
+    margin-bottom: 8px;
+  }
+  .hcaptcha-thanks{
+    font-size: 12px;
+    color: var(--muted-2);
+    text-align: center;
   }
   .invite-code-display{
     margin-top: 24px;
@@ -1937,6 +1955,13 @@
                 <label class="form-label">Email Address</label>
                 <input type="email" class="form-input" id="inviteEmail" placeholder="friend@example.com">
               </div>
+              <div class="form-group">
+                <div class="hcaptcha-container">
+                  <div class="hcaptcha-message">We know, inconvenient, but it helps us stop the bots.</div>
+                  <div class="hcaptcha-widget" id="hcaptcha-widget"></div>
+                  <div class="hcaptcha-thanks">Thanks for helping us create a robot-free experience 🙏</div>
+                </div>
+              </div>
               <div class="form-actions">
                 <button class="btn btn-primary" id="sendInviteBtn">Send Invite</button>
                 <button class="btn btn-ghost" id="cancelEmailBtn">Cancel</button>
@@ -1966,6 +1991,13 @@
         document.getElementById('inviteEmailForm').style.display = 'block';
         document.getElementById('inviteCodeDisplay').style.display = 'none';
         document.getElementById('invite-methods').style.display = 'none';
+        
+        // Render hCaptcha widget
+        if(typeof hcaptcha !== 'undefined' && !document.getElementById('hcaptcha-widget').hasChildNodes()){
+          hcaptcha.render('hcaptcha-widget', {
+            sitekey: '6756a528-fd90-49fc-b01e-80e2b896d9b8'
+          });
+        }
       });
 
       document.getElementById('showCodeBtn').addEventListener('click', function(){
@@ -1999,6 +2031,13 @@
         return;
       }
 
+      // Verify hCaptcha
+      var captchaResponse = hcaptcha.getResponse();
+      if(!captchaResponse){
+        alert('Please complete the captcha verification');
+        return;
+      }
+
       try{
         btn.disabled = true;
         btn.textContent = 'Sending...';
@@ -2009,7 +2048,8 @@
         var templateParams = {
           toemail: email,
           invite_code: currentPod.inviteCode,
-          pod_name: currentPod.name
+          pod_name: currentPod.name,
+          'h-captcha-response': captchaResponse
         };
 
         await emailjs.send('service_yn3gq3m', 'template_7xm80oj', templateParams);
@@ -2020,6 +2060,9 @@
         document.getElementById('inviteEmail').value = '';
         document.getElementById('inviteEmailForm').style.display = 'none';
         document.getElementById('invite-methods').style.display = 'flex';
+        
+        // Reset hCaptcha
+        hcaptcha.reset();
       }catch(err){
         console.error('Error sending email:', err);
         alert('Error sending invite: ' + err.message);
