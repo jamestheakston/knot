@@ -792,6 +792,17 @@
   .invite-instructions li{
     margin-bottom: 12px;
   }
+  .admin-contact-info{
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 20px;
+    background: var(--blue-soft);
+    border-radius: 12px;
+    margin-top: 24px;
+    color: var(--ink);
+    font-size: 14px;
+  }
 
   /* ---------- PROFILE SECTION ---------- */
   .profile-section{
@@ -831,6 +842,19 @@
   .profile-info p{
     color: var(--muted);
     font-size: 15px;
+    margin-bottom: 4px;
+  }
+  .profile-description{
+    color: var(--muted-2);
+    font-size: 14px;
+    font-style: italic;
+  }
+  .profile-edit-section{
+    margin-bottom: 32px;
+    background: var(--bg-2);
+    border-radius: 16px;
+    padding: 24px;
+    border: 1px solid var(--line);
   }
   .profile-stats{
     display: grid;
@@ -1129,9 +1153,172 @@
   .join-pod-option:hover{
     background: var(--blue-soft);
   }
+
+  /* ---------- MODALS ---------- */
+  .modal-overlay{
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    background: rgba(21, 25, 34, 0.6);
+    backdrop-filter: blur(4px);
+  }
+  .modal-overlay.is-open{
+    display: flex;
+  }
+  .modal{
+    background: var(--bg-2);
+    border-radius: 20px;
+    padding: 32px;
+    max-width: 480px;
+    width: 90%;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+  }
+  .streak-modal{
+    max-width: 520px;
+  }
+  .modal-header h2{
+    font-size: 24px;
+    font-weight: 600;
+    margin-bottom: 16px;
+    color: var(--ink);
+  }
+  .modal-body{
+    margin-bottom: 24px;
+  }
+  .modal-body p{
+    color: var(--muted);
+    line-height: 1.6;
+  }
+  .modal-footer{
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+  }
+  .streak-display-modal{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 32px 20px;
+    margin-bottom: 32px;
+  }
+  .streak-display-modal .streak-image{
+    max-width: 200px;
+    height: auto;
+    margin-bottom: 20px;
+  }
+  .streak-display-modal .streak-count{
+    font-size: 64px;
+    font-weight: 700;
+    color: var(--ink);
+    margin-bottom: 8px;
+    font-family: 'Instrument Serif', serif;
+  }
+  .streak-display-modal .streak-message{
+    font-size: 16px;
+    color: var(--muted);
+    font-weight: 500;
+  }
+  .group-streak-section{
+    border-top: 1px solid var(--line);
+    padding-top: 24px;
+  }
+  .group-streak-section h3{
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 16px;
+    color: var(--ink);
+  }
+  .group-streak-list{
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .group-streak-item{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    background: var(--bg-3);
+    border-radius: 10px;
+  }
+  .group-streak-user{
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .group-streak-avatar{
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--blue);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 600;
+  }
+  .group-streak-name{
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--ink);
+  }
+  .group-streak-value{
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--blue);
+  }
+  .group-streak-broken{
+    color: var(--red);
+  }
 </style>
 </head>
 <body>
+
+<!-- Check-in Confirmation Modal -->
+<div class="modal-overlay" id="checkInConfirmModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h2>Confirm Check-in</h2>
+    </div>
+    <div class="modal-body">
+      <p>Are you sure you want to check in today? This will record your progress for today.</p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" id="cancelCheckInBtn">Cancel</button>
+      <button class="btn btn-primary" id="confirmCheckInBtn">Yes, Check In</button>
+    </div>
+  </div>
+</div>
+
+<!-- Streak Modal -->
+<div class="modal-overlay" id="streakModal">
+  <div class="modal streak-modal">
+    <div class="modal-header">
+      <h2>Your Streak</h2>
+    </div>
+    <div class="modal-body">
+      <div class="streak-display-modal">
+        <img src="/assets/streak.svg" alt="Streak" class="streak-image streak-animated">
+        <div class="streak-count" id="streakModalCount">0</div>
+        <div class="streak-message">day streak</div>
+      </div>
+      <div class="group-streak-section">
+        <h3>Group Streak</h3>
+        <div class="group-streak-list" id="groupStreakList">
+          <!-- Group streaks will be populated by JS -->
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-primary" id="closeStreakModal">Awesome!</button>
+    </div>
+  </div>
+</div>
 
 <div class="dashboard">
   <!-- Sidebar -->
@@ -1974,7 +2161,7 @@
         `;
 
         if(!checkedInToday){
-          document.getElementById('checkInBtn').addEventListener('click', handleCheckIn);
+          document.getElementById('checkInBtn').addEventListener('click', showCheckInConfirm);
         }
       }catch(err){
         console.error('Error loading check-ins:', err);
@@ -1982,13 +2169,29 @@
       }
     }
 
+    function showCheckInConfirm(){
+      document.getElementById('checkInConfirmModal').classList.add('is-open');
+    }
+
+    function hideCheckInConfirm(){
+      document.getElementById('checkInConfirmModal').classList.remove('is-open');
+    }
+
+    function showStreakModal(streak){
+      document.getElementById('streakModalCount').textContent = streak;
+      document.getElementById('streakModal').classList.add('is-open');
+      loadGroupStreaks();
+    }
+
+    function hideStreakModal(){
+      document.getElementById('streakModal').classList.remove('is-open');
+    }
+
     async function handleCheckIn(){
       var client = getSupabaseClient();
-      var btn = document.getElementById('checkInBtn');
       
       try{
-        btn.disabled = true;
-        btn.textContent = 'Checking in...';
+        hideCheckInConfirm();
 
         // Get habits for the pod
         var { data: habits, error: habitsError } = await client
@@ -2013,14 +2216,140 @@
           if(checkInError) throw checkInError;
         }
 
+        // Calculate new streak and show modal
+        var streak = await loadStreakData();
+        showStreakModal(streak);
+
         // Reload check-ins
         loadCheckIns();
       }catch(err){
         console.error('Error checking in:', err);
         alert('Error checking in: ' + err.message);
-        btn.disabled = false;
-        btn.textContent = 'Check in today';
       }
+    }
+
+    async function loadGroupStreaks(){
+      var client = getSupabaseClient();
+      var groupStreakList = document.getElementById('groupStreakList');
+      
+      try{
+        // Get all members of the pod
+        var { data: members, error: membersError } = await client
+          .from('pod_members')
+          .select('*')
+          .eq('pod_id', currentPod.id);
+
+        if(membersError) throw membersError;
+
+        // Get streak for each member
+        var streakData = [];
+        for(var i = 0; i < members.length; i++){
+          var member = members[i];
+          var { data: checkIns, error: checkInsError } = await client
+            .from('check_ins')
+            .select('*')
+            .eq('pod_id', currentPod.id)
+            .eq('user_id', member.user_id)
+            .order('created_at', { ascending: false })
+            .limit(30);
+
+          if(checkInsError){
+            console.error('Error loading check-ins for member:', member.user_id, checkInsError);
+            continue;
+          }
+
+          // Calculate streak for this member
+          var streak = calculateStreakFromCheckIns(checkIns);
+          
+          // Get user profile
+          var { data: profile, error: profileError } = await client
+            .from('user_profiles')
+            .select('*')
+            .eq('user_id', member.user_id)
+            .maybeSingle();
+
+          var displayName = profile?.display_name || member.user_id.substring(0, 8);
+          
+          streakData.push({
+            user_id: member.user_id,
+            name: displayName,
+            streak: streak,
+            isCurrentUser: member.user_id === currentUser.id
+          });
+        }
+
+        // Sort by streak (highest first)
+        streakData.sort(function(a, b){
+          return b.streak - a.streak;
+        });
+
+        // Render group streaks
+        var streakHTML = streakData.map(function(data){
+          var streakClass = data.streak === 0 ? 'group-streak-broken' : '';
+          var streakText = data.streak === 0 ? 'Broken' : data.streak + ' days';
+          var currentUserClass = data.isCurrentUser ? ' (You)' : '';
+          
+          return `
+            <div class="group-streak-item">
+              <div class="group-streak-user">
+                <div class="group-streak-avatar">${data.name.charAt(0).toUpperCase()}</div>
+                <div class="group-streak-name">${data.name}${currentUserClass}</div>
+              </div>
+              <div class="group-streak-value ${streakClass}">${streakText}</div>
+            </div>
+          `;
+        }).join('');
+
+        groupStreakList.innerHTML = streakHTML;
+      }catch(err){
+        console.error('Error loading group streaks:', err);
+        groupStreakList.innerHTML = '<div class="error">Error loading group streaks</div>';
+      }
+    }
+
+    function calculateStreakFromCheckIns(checkIns){
+      if(!checkIns || checkIns.length === 0){
+        return 0;
+      }
+
+      var streak = 0;
+      var today = new Date();
+      today.setHours(0, 0, 0, 0);
+      
+      var checkInDates = checkIns.map(function(ci){
+        return new Date(ci.created_at);
+      }).sort(function(a, b){
+        return b - a;
+      });
+
+      var lastCheckIn = checkInDates[0];
+      var lastCheckInDate = new Date(lastCheckIn);
+      lastCheckInDate.setHours(0, 0, 0, 0);
+      
+      var dayDiff = Math.floor((today - lastCheckInDate) / (1000 * 60 * 60 * 24));
+      
+      if(dayDiff > 1){
+        return 0;
+      }
+
+      streak = 1;
+      var currentDate = lastCheckInDate;
+      
+      for(var i = 1; i < checkInDates.length; i++){
+        var prevDate = new Date(checkInDates[i]);
+        prevDate.setHours(0, 0, 0, 0);
+        var prevDay = new Date(currentDate);
+        prevDay.setDate(prevDay.getDate() - 1);
+        
+        if(prevDate.getTime() === prevDay.getTime()){
+          streak++;
+          currentDate = prevDate;
+        }else{
+          break;
+        }
+      }
+
+      return streak;
     }
 
     async function loadStreakSection(){
@@ -2096,7 +2425,21 @@
       var contentArea = document.getElementById('contentArea');
       
       if(!isAdmin){
-        contentArea.innerHTML = '<div class="error">You must be an admin to invite members</div>';
+        contentArea.innerHTML = `
+          <div class="invite-section">
+            <div class="invite-card">
+              <h3>Invite Members</h3>
+              <p>You need to contact your pod admin to invite new members. Only admins can send invitations to join the pod.</p>
+              <div class="admin-contact-info">
+                <i data-lucide="info" style="width: 20px; height: 20px; color: var(--blue);"></i>
+                <span>Ask your admin for the invite code or have them send you an invitation.</span>
+              </div>
+            </div>
+          </div>
+        `;
+        if(typeof lucide !== 'undefined'){
+          lucide.createIcons();
+        }
         return;
       }
 
@@ -2245,6 +2588,16 @@
             <div class="profile-info">
               <h3>${displayName}</h3>
               <p>${currentUser.email}</p>
+              <p class="profile-description">View and edit your profile - this is how other people in your knot see you</p>
+            </div>
+          </div>
+          <div class="profile-edit-section">
+            <div class="form-group">
+              <label class="form-label">Display Name</label>
+              <input type="text" class="form-input" id="profileDisplayName" value="${displayName}" placeholder="Enter your display name">
+            </div>
+            <div class="form-actions">
+              <button class="btn btn-primary" id="saveProfileBtn">Save Changes</button>
             </div>
           </div>
           <div class="profile-stats">
@@ -2259,6 +2612,57 @@
           </div>
         </div>
       `;
+
+      document.getElementById('saveProfileBtn').addEventListener('click', saveProfileChanges);
+    }
+
+    async function saveProfileChanges(){
+      var displayName = document.getElementById('profileDisplayName').value;
+      var btn = document.getElementById('saveProfileBtn');
+      
+      if(!displayName || displayName.trim() === ''){
+        alert('Please enter a display name');
+        return;
+      }
+
+      try{
+        btn.disabled = true;
+        btn.textContent = 'Saving...';
+
+        var client = getSupabaseClient();
+        
+        // Update user metadata
+        var { error: metadataError } = await client.auth.updateUser({
+          data: { display_name: displayName }
+        });
+
+        if(metadataError) throw metadataError;
+
+        // Update user profile
+        var { error: profileError } = await client
+          .from('user_profiles')
+          .update({ display_name: displayName })
+          .eq('user_id', currentUser.id);
+
+        if(profileError) throw profileError;
+
+        // Update current user metadata
+        currentUser.user_metadata = currentUser.user_metadata || {};
+        currentUser.user_metadata.display_name = displayName;
+
+        // Update UI
+        document.getElementById('userName').textContent = displayName;
+        document.getElementById('userAvatar').textContent = displayName.charAt(0).toUpperCase();
+
+        alert('Profile updated successfully');
+        loadProfile();
+      }catch(err){
+        console.error('Error saving profile:', err);
+        alert('Error saving profile: ' + err.message);
+      }finally{
+        btn.disabled = false;
+        btn.textContent = 'Save Changes';
+      }
     }
 
     function loadAccountSettings(){
@@ -2326,6 +2730,21 @@
         var section = this.getAttribute('data-nav');
         if(section) navigateTo(section);
       });
+    });
+
+    // Check-in confirmation modal handlers
+    document.getElementById('cancelCheckInBtn').addEventListener('click', hideCheckInConfirm);
+    document.getElementById('confirmCheckInBtn').addEventListener('click', handleCheckIn);
+
+    // Streak modal handlers
+    document.getElementById('closeStreakModal').addEventListener('click', hideStreakModal);
+
+    // Modal overlay click to close
+    document.getElementById('checkInConfirmModal').addEventListener('click', function(e){
+      if(e.target === this) hideCheckInConfirm();
+    });
+    document.getElementById('streakModal').addEventListener('click', function(e){
+      if(e.target === this) hideStreakModal();
     });
 
     function updatePodSelector(){
