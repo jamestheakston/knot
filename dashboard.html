@@ -1936,7 +1936,8 @@
       // Check for pending pod creation BEFORE redirecting
       var urlParams = new URLSearchParams(window.location.search);
       var shouldCreatePod = urlParams.get('createpod');
-      
+      var isLinking = urlParams.get('link');
+
       if(userPods.length > 0){
         currentPod = userPods[0];
         isAdmin = currentPod.role === 'admin';
@@ -1944,9 +1945,22 @@
         updateAdminVisibility();
         // Load overview section by default
         navigateTo('overview');
+        // If linking account, show success message
+        if(isLinking){
+          alert('Account linked successfully!');
+          // Remove link parameter from URL
+          window.history.replaceState({}, document.title, window.location.pathname);
+        }
       }else{
-        // Show no pods placeholder
-        showNoPodsPlaceholder();
+        // Only show no pods placeholder if not linking an account
+        if(!isLinking){
+          showNoPodsPlaceholder();
+        }else{
+          // If linking account but no pods, this is an error state
+          alert('Account linked successfully, but you are not in any pods.');
+          window.history.replaceState({}, document.title, window.location.pathname);
+          showNoPodsPlaceholder();
+        }
       }
 
       // Check for pending pod creation
@@ -2591,7 +2605,7 @@
                 <div class="check-in-user-name">${ci.displayName}${ci.isCurrentUser ? ' (You)' : ''}</div>
                 <div class="check-in-user-time">${time}</div>
               </div>
-              ${ci.isCurrentUser ? '<button class="btn btn-ghost btn-sm" id="uncheckInBtn">Undo</button>' : ''}
+              ${ci.isCurrentUser ? '<button class="btn btn-ghost btn-sm uncheck-in-btn">Undo</button>' : ''}
             </div>
           `;
         }).join('');
@@ -2634,7 +2648,9 @@
         }
 
         if(checkedInToday){
-          document.getElementById('uncheckInBtn').addEventListener('click', handleUncheckIn);
+          document.querySelectorAll('.uncheck-in-btn').forEach(function(btn){
+            btn.addEventListener('click', handleUncheckIn);
+          });
         }
       }catch(err){
         console.error('Error loading check-ins:', err);
