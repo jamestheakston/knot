@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Knot — Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Work+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@latest"></script>
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+<style>
+  :root{
+    --bg: #F7F8FB;
+    --bg-2: #FFFFFF;
+    --bg-3: #EEF1F6;
+    --ink: #151922;
+    --muted: #5B6472;
+    --muted-2: #8890A0;
+    --blue: #2A4BD7;
+    --blue-bright: #1B37AE;
+    --blue-soft: #EAEFFF;
+    --red: #C4432A;
+    --line: rgba(21,25,34,0.10);
+    --line-strong: rgba(21,25,34,0.18);
+  }
+
+  *{ box-sizing: border-box; }
+  html{ scroll-behavior: smooth; }
+  body{
+    margin:0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'Work Sans', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    line-height: 1.5;
+  }
+  h1,h2,h3{
+    font-family: 'Instrument Serif', serif;
+    font-weight: 400;
+    margin: 0;
+    letter-spacing: -0.01em;
+  }
+  a{ color: inherit; text-decoration: none; }
+  .mono{ font-family: 'IBM Plex Mono', monospace; }
+
+  ::selection{ background: var(--blue); color: #fff; }
+
+  :focus-visible{
+    outline: 2px solid var(--blue);
+    outline-offset: 3px;
+    border-radius: 4px;
+  }
+
+  /* ---------- LAYOUT ---------- */
+  .dashboard{
+    display: flex;
+    min-height: 100vh;
+  }
+
+  /* ---------- SIDEBAR ---------- */
+  .sidebar{
+    width: 280px;
+    background: var(--bg-2);
+    border-right: 1px solid var(--line);
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    z-index: 10;
+  }
+
+  .sidebar-header{
+    padding: 24px 20px;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .sidebar-logo{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: 'Instrument Serif', serif;
+    font-size: 22px;
+    font-weight: 400;
+  }
+
+  .sidebar-logo i{
+    width: 20px;
+    height: 20px;
+    color: var(--blue);
+  }
+
+  /* ---------- POD SELECTOR ---------- */
+  .pod-selector{
+    padding: 20px;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .pod-selector-label{
+    font-size: 11.5px;
+    font-weight: 500;
+    color: var(--muted-2);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 8px;
+    display: block;
+  }
+
+  .pod-dropdown{
+    position: relative;
+  }
+
+  .pod-dropdown-btn{
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 10px 14px;
+    background: var(--bg-3);
+    border: 1px solid var(--line-strong);
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--ink);
+    cursor: pointer;
+    transition: border-color 0.2s ease, background 0.2s ease;
+  }
+
+  .pod-dropdown-btn:hover{
+    border-color: var(--blue);
+    background: var(--blue-soft);
+  }
+
+  .pod-dropdown-btn .pod-name{
+    flex: 1;
+    text-align: left;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .pod-dropdown-menu{
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    right: 0;
+    background: var(--bg-2);
+    border: 1px solid var(--line-strong);
+    border-radius: 12px;
+    box-shadow: 0 8px 30px rgba(21,25,34,0.15);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-8px);
+    transition: opacity 0.2s ease, transform 0.2s ease, visibility 0s linear 0.2s;
+    z-index: 20;
+  }
+
+  .pod-dropdown.is-open .pod-dropdown-menu{
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+    transition: opacity 0.2s ease, transform 0.2s ease;
+  }
+
+  .pod-option{
+    padding: 10px 14px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background 0.15s ease;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .pod-option:hover{
+    background: var(--bg-3);
+  }
+
+  .pod-option.is-active{
+    background: var(--blue-soft);
+    color: var(--blue);
+  }
+
+  /* ---------- NAVIGATION ---------- */
+  .sidebar-nav{
+    flex: 1;
+    padding: 20px 0;
+    overflow-y: auto;
+  }
+
+  .nav-section{
+    margin-bottom: 24px;
+  }
+
+  .nav-section-title{
+    font-size: 11.5px;
+    font-weight: 500;
+    color: var(--muted-2);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    padding: 0 20px;
+    margin-bottom: 8px;
+  }
+
+  .nav-item{
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 20px;
+    font-size: 14px;
+    color: var(--muted);
+    cursor: pointer;
+    transition: color 0.2s ease, background 0.15s ease;
+  }
+
+  .nav-item:hover{
+    color: var(--ink);
+    background: var(--bg-3);
+  }
+
+  .nav-item.is-active{
+    color: var(--blue);
+    background: var(--blue-soft);
+  }
+
+  .nav-item i{
+    width: 18px;
+    height: 18px;
+  }
+
+  .nav-item.admin-only{
+    display: none;
+  }
+
+  .nav-item.admin-only.is-visible{
+    display: flex;
+  }
+
+  /* ---------- USER PROFILE ---------- */
+  .sidebar-footer{
+    padding: 16px 20px;
+    border-top: 1px solid var(--line);
+  }
+
+  .user-profile{
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    position: relative;
+  }
+
+  .user-avatar{
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: var(--blue);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 13px;
+    font-weight: 500;
+    flex-shrink: 0;
+  }
+
+  .user-info{
+    flex: 1;
+    min-width: 0;
+  }
+
+  .user-name{
+    font-size: 14px;
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .user-email{
+    font-size: 12px;
+    color: var(--muted-2);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .kebab-btn{
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: none;
+    background: transparent;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: var(--muted);
+    transition: background 0.2s ease, color 0.2s ease;
+  }
+
+  .kebab-btn:hover{
+    background: var(--bg-3);
+    color: var(--ink);
+  }
+
+  .kebab-btn i{
+    width: 18px;
+    height: 18px;
+  }
+
+  .kebab-menu{
+    position: absolute;
+    bottom: calc(100% + 8px);
+    right: 0;
+    background: var(--bg-2);
+    border: 1px solid var(--line-strong);
+    border-radius: 12px;
+    box-shadow: 0 8px 30px rgba(21,25,34,0.15);
+    min-width: 180px;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(8px);
+    transition: opacity 0.2s ease, transform 0.2s ease, visibility 0s linear 0.2s;
+    z-index: 20;
+  }
+
+  .kebab-menu.is-open{
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+    transition: opacity 0.2s ease, transform 0.2s ease;
+  }
+
+  .kebab-option{
+    padding: 10px 16px;
+    font-size: 14px;
+    color: var(--ink);
+    cursor: pointer;
+    transition: background 0.15s ease;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .kebab-option:hover{
+    background: var(--bg-3);
+  }
+
+  .kebab-option i{
+    width: 16px;
+    height: 16px;
+    color: var(--muted);
+  }
+
+  .kebab-divider{
+    height: 1px;
+    background: var(--line);
+    margin: 4px 0;
+  }
+
+  /* ---------- MAIN CONTENT ---------- */
+  .main-content{
+    flex: 1;
+    margin-left: 280px;
+    padding: 32px 40px;
+  }
+
+  .content-header{
+    margin-bottom: 32px;
+  }
+
+  .content-header h1{
+    font-size: 32px;
+    margin-bottom: 8px;
+  }
+
+  .content-header p{
+    color: var(--muted);
+    font-size: 15px;
+  }
+
+  /* ---------- LOADING ---------- */
+  .loading{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 200px;
+    color: var(--muted);
+  }
+
+  /* ---------- RESPONSIVE ---------- */
+  @media (max-width: 768px){
+    .sidebar{
+      transform: translateX(-100%);
+      transition: transform 0.3s ease;
+    }
+    .sidebar.is-open{
+      transform: translateX(0);
+    }
+    .main-content{
+      margin-left: 0;
+      padding: 20px;
+    }
+  }
+</style>
+</head>
+<body>
+
+<div class="dashboard">
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <!-- Logo -->
+    <div class="sidebar-header">
+      <div class="sidebar-logo">
+        <i data-lucide="link"></i>
+        Knot
+      </div>
+    </div>
+
+    <!-- Pod Selector -->
+    <div class="pod-selector">
+      <span class="pod-selector-label">Current Pod</span>
+      <div class="pod-dropdown" id="podDropdown">
+        <button class="pod-dropdown-btn" id="podDropdownBtn">
+          <span class="pod-name" id="currentPodName">Loading...</span>
+          <i data-lucide="chevron-down" style="width: 16px; height: 16px;"></i>
+        </button>
+        <div class="pod-dropdown-menu" id="podDropdownMenu">
+          <!-- Pod options will be populated by JS -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="sidebar-nav">
+      <div class="nav-section">
+        <div class="nav-section-title">Pod</div>
+        <div class="nav-item is-active" data-nav="overview">
+          <i data-lucide="layout-dashboard"></i>
+          Overview
+        </div>
+        <div class="nav-item" data-nav="members">
+          <i data-lucide="users"></i>
+          Members
+        </div>
+        <div class="nav-item" data-nav="check-ins">
+          <i data-lucide="check-square"></i>
+          Check-ins
+        </div>
+        <div class="nav-item" data-nav="streak">
+          <i data-lucide="flame"></i>
+          Streak
+        </div>
+      </div>
+
+      <div class="nav-section">
+        <div class="nav-section-title">Settings</div>
+        <div class="nav-item admin-only" data-nav="pod-settings">
+          <i data-lucide="settings"></i>
+          Pod Settings
+        </div>
+        <div class="nav-item admin-only" data-nav="invite">
+          <i data-lucide="user-plus"></i>
+          Invite Members
+        </div>
+      </div>
+    </nav>
+
+    <!-- User Profile -->
+    <div class="sidebar-footer">
+      <div class="user-profile">
+        <div class="user-avatar" id="userAvatar">?</div>
+        <div class="user-info">
+          <div class="user-name" id="userName">Loading...</div>
+          <div class="user-email" id="userEmail">Loading...</div>
+        </div>
+        <button class="kebab-btn" id="kebabBtn">
+          <i data-lucide="more-vertical"></i>
+        </button>
+        <div class="kebab-menu" id="kebabMenu">
+          <div class="kebab-option" data-action="profile">
+            <i data-lucide="user"></i>
+            Profile
+          </div>
+          <div class="kebab-option" data-action="account">
+            <i data-lucide="settings"></i>
+            Account Settings
+          </div>
+          <div class="kebab-divider"></div>
+          <div class="kebab-option" data-action="logout">
+            <i data-lucide="log-out"></i>
+            Log Out
+          </div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <div class="content-header">
+      <h1 id="pageTitle">Overview</h1>
+      <p id="pageSubtitle">View your pod's progress and activity</p>
+    </div>
+    <div id="contentArea">
+      <div class="loading">Loading...</div>
+    </div>
+  </main>
+</div>
+
+<script>
+  (function(){
+    var SupabaseClient = null;
+    var currentUser = null;
+    var currentPod = null;
+    var userPods = [];
+    var isAdmin = false;
+
+    function getSupabaseClient(){
+      if(SupabaseClient) return SupabaseClient;
+      
+      try{
+        if(typeof supabase === 'undefined'){
+          throw new Error('Supabase not loaded');
+        }
+        SupabaseClient = supabase.createClient(
+          'https://mfjtdrqvmuwtoarkiezi.supabase.co',
+          'sb_publishable_SPhsUI31nYbrrLjPBAaRBw_OkWQ2_Xn'
+        );
+        return SupabaseClient;
+      }catch(err){
+        console.error('Failed to initialize Supabase:', err);
+        return null;
+      }
+    }
+
+    async function checkAuth(){
+      var client = getSupabaseClient();
+      if(!client){
+        window.location.href = 'index.html';
+        return;
+      }
+
+      var { data: { session }, error } = await client.auth.getSession();
+      
+      if(error || !session){
+        window.location.href = 'index.html';
+        return;
+      }
+
+      currentUser = session.user;
+      await loadUserData();
+      await loadUserPods();
+    }
+
+    async function loadUserData(){
+      var client = getSupabaseClient();
+      var displayName = currentUser.user_metadata?.display_name || currentUser.email?.split('@')[0] || 'User';
+      
+      document.getElementById('userName').textContent = displayName;
+      document.getElementById('userEmail').textContent = currentUser.email;
+      document.getElementById('userAvatar').textContent = displayName.charAt(0).toUpperCase();
+    }
+
+    async function loadUserPods(){
+      var client = getSupabaseClient();
+      
+      var { data: pods, error } = await client
+        .from('pod_members')
+        .select(`
+          pod_id,
+          role,
+          pods (
+            id,
+            name,
+            invite_code
+          )
+        `)
+        .eq('user_id', currentUser.id);
+
+      if(error){
+        console.error('Error loading pods:', error);
+        return;
+      }
+
+      userPods = pods.map(function(p){
+        return {
+          id: p.pods.id,
+          name: p.pods.name,
+          inviteCode: p.pods.invite_code,
+          role: p.role
+        };
+      });
+
+      if(userPods.length > 0){
+        currentPod = userPods[0];
+        isAdmin = currentPod.role === 'admin';
+        updatePodSelector();
+        updateAdminVisibility();
+      }else{
+        window.location.href = 'index.html';
+      }
+    }
+
+    function updatePodSelector(){
+      document.getElementById('currentPodName').textContent = currentPod.name;
+      
+      var menu = document.getElementById('podDropdownMenu');
+      menu.innerHTML = '';
+
+      userPods.forEach(function(pod){
+        var option = document.createElement('div');
+        option.className = 'pod-option' + (pod.id === currentPod.id ? ' is-active' : '');
+        option.textContent = pod.name;
+        option.addEventListener('click', function(){
+          switchPod(pod);
+        });
+        menu.appendChild(option);
+      });
+    }
+
+    function updateAdminVisibility(){
+      var adminItems = document.querySelectorAll('.nav-item.admin-only');
+      adminItems.forEach(function(item){
+        if(isAdmin){
+          item.classList.add('is-visible');
+        }else{
+          item.classList.remove('is-visible');
+        }
+      });
+    }
+
+    async function switchPod(pod){
+      currentPod = pod;
+      isAdmin = pod.role === 'admin';
+      updatePodSelector();
+      updateAdminVisibility();
+      document.getElementById('podDropdown').classList.remove('is-open');
+    }
+
+    // Dropdown toggles
+    document.getElementById('podDropdownBtn').addEventListener('click', function(e){
+      e.stopPropagation();
+      document.getElementById('podDropdown').classList.toggle('is-open');
+      document.getElementById('kebabMenu').classList.remove('is-open');
+    });
+
+    document.getElementById('kebabBtn').addEventListener('click', function(e){
+      e.stopPropagation();
+      document.getElementById('kebabMenu').classList.toggle('is-open');
+      document.getElementById('podDropdown').classList.remove('is-open');
+    });
+
+    // Close dropdowns on outside click
+    document.addEventListener('click', function(){
+      document.getElementById('podDropdown').classList.remove('is-open');
+      document.getElementById('kebabMenu').classList.remove('is-open');
+    });
+
+    // Navigation
+    document.querySelectorAll('.nav-item').forEach(function(item){
+      item.addEventListener('click', function(){
+        document.querySelectorAll('.nav-item').forEach(function(i){ i.classList.remove('is-active'); });
+        item.classList.add('is-active');
+        
+        var nav = item.dataset.nav;
+        navigateTo(nav);
+      });
+    });
+
+    function navigateTo(nav){
+      var title = nav.charAt(0).toUpperCase() + nav.slice(1).replace('-', ' ');
+      document.getElementById('pageTitle').textContent = title;
+      document.getElementById('contentArea').innerHTML = '<div class="loading">Loading...</div>';
+      
+      // Load content based on nav
+      setTimeout(function(){
+        document.getElementById('contentArea').innerHTML = '<p style="color: var(--muted);">' + title + ' content coming soon...</p>';
+      }, 300);
+    }
+
+    // Kebab menu actions
+    document.querySelectorAll('.kebab-option').forEach(function(option){
+      option.addEventListener('click', function(){
+        var action = option.dataset.action;
+        
+        if(action === 'logout'){
+          handleLogout();
+        }else if(action === 'profile'){
+          navigateTo('profile');
+        }else if(action === 'account'){
+          navigateTo('account-settings');
+        }
+        
+        document.getElementById('kebabMenu').classList.remove('is-open');
+      });
+    });
+
+    async function handleLogout(){
+      var client = getSupabaseClient();
+      await client.auth.signOut();
+      window.location.href = 'index.html';
+    }
+
+    // Initialize Lucide icons
+    if(typeof lucide !== 'undefined'){
+      lucide.createIcons();
+    }
+
+    // Check auth on load
+    checkAuth();
+  })();
+</script>
+
+</body>
+</html>

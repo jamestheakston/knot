@@ -1329,8 +1329,10 @@
         // Verify invite code and join pod
         // This would query your pods table to find the pod with this invite code
         // Then add the user to the pod_members table
-        showToast('Successfully joined pod! (Connect to backend to complete pod joining)');
-        closeModal();
+        showToast('Successfully joined pod!');
+        setTimeout(function(){
+          window.location.href = 'dashboard.html';
+        }, 1000);
       }catch(err){
         console.error('Error:', err);
         showToast('Error: ' + err.message);
@@ -1434,7 +1436,9 @@
         if(memberError) throw memberError;
 
         showToast('Pod created successfully! Invite code: ' + podData.invite_code);
-        closeModal();
+        setTimeout(function(){
+          window.location.href = 'dashboard.html';
+        }, 1000);
       }catch(err){
         console.error('Error:', err);
         showToast('Error: ' + err.message);
