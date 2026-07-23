@@ -2224,14 +2224,28 @@
 
     async function handlePodJoinFromCode(code){
       var client = getSupabaseClient();
-      if(!client) return;
+      if(!client){
+        console.error('No Supabase client available');
+        return;
+      }
+
+      console.log('handlePodJoinFromCode called with code:', code);
+      console.log('Current user:', currentUser);
 
       try{
         // Verify the invite code exists using the security definer function
         var { data: exists, error: checkError } = await client
           .rpc('check_invite_code_exists', { invite_code_param: code });
 
-        if(checkError || !exists){
+        console.log('Invite code check result:', exists, checkError);
+
+        if(checkError){
+          console.error('Invite code check error:', checkError);
+          alert('Error checking invite code: ' + checkError.message);
+          return;
+        }
+
+        if(!exists){
           console.error('Invalid invite code:', code);
           alert('Invalid invite code. Please check and try again.');
           return;
@@ -2244,7 +2258,15 @@
           .eq('invite_code', code)
           .maybeSingle();
 
-        if(podError || !pod){
+        console.log('Pod lookup result:', pod, podError);
+
+        if(podError){
+          console.error('Pod lookup error:', podError);
+          alert('Error finding pod: ' + podError.message);
+          return;
+        }
+
+        if(!pod){
           console.error('Pod not found for code:', code);
           alert('Invalid invite code. Please check and try again.');
           return;
@@ -2258,6 +2280,12 @@
           .eq('user_id', currentUser.id)
           .maybeSingle();
 
+        console.log('Existing member check:', existingMember, memberError);
+
+        if(memberError){
+          console.error('Member check error:', memberError);
+        }
+
         if(existingMember){
           console.log('Already a member of this pod');
           alert('You are already a member of this pod.');
@@ -2265,25 +2293,37 @@
         }
 
         // Join the pod
-        var { error: joinError } = await client
+        console.log('Attempting to join pod:', pod.id, 'for user:', currentUser.id);
+        var { data: joinData, error: joinError } = await client
           .from('pod_members')
           .insert({
             pod_id: pod.id,
             user_id: currentUser.id,
             role: 'member'
-          });
+          })
+          .select()
+          .single();
 
-        if(joinError) throw joinError;
+        console.log('Join result:', joinData, joinError);
+
+        if(joinError){
+          console.error('Join error:', joinError);
+          throw joinError;
+        }
 
         console.log('Successfully joined pod:', pod.name);
         
         // Reload pods to show the newly joined pod
         await loadUserPods();
         
+        console.log('User pods after reload:', userPods);
+        
         if(userPods.length > 0){
           currentPod = userPods.find(function(p){
             return p.id === pod.id;
           });
+          
+          console.log('Current pod set to:', currentPod);
           
           if(currentPod){
             isAdmin = currentPod.role === 'admin';
@@ -2291,6 +2331,8 @@
             updateAdminVisibility();
             navigateTo('overview');
           }
+        }else{
+          console.error('No pods found after joining');
         }
         
         alert('Successfully joined ' + pod.name + '!');
