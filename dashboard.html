@@ -883,6 +883,7 @@
         while(retries < maxRetries){
           try{
             var inviteCode = generateInviteCode();
+            console.log('Attempt ' + (retries + 1) + ' with invite code:', inviteCode);
             var result = await client
               .from('pods')
               .insert({
@@ -899,8 +900,10 @@
             if(podError) throw podError;
             break;
           }catch(err){
+            console.error('Pod creation error on attempt ' + (retries + 1) + ':', err.code, err.message, err);
             if((err.code === '23505' || err.code === '409' || err.code === 'PGRST116') && retries < maxRetries - 1){
               retries++;
+              console.log('Retrying...');
               continue;
             }
             throw err;
