@@ -1009,8 +1009,7 @@
       
       createOption.addEventListener('click', function(){
         if(canCreate){
-          // TODO: Open create pod modal
-          alert('Create pod modal coming soon!');
+          window.location.href = 'index.html?openmodal=true';
         }else{
           showUpgradeModal();
         }
