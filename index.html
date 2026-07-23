@@ -10,9 +10,8 @@
 <meta name="description" content="Knot — A habit, held by your pod. Join a pod and start building better habits together.">
 <meta name="google-site-verification" content="y6YHbLqPwL8Tp5etzfWito5BOlt5b8nL32ufh-iHzcA" />
 <link rel="manifest" href="/manifest.json">
+<link rel="icon" type="image/svg+xml" href="/icon.svg">
 <link rel="apple-touch-icon" href="/icon-192x192.png">
-<link rel="icon" type="image/png" sizes="192x192" href="/icon-192x192.png">
-<link rel="icon" type="image/png" sizes="512x512" href="/icon-512x512.png">
 <title>Knot — A habit, held by your pod</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -2071,13 +2070,25 @@
       if(type === 'create'){
         content.innerHTML = `
           <span class="kicker" style="font-family: 'IBM Plex Mono', monospace; font-size: 11.5px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--blue); display: block; margin-bottom: 12px;">START A POD</span>
-          <h2 style="font-family: 'Instrument Serif', serif; font-size: 32px; font-weight: 400; margin-bottom: 16px; color: var(--ink);">Name your habit</h2>
+          <h2 style="font-family: 'Instrument Serif', serif; font-size: 32px; font-weight: 400; margin-bottom: 16px; color: var(--ink);">Name your pod</h2>
           <p style="color: var(--muted); margin-bottom: 24px;">What are you all keeping together?</p>
           
+          <input type="text" id="pwa-pod-name" placeholder="e.g., Morning Writers" style="width: 100%; padding: 16px; border: 1px solid var(--line); border-radius: 12px; font-size: 16px; margin-bottom: 16px; background: var(--bg-2); color: var(--ink);">
+          
+          <span class="kicker" style="font-family: 'IBM Plex Mono', monospace; font-size: 11.5px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--blue); display: block; margin-bottom: 12px; margin-top: 24px;">HABIT NAME</span>
           <input type="text" id="pwa-habit-name" placeholder="e.g., No-scroll mornings" style="width: 100%; padding: 16px; border: 1px solid var(--line); border-radius: 12px; font-size: 16px; margin-bottom: 16px; background: var(--bg-2); color: var(--ink);">
           
           <span class="kicker" style="font-family: 'IBM Plex Mono', monospace; font-size: 11.5px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--blue); display: block; margin-bottom: 12px; margin-top: 24px;">DAILY BAR</span>
-          <input type="text" id="pwa-habit-bar" placeholder="e.g., 500 words, 30 min workout" style="width: 100%; padding: 16px; border: 1px solid var(--line); border-radius: 12px; font-size: 16px; margin-bottom: 24px; background: var(--bg-2); color: var(--ink);">
+          <input type="text" id="pwa-habit-bar" placeholder="e.g., 500 words, 30 min workout" style="width: 100%; padding: 16px; border: 1px solid var(--line); border-radius: 12px; font-size: 16px; margin-bottom: 16px; background: var(--bg-2); color: var(--ink);">
+          
+          <span class="kicker" style="font-family: 'IBM Plex Mono', monospace; font-size: 11.5px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--blue); display: block; margin-bottom: 12px; margin-top: 24px;">YOUR NAME</span>
+          <input type="text" id="pwa-name" placeholder="Your name" style="width: 100%; padding: 16px; border: 1px solid var(--line); border-radius: 12px; font-size: 16px; margin-bottom: 16px; background: var(--bg-2); color: var(--ink);">
+          
+          <span class="kicker" style="font-family: 'IBM Plex Mono', monospace; font-size: 11.5px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--blue); display: block; margin-bottom: 12px; margin-top: 24px;">EMAIL</span>
+          <input type="email" id="pwa-email" placeholder="you@example.com" style="width: 100%; padding: 16px; border: 1px solid var(--line); border-radius: 12px; font-size: 16px; margin-bottom: 16px; background: var(--bg-2); color: var(--ink);">
+          
+          <span class="kicker" style="font-family: 'IBM Plex Mono', monospace; font-size: 11.5px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--blue); display: block; margin-bottom: 12px; margin-top: 24px;">PASSWORD</span>
+          <input type="password" id="pwa-password" placeholder="Create a password" style="width: 100%; padding: 16px; border: 1px solid var(--line); border-radius: 12px; font-size: 16px; margin-bottom: 24px; background: var(--bg-2); color: var(--ink);">
           
           <button id="pwa-create-submit" style="width: 100%; padding: 18px 32px; font-size: 16px; font-weight: 500; background: var(--blue); color: white; border: none; border-radius: 12px; cursor: pointer;">
             Create Pod
@@ -2093,12 +2104,12 @@
           
           <input type="text" id="pwa-invite-code" placeholder="6-character code" maxlength="6" style="width: 100%; padding: 16px; border: 1px solid var(--line); border-radius: 12px; font-size: 16px; margin-bottom: 24px; background: var(--bg-2); color: var(--ink); text-transform: uppercase; letter-spacing: 2px; text-align: center;">
           
-          <button id="pwa-join-submit" style="width: 100%; padding: 18px 32px; font-size: 16px; font-weight: 500; background: var(--blue); color: white; border: none; border-radius: 12px; cursor: pointer;">
-            Join Pod
+          <button id="pwa-join-verify" style="width: 100%; padding: 18px 32px; font-size: 16px; font-weight: 500; background: var(--blue); color: white; border: none; border-radius: 12px; cursor: pointer;">
+            Verify Code
           </button>
         `;
         
-        document.getElementById('pwa-join-submit').addEventListener('click', handlePWAJoin);
+        document.getElementById('pwa-join-verify').addEventListener('click', handlePWAJoinVerify);
       }
       
       console.log('Content set, starting animation');
@@ -2108,6 +2119,47 @@
       flow.style.left = '0';
       
       console.log('Animation complete');
+    }
+    
+    async function handlePWAJoinVerify(){
+      var code = document.getElementById('pwa-invite-code').value.toUpperCase();
+      
+      if(!code || code.length !== 6){
+        alert('Please enter a valid 6-character code');
+        return;
+      }
+      
+      // Verify code and show signup form
+      var isValid = await checkInviteCode(code);
+      if(!isValid){
+        alert('Invalid invite code. Please check and try again.');
+        return;
+      }
+      
+      // Show signup form
+      var content = document.getElementById('pwa-flow-content');
+      content.innerHTML = `
+        <span class="kicker" style="font-family: 'IBM Plex Mono', monospace; font-size: 11.5px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--blue); display: block; margin-bottom: 12px;">JOIN A POD</span>
+        <h2 style="font-family: 'Instrument Serif', serif; font-size: 32px; font-weight: 400; margin-bottom: 16px; color: var(--ink);">Create your account</h2>
+        <p style="color: var(--muted); margin-bottom: 24px;">One last step before you join the pod.</p>
+        
+        <span class="kicker" style="font-family: 'IBM Plex Mono', monospace; font-size: 11.5px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--blue); display: block; margin-bottom: 12px;">YOUR NAME</span>
+        <input type="text" id="pwa-join-name" placeholder="Your name" style="width: 100%; padding: 16px; border: 1px solid var(--line); border-radius: 12px; font-size: 16px; margin-bottom: 16px; background: var(--bg-2); color: var(--ink);">
+        
+        <span class="kicker" style="font-family: 'IBM Plex Mono', monospace; font-size: 11.5px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--blue); display: block; margin-bottom: 12px; margin-top: 24px;">EMAIL</span>
+        <input type="email" id="pwa-join-email" placeholder="you@example.com" style="width: 100%; padding: 16px; border: 1px solid var(--line); border-radius: 12px; font-size: 16px; margin-bottom: 16px; background: var(--bg-2); color: var(--ink);">
+        
+        <span class="kicker" style="font-family: 'IBM Plex Mono', monospace; font-size: 11.5px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--blue); display: block; margin-bottom: 12px; margin-top: 24px;">PASSWORD</span>
+        <input type="password" id="pwa-join-password" placeholder="Create a password" style="width: 100%; padding: 16px; border: 1px solid var(--line); border-radius: 12px; font-size: 16px; margin-bottom: 24px; background: var(--bg-2); color: var(--ink);">
+        
+        <input type="hidden" id="pwa-join-code" value="${code}">
+        
+        <button id="pwa-join-submit" style="width: 100%; padding: 18px 32px; font-size: 16px; font-weight: 500; background: var(--blue); color: white; border: none; border-radius: 12px; cursor: pointer;">
+          Join Pod
+        </button>
+      `;
+      
+      document.getElementById('pwa-join-submit').addEventListener('click', handlePWAJoin);
     }
     
     function hidePWAFlow(){
@@ -2123,48 +2175,111 @@
     }
     
     async function handlePWACreate(){
+      var podName = document.getElementById('pwa-pod-name').value;
       var habitName = document.getElementById('pwa-habit-name').value;
       var habitBar = document.getElementById('pwa-habit-bar').value;
+      var name = document.getElementById('pwa-name').value;
+      var email = document.getElementById('pwa-email').value;
+      var password = document.getElementById('pwa-password').value;
       
-      if(!habitName || !habitBar){
-        alert('Please fill in both fields');
+      if(!podName || !habitName || !name || !email || !password){
+        alert('Please fill in all required fields');
         return;
       }
       
-      // Open modal with pre-filled values
-      openModal();
-      setTimeout(function(){
-        var startBtn = document.querySelector('[data-step="choice"] .option-card:last-child');
-        if(startBtn) startBtn.click();
-        
+      var client = getSupabaseClient();
+      if(!client){
+        alert('Authentication service unavailable. Please try again later.');
+        return;
+      }
+      
+      var btn = document.getElementById('pwa-create-submit');
+      btn.disabled = true;
+      btn.textContent = 'Creating...';
+      
+      try{
+        // Sign up user
+        var { data: authData, error: authError } = await client.auth.signUp({
+          email: email,
+          password: password,
+          options: {
+            data: {
+              display_name: name
+            }
+          }
+        });
+
+        if(authError) throw authError;
+
+        // Store pod data in localStorage for dashboard to create
+        var podDataToStore = {
+          podName: podName,
+          habitName: habitName,
+          habitDescription: habitBar,
+          frequency: 'Daily'
+        };
+        localStorage.setItem('pendingPodCreation', JSON.stringify(podDataToStore));
+
+        alert('Account created! Redirecting to dashboard...');
         setTimeout(function(){
-          var nameInput = document.querySelector('[data-step="start"] input[type="text"]');
-          var barInput = document.querySelector('[data-step="start"] textarea');
-          if(nameInput) nameInput.value = habitName;
-          if(barInput) barInput.value = habitBar;
-        }, 200);
-      }, 100);
+          window.location.href = 'dashboard.html?createpod=true';
+        }, 1000);
+      }catch(err){
+        console.error('Error creating pod:', err);
+        alert('Error: ' + (err.message || 'Failed to create account. Please try again.'));
+        btn.disabled = false;
+        btn.textContent = 'Create Pod';
+      }
     }
     
     async function handlePWAJoin(){
-      var code = document.getElementById('pwa-invite-code').value.toUpperCase();
+      var code = document.getElementById('pwa-join-code').value;
+      var name = document.getElementById('pwa-join-name').value;
+      var email = document.getElementById('pwa-join-email').value;
+      var password = document.getElementById('pwa-join-password').value;
       
-      if(!code || code.length !== 6){
-        alert('Please enter a valid 6-character code');
+      if(!name || !email || !password){
+        alert('Please fill in all required fields');
         return;
       }
       
-      // Open modal with pre-filled code
-      openModal();
-      setTimeout(function(){
-        var joinBtn = document.querySelector('[data-step="choice"] .option-card:first-child');
-        if(joinBtn) joinBtn.click();
-        
+      var client = getSupabaseClient();
+      if(!client){
+        alert('Authentication service unavailable. Please try again later.');
+        return;
+      }
+      
+      var btn = document.getElementById('pwa-join-submit');
+      btn.disabled = true;
+      btn.textContent = 'Joining...';
+      
+      try{
+        // Sign up user
+        var { data: authData, error: authError } = await client.auth.signUp({
+          email: email,
+          password: password,
+          options: {
+            data: {
+              display_name: name
+            }
+          }
+        });
+
+        if(authError) throw authError;
+
+        // Store invite code in localStorage for dashboard to use
+        localStorage.setItem('pendingJoinCode', code);
+
+        alert('Account created! Redirecting to dashboard...');
         setTimeout(function(){
-          var codeInput = document.querySelector('[data-step="join"] input[type="text"]');
-          if(codeInput) codeInput.value = code;
-        }, 200);
-      }, 100);
+          window.location.href = 'dashboard.html?joinpod=true';
+        }, 1000);
+      }catch(err){
+        console.error('Error joining pod:', err);
+        alert('Error: ' + (err.message || 'Failed to create account. Please try again.'));
+        btn.disabled = false;
+        btn.textContent = 'Join Pod';
+      }
     }
 
     // Run checks on page load
