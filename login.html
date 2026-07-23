@@ -339,7 +339,7 @@
   <div class="login-container">
     <div class="login-header">
       <h1>Welcome back</h1>
-      <p>Don't have an account? <a href="index.html?openmodal=true">Start a pod or join one</a></p>
+      <p>Don't have an account? You must <a href="index.html?openmodal=true">create an account</a> to start a pod or join one.</p>
     </div>
 
     <button class="social-btn github-btn" id="githubLoginBtn">
@@ -474,7 +474,16 @@
         }, 500);
       }catch(err){
         console.error('Login error:', err);
-        showToast('Error: ' + err.message);
+        var message = err.message;
+        
+        // Check if error indicates user doesn't exist
+        if(message.toLowerCase().includes('invalid login credentials') || 
+           message.toLowerCase().includes('user not found') ||
+           message.toLowerCase().includes('email not confirmed')){
+          message = 'Account not found. You must create an account to start a pod or join one.';
+        }
+        
+        showToast('Error: ' + message);
         setButtonLoading(btn, false);
       }
     });
