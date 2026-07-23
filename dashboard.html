@@ -854,6 +854,20 @@
       var shouldCreatePod = urlParams.get('createpod');
       
       if(shouldCreatePod === 'true'){
+        // Refresh session to ensure we have the latest user data
+        var client = getSupabaseClient();
+        if(client){
+          var { data: { session }, error: sessionError } = await client.auth.getSession();
+          if(sessionError){
+            console.error('Error getting session:', sessionError);
+            return;
+          }
+          if(session && session.user){
+            currentUser = session.user;
+            console.log('Refreshed user session:', currentUser.id);
+          }
+        }
+
         var pendingPodData = localStorage.getItem('pendingPodCreation');
         if(pendingPodData){
           try{
@@ -875,6 +889,15 @@
       if(!client) return;
 
       try{
+        // Ensure user is authenticated
+        if(!currentUser || !currentUser.id){
+          console.error('User not authenticated, cannot create pod');
+          alert('You must be logged in to create a pod. Please refresh the page.');
+          return;
+        }
+
+        console.log('Creating pod for user:', currentUser.id);
+
         // Create pod with retry on invite code collision
         var podResult, podError;
         var retries = 0;
