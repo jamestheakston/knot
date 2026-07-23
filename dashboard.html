@@ -2069,7 +2069,7 @@
         updatePodSelector();
         updateAdminVisibility();
         
-        // Handle PWA shortcut actions
+        // Handle shortcut actions
         if(action === 'checkin'){
           navigateTo('check-ins');
           // Remove action parameter from URL
@@ -4100,19 +4100,6 @@
 
     // Check auth on load
     checkAuth();
-
-    // Register Service Worker for PWA
-    if('serviceWorker' in navigator){
-      window.addEventListener('load', function(){
-        navigator.serviceWorker.register('/sw.js')
-          .then(function(registration){
-            console.log('[PWA] Service Worker registered with scope:', registration.scope);
-          })
-          .catch(function(error){
-            console.log('[PWA] Service Worker registration failed:', error);
-          });
-      });
-    }
   });
 </script>
 
