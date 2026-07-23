@@ -178,7 +178,12 @@ CREATE POLICY "Pod admins can update habits"
 DROP POLICY IF EXISTS "Users can view pod members for pods they are in" ON pod_members;
 CREATE POLICY "Users can view pod members for pods they are in"
   ON pod_members FOR SELECT
-  USING (user_id = auth.uid());
+  USING (
+    user_id = auth.uid() OR
+    pod_id IN (
+      SELECT pod_id FROM pod_members WHERE user_id = auth.uid()
+    )
+  );
 
 DROP POLICY IF EXISTS "Users can insert themselves into a pod via invite code" ON pod_members;
 CREATE POLICY "Users can insert themselves into a pod via invite code"
