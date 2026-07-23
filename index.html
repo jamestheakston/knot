@@ -440,17 +440,15 @@
     position: fixed;
     inset: 0;
     z-index: 100;
-    display: flex;
+    display: none;
     align-items: center;
     justify-content: center;
     padding: 24px;
     background: rgba(21,25,34,0.5);
     backdrop-filter: blur(6px);
-    opacity: 0;
-    visibility: hidden;
-    transition: opacity 0.28s ease, visibility 0s linear 0.28s;
   }
   .modal-overlay.is-open{
+    display: flex;
     opacity: 1;
     visibility: visible;
     transition: opacity 0.28s ease;
