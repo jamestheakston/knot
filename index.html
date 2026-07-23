@@ -2063,6 +2063,10 @@
       var flow = document.getElementById('pwa-flow');
       var content = document.getElementById('pwa-flow-content');
       
+      console.log('showPWAFlow called with type:', type);
+      console.log('flow element:', flow);
+      console.log('content element:', content);
+      
       // Set content based on type
       if(type === 'create'){
         content.innerHTML = `
@@ -2097,21 +2101,23 @@
         document.getElementById('pwa-join-submit').addEventListener('click', handlePWAJoin);
       }
       
-      // Slide animation
-      home.style.transform = 'translateX(-20%)';
+      console.log('Content set, starting animation');
+      
+      // Slide animation - use left instead of transform
       home.style.opacity = '0';
-      setTimeout(function(){
-        flow.style.transform = 'translateX(0)';
-      }, 100);
+      flow.style.left = '0';
+      
+      console.log('Animation complete');
     }
     
     function hidePWAFlow(){
       var home = document.getElementById('pwa-home');
       var flow = document.getElementById('pwa-flow');
       
-      flow.style.transform = 'translateX(100%)';
+      console.log('hidePWAFlow called');
+      
+      flow.style.left = '100%';
       setTimeout(function(){
-        home.style.transform = 'translateX(0)';
         home.style.opacity = '1';
       }, 100);
     }
