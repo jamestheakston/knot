@@ -1,0 +1,1496 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Knot — A habit, held by your pod</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Work+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@latest"></script>
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+<style>
+  :root{
+    --bg: #F7F8FB;
+    --bg-2: #FFFFFF;
+    --bg-3: #EEF1F6;
+    --ink: #151922;
+    --muted: #5B6472;
+    --muted-2: #8890A0;
+    --blue: #2A4BD7;
+    --blue-bright: #1B37AE;
+    --blue-soft: #EAEFFF;
+    --red: #C4432A;
+    --line: rgba(21,25,34,0.10);
+    --line-strong: rgba(21,25,34,0.18);
+  }
+
+  *{ box-sizing: border-box; }
+  html{ scroll-behavior: smooth; }
+  body{
+    margin:0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'Work Sans', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    line-height: 1.5;
+  }
+  h1,h2,h3{
+    font-family: 'Instrument Serif', serif;
+    font-weight: 400;
+    margin: 0;
+    letter-spacing: -0.01em;
+  }
+  a{ color: inherit; }
+  .mono{ font-family: 'IBM Plex Mono', monospace; }
+
+  ::selection{ background: var(--blue); color: #fff; }
+
+  :focus-visible{
+    outline: 2px solid var(--blue);
+    outline-offset: 3px;
+    border-radius: 4px;
+  }
+
+  .wrap{
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: 0 32px;
+  }
+
+  /* ---------- NAV ---------- */
+  nav{
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    background: rgba(247,248,251,0.85);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--line);
+  }
+  .nav-inner{
+    display:flex;
+    align-items:center;
+    justify-content: space-between;
+    padding: 20px 32px;
+    max-width: 1120px;
+    margin: 0 auto;
+  }
+  .logo{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    font-family:'Instrument Serif', serif;
+    font-size: 24px;
+    font-weight:400;
+  }
+  .logo-mark{
+    width: 22px; height: 22px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+  .nav-links{
+    display:flex;
+    align-items:center;
+    gap: 28px;
+  }
+  .nav-links a.text-link{
+    font-size: 14.5px;
+    color: var(--muted);
+    text-decoration:none;
+    transition: color 0.2s ease;
+  }
+  .nav-links a.text-link:hover{ color: var(--ink); }
+
+  .btn{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    gap: 8px;
+    padding: 11px 20px;
+    border-radius: 8px;
+    font-size: 14.5px;
+    font-weight: 500;
+    text-decoration:none;
+    cursor:pointer;
+    border: 1px solid transparent;
+    transition: transform 0.15s ease, background 0.2s ease, border-color 0.2s ease;
+    font-family: 'Work Sans', sans-serif;
+  }
+  .btn:active{ transform: scale(0.98); }
+  .btn-primary{
+    background: var(--blue);
+    color: #fff;
+  }
+  .btn-primary:hover{ background: var(--blue-bright); }
+  .btn-ghost{
+    background: transparent;
+    border-color: var(--line-strong);
+    color: var(--ink);
+  }
+  .btn-ghost:hover{ border-color: var(--blue); color: var(--blue); }
+
+  /* ---------- HERO ---------- */
+  .hero{
+    padding: 96px 32px 60px;
+    text-align:center;
+  }
+  .eyebrow{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12.5px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--blue-bright);
+    background: var(--blue-soft);
+    border: 1px solid rgba(42,75,215,0.22);
+    padding: 6px 14px;
+    border-radius: 100px;
+    margin-bottom: 28px;
+  }
+  .eyebrow .dot{
+    width:6px; height:6px; border-radius:50%;
+    background: var(--blue);
+  }
+  .hero h1{
+    font-size: clamp(42px, 6.5vw, 70px);
+    line-height: 1.08;
+    max-width: 800px;
+    margin: 0 auto;
+    font-weight: 400;
+  }
+  .hero h1 em{
+    font-style: italic;
+    color: var(--blue);
+  }
+  .hero p.sub{
+    max-width: 520px;
+    margin: 24px auto 0;
+    color: var(--muted);
+    font-size: 17px;
+  }
+  .hero-ctas{
+    display:flex;
+    gap:14px;
+    justify-content:center;
+    margin-top: 36px;
+    flex-wrap: wrap;
+  }
+  .hero-ctas .btn-primary{ padding: 13px 24px; font-size: 15px; }
+  .hero-ctas .btn-ghost{ padding: 13px 24px; font-size: 15px; }
+
+  /* ---------- CHAIN VISUAL ---------- */
+  .chain-stage{
+    margin: 68px auto 0;
+    max-width: 720px;
+    padding: 36px 20px 28px;
+    background: var(--bg-2);
+    border: 1px solid var(--line);
+    border-radius: 20px;
+  }
+  .chain-row{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+  .chain-svg{ width:100%; height:auto; display:block; }
+  .chain-caption{
+    display:flex;
+    justify-content:center;
+    gap: 10px;
+    margin-top: 18px;
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 12px;
+    color: var(--muted-2);
+  }
+  .chain-caption b{ color: var(--blue); font-weight:500; }
+
+  /* ---------- SECTION SHARED ---------- */
+  section{ padding: 88px 0; }
+  .section-head{
+    max-width: 560px;
+    margin-bottom: 56px;
+  }
+  .section-head .kicker{
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 12.5px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--muted-2);
+    margin-bottom: 14px;
+    display:block;
+  }
+  .section-head h2{
+    font-size: clamp(30px, 4.2vw, 42px);
+    line-height:1.15;
+  }
+  .section-head p{
+    color: var(--muted);
+    margin-top: 16px;
+    font-size: 16px;
+  }
+
+  /* ---------- HOW IT WORKS ---------- */
+  .steps{
+    border-top: 1px solid var(--line);
+  }
+  .step{
+    display:grid;
+    grid-template-columns: 90px 1fr;
+    gap: 28px;
+    padding: 36px 0;
+    border-bottom: 1px solid var(--line);
+    align-items: start;
+  }
+  .step-num{
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 15px;
+    color: var(--blue);
+    padding-top: 4px;
+  }
+  .step h3{
+    font-size: 24px;
+    margin-bottom: 8px;
+    font-weight: 400;
+  }
+  .step p{
+    color: var(--muted);
+    max-width: 520px;
+    margin:0;
+    font-size: 15.5px;
+  }
+
+  /* ---------- FEATURES ---------- */
+  .feature-grid{
+    display:grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1px;
+    background: var(--line);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    overflow:hidden;
+  }
+  .feature{
+    background: var(--bg-2);
+    padding: 32px 28px;
+  }
+  .feature-icon{
+    width: 34px; height: 34px;
+    margin-bottom: 20px;
+  }
+  .feature h3{
+    font-size: 19px;
+    margin-bottom: 10px;
+    font-weight: 400;
+  }
+  .feature p{
+    color: var(--muted);
+    font-size: 14.5px;
+    margin:0;
+  }
+
+  /* ---------- POD PREVIEW ---------- */
+  .pod-card{
+    background: var(--bg-2);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 36px;
+    display:grid;
+    grid-template-columns: 1.1fr 1fr;
+    gap: 40px;
+    align-items:center;
+  }
+  .pod-card-copy .kicker{
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--blue);
+    display:block;
+    margin-bottom: 12px;
+  }
+  .pod-card-copy h3{
+    font-size: 28px;
+    margin-bottom: 14px;
+    font-weight: 400;
+  }
+  .pod-card-copy p{
+    color: var(--muted);
+    font-size: 15px;
+    margin: 0 0 20px;
+  }
+  .pod-members{
+    display:flex;
+    flex-direction:column;
+    gap: 10px;
+  }
+  .member-row{
+    display:flex;
+    align-items:center;
+    gap: 12px;
+    background: var(--bg-3);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 12px 14px;
+  }
+  .avatar{
+    width: 30px; height:30px;
+    border-radius: 50%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 12px;
+    font-weight: 500;
+    flex-shrink:0;
+  }
+  .member-row .name{ font-size: 14px; flex:1; }
+  .member-row .status{
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 11.5px;
+    padding: 3px 9px;
+    border-radius: 100px;
+  }
+  .status.done{ background: var(--blue-soft); color: var(--blue-bright); }
+  .status.waiting{ background: rgba(21,25,34,0.06); color: var(--muted); }
+  .status.missed{ background: rgba(196,67,42,0.12); color: var(--red); }
+
+  /* ---------- CTA FOOTER ---------- */
+  .cta-band{
+    text-align:center;
+    padding: 100px 32px;
+    border-top: 1px solid var(--line);
+  }
+  .cta-band h2{
+    font-size: clamp(32px, 5.5vw, 48px);
+    max-width: 620px;
+    margin: 0 auto;
+    line-height: 1.15;
+    font-weight: 400;
+  }
+  .cta-band p{
+    color: var(--muted);
+    margin: 18px auto 32px;
+    max-width: 420px;
+  }
+
+  footer{
+    border-top: 1px solid var(--line);
+    padding: 28px 32px 40px;
+  }
+  .footer-inner{
+    max-width: 1120px;
+    margin: 0 auto;
+    display:flex;
+    justify-content: space-between;
+    align-items:center;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+  .footer-inner .logo{ font-size: 18px; }
+  .footer-inner p{
+    color: var(--muted-2);
+    font-size: 13px;
+    margin:0;
+  }
+
+  /* ---------- RESPONSIVE ---------- */
+  @media (max-width: 860px){
+    .feature-grid{ grid-template-columns: 1fr; }
+    .pod-card{ grid-template-columns: 1fr; }
+    .nav-links .text-link{ display:none; }
+  }
+  @media (max-width: 560px){
+    .hero{ padding: 72px 20px 40px; }
+    section{ padding: 64px 0; }
+    .step{ grid-template-columns: 1fr; gap: 8px; }
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *{ animation: none !important; transition: none !important; }
+  }
+
+  /* chain link draw-in */
+  .link-fill{
+    opacity: 0;
+    animation: fadein 0.4s ease forwards;
+  }
+  @keyframes fadein{ to{ opacity: 1; } }
+
+  /* ---------- MODAL ---------- */
+  .modal-overlay{
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    background: rgba(21,25,34,0.5);
+    backdrop-filter: blur(6px);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.28s ease, visibility 0s linear 0.28s;
+  }
+  .modal-overlay.is-open{
+    opacity: 1;
+    visibility: visible;
+    transition: opacity 0.28s ease;
+  }
+  .modal-panel{
+    position: relative;
+    width: 100%;
+    max-width: 580px;
+    background: var(--bg-2);
+    border-radius: 22px;
+    padding: 40px 40px 36px;
+    box-shadow: 0 40px 90px -24px rgba(21,25,34,0.4), 0 0 0 1px rgba(21,25,34,0.06);
+    transform: translateY(28px) scale(0.95);
+    opacity: 0;
+    transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.3s ease;
+  }
+  .modal-overlay.is-open .modal-panel{
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+  .modal-close{
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    border: 1px solid var(--line);
+    background: var(--bg-3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: var(--muted);
+    transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease;
+  }
+  .modal-close:hover{
+    background: var(--blue-soft);
+    color: var(--blue-bright);
+    transform: rotate(90deg);
+  }
+  .modal-eyebrow{
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--blue);
+    display: block;
+    margin-bottom: 14px;
+  }
+  .modal-head h2{
+    font-size: clamp(26px, 4vw, 32px);
+    line-height: 1.15;
+    max-width: 420px;
+  }
+  .modal-head p{
+    color: var(--muted);
+    font-size: 15px;
+    margin: 12px 0 0;
+  }
+  .modal-cards{
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-top: 30px;
+  }
+  .option-card{
+    position: relative;
+    text-align: left;
+    background: var(--bg-2);
+    border: 1px solid var(--line-strong);
+    border-radius: 16px;
+    padding: 24px 20px 22px;
+    cursor: pointer;
+    font-family: 'Work Sans', sans-serif;
+    color: var(--ink);
+    overflow: hidden;
+    opacity: 0;
+    transform: translateY(14px);
+    transition: transform 0.35s cubic-bezier(0.22,1,0.36,1), opacity 0.35s ease,
+                border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+  }
+  .modal-overlay.is-open .option-card{
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .modal-overlay.is-open .option-card:nth-child(1){ transition-delay: 0.12s; }
+  .modal-overlay.is-open .option-card:nth-child(2){ transition-delay: 0.19s; }
+  .option-card:hover{
+    border-color: var(--blue);
+    box-shadow: 0 14px 30px -16px rgba(42,75,215,0.35);
+    background: var(--blue-soft);
+  }
+  .option-card:active{ transform: scale(0.98); }
+  .option-icon{
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    background: var(--blue-soft);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 18px;
+    transition: background 0.2s ease;
+  }
+  .option-card:hover .option-icon{ background: #fff; }
+  .option-card h3{
+    font-size: 19px;
+    font-weight: 400;
+    margin-bottom: 6px;
+  }
+  .option-card p{
+    font-size: 13.5px;
+    color: var(--muted);
+    margin: 0;
+    line-height: 1.45;
+  }
+  .option-arrow{
+    position: absolute;
+    top: 22px;
+    right: 20px;
+    color: var(--muted-2);
+    transition: transform 0.25s cubic-bezier(0.22,1,0.36,1), color 0.2s ease;
+  }
+  .option-card:hover .option-arrow{
+    transform: translate(3px, -3px);
+    color: var(--blue);
+  }
+  .option-card.is-selected{
+    border-color: var(--blue);
+    background: var(--blue-soft);
+  }
+  .option-check{
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--blue);
+    border-radius: 15px;
+    opacity: 0;
+    transform: scale(0.8);
+    transition: opacity 0.22s ease, transform 0.22s cubic-bezier(0.34,1.56,0.64,1);
+    pointer-events: none;
+  }
+  .option-card.is-selected .option-check{
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  @media (max-width: 560px){
+    .modal-panel{ padding: 32px 24px 28px; }
+    .modal-cards{ grid-template-columns: 1fr; }
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .modal-overlay, .modal-panel, .option-card, .option-check{ transition: none !important; }
+  }
+
+  /* ---------- FORM STEPS ---------- */
+  .modal-step{
+    display: none;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+  }
+  .modal-step.is-active{
+    display: block;
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .form-group{
+    margin-bottom: 20px;
+  }
+  .form-label{
+    display: block;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--ink);
+    margin-bottom: 8px;
+  }
+  .form-input{
+    width: 100%;
+    padding: 12px 16px;
+    border: 1px solid var(--line-strong);
+    border-radius: 10px;
+    font-size: 15px;
+    font-family: 'Work Sans', sans-serif;
+    color: var(--ink);
+    background: var(--bg-2);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  }
+  .form-input:focus{
+    outline: none;
+    border-color: var(--blue);
+    box-shadow: 0 0 0 3px var(--blue-soft);
+  }
+  .form-input::placeholder{
+    color: var(--muted-2);
+  }
+  .form-input.code-input{
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 18px;
+    letter-spacing: 0.1em;
+    text-align: center;
+    text-transform: uppercase;
+  }
+  .form-help{
+    font-size: 12px;
+    color: var(--muted-2);
+    margin-top: 6px;
+  }
+  .form-actions{
+    display: flex;
+    gap: 12px;
+    margin-top: 28px;
+  }
+  .form-actions .btn{
+    flex: 1;
+  }
+  .step-indicator{
+    display: flex;
+    gap: 8px;
+    margin-bottom: 24px;
+  }
+  .step-dot{
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--line-strong);
+    transition: background 0.2s ease;
+  }
+  .step-dot.is-active{
+    background: var(--blue);
+  }
+  .step-dot.is-complete{
+    background: var(--blue);
+  }
+
+  /* ---------- SOCIAL BUTTONS ---------- */
+  .social-btn{
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    width: 100%;
+    padding: 12px 20px;
+    border-radius: 10px;
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    border: 1px solid var(--line-strong);
+    background: var(--bg-2);
+    color: var(--ink);
+    transition: border-color 0.2s ease, background 0.2s ease, transform 0.15s ease;
+    font-family: 'Work Sans', sans-serif;
+  }
+  .social-btn:hover{
+    border-color: var(--blue);
+    background: var(--blue-soft);
+  }
+  .social-btn:active{
+    transform: scale(0.98);
+  }
+  .social-btn svg{
+    width: 20px;
+    height: 20px;
+  }
+  .social-btn.github-btn{
+    background: #24292f;
+    border-color: #24292f;
+    color: #fff;
+  }
+  .social-btn.github-btn:hover{
+    background: #1a1e22;
+    border-color: #1a1e22;
+  }
+  .divider{
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin: 24px 0;
+  }
+  .divider-line{
+    flex: 1;
+    height: 1px;
+    background: var(--line);
+  }
+  .divider-text{
+    font-size: 13px;
+    color: var(--muted-2);
+    font-weight: 500;
+  }
+  .email-toggle{
+    background: none;
+    border: none;
+    color: var(--blue);
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    padding: 0;
+    font-family: 'Work Sans', sans-serif;
+    transition: color 0.2s ease;
+  }
+  .email-toggle:hover{
+    color: var(--blue-bright);
+  }
+  .email-form{
+    display: none;
+  }
+  .email-form.is-visible{
+    display: block;
+  }
+  .social-only{
+    display: block;
+  }
+  .social-only.is-hidden{
+    display: none;
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <div class="logo">
+      <i data-lucide="link" class="logo-mark" style="color: #2A4BD7;"></i>
+      Knot
+    </div>
+    <div class="nav-links">
+      <a class="text-link" href="#how">How it works</a>
+      <a class="text-link" href="#features">Features</a>
+      <a class="btn btn-ghost" href="#">Log in</a>
+      <a class="btn btn-primary" href="#" data-modal-open>Start a pod</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="wrap">
+    <span class="eyebrow"><span class="dot"></span>Built for pods of 3–5</span>
+    <h1>A habit holds when <em>someone else</em> is watching.</h1>
+    <p class="sub">Knot is a daily check-in for small groups. Pick one habit, invite your people, and show up — because the pod sees the day you didn't.</p>
+    <div class="hero-ctas">
+      <a class="btn btn-primary" href="#" data-modal-open>Start a pod — free</a>
+      <a class="btn btn-ghost" href="#how">See how it works</a>
+    </div>
+
+    <div class="chain-stage">
+      <div class="chain-row">
+        <svg class="chain-svg" viewBox="0 0 640 120" xmlns="http://www.w3.org/2000/svg">
+          <!-- connecting line -->
+          <line x1="40" y1="60" x2="600" y2="60" stroke="#151922" stroke-opacity="0.08" stroke-width="2"/>
+          <!-- filled links (past days, done) -->
+          <g>
+            <circle class="link-fill" style="animation-delay:0.1s" cx="70" cy="60" r="22" fill="#2A4BD7"/>
+            <text x="70" y="65" text-anchor="middle" font-family="IBM Plex Mono" font-size="14" fill="#fff" font-weight="500">M</text>
+          </g>
+          <g>
+            <circle class="link-fill" style="animation-delay:0.25s" cx="180" cy="60" r="22" fill="#2A4BD7"/>
+            <text x="180" y="65" text-anchor="middle" font-family="IBM Plex Mono" font-size="14" fill="#fff" font-weight="500">A</text>
+          </g>
+          <g>
+            <circle class="link-fill" style="animation-delay:0.4s" cx="290" cy="60" r="22" fill="#2A4BD7"/>
+            <text x="290" y="65" text-anchor="middle" font-family="IBM Plex Mono" font-size="14" fill="#fff" font-weight="500">J</text>
+          </g>
+          <!-- missed day -->
+          <g>
+            <circle class="link-fill" style="animation-delay:0.55s" cx="400" cy="60" r="22" fill="#F7F8FB" stroke="#C4432A" stroke-width="2"/>
+            <text x="400" y="65" text-anchor="middle" font-family="IBM Plex Mono" font-size="13" fill="#C4432A">·</text>
+          </g>
+          <!-- today, waiting -->
+          <g>
+            <circle class="link-fill" style="animation-delay:0.7s" cx="510" cy="60" r="24" fill="#fff" stroke="#2A4BD7" stroke-width="2.5" stroke-dasharray="5 4"/>
+            <text x="510" y="65" text-anchor="middle" font-family="IBM Plex Mono" font-size="12" fill="#2A4BD7">TODAY</text>
+          </g>
+          <!-- future, dim -->
+          <circle class="link-fill" style="animation-delay:0.85s" cx="600" cy="60" r="16" fill="#EEF1F6"/>
+        </svg>
+      </div>
+      <div class="chain-caption">Day 14 of the pod's <b>write daily</b> streak — one link open, waiting on you.</div>
+    </div>
+  </div>
+</header>
+
+<section id="how">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="kicker">How a pod works</span>
+      <h2>Three steps, then it runs itself.</h2>
+      <p>No streak freezes, no badges to buy. Just a small group and a habit you all agreed to keep.</p>
+    </div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num mono">01</div>
+        <div>
+          <h3>Start a pod</h3>
+          <p>Name the habit and set the daily bar — 500 words, a workout, no takeout, whatever you're actually trying to keep.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num mono">02</div>
+        <div>
+          <h3>Bring your people</h3>
+          <p>Share an invite code with 3 to 5 people. Small enough that everyone notices who's missing.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num mono">03</div>
+        <div>
+          <h3>Check in, daily</h3>
+          <p>One tap when you've done it. The pod sees the day's board — who showed up, and who didn't, in real time.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="features">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="kicker">Why a pod, not an app</span>
+      <h2>The accountability was always the people.</h2>
+      <p>Knot just gives the group a shared board to keep each other honest.</p>
+    </div>
+    <div class="feature-grid">
+      <div class="feature">
+        <i data-lucide="users" class="feature-icon" style="color: #2A4BD7;"></i>
+        <h3>One shared streak</h3>
+        <p>The pod's streak breaks the day anyone in the group misses — it's a group's record, not five separate ones.</p>
+      </div>
+      <div class="feature">
+        <i data-lucide="user-check" class="feature-icon" style="color: #2A4BD7;"></i>
+        <h3>Capped at five</h3>
+        <p>Pods max out at five people on purpose. Big enough to cover a slip, small enough that no one hides in the crowd.</p>
+      </div>
+      <div class="feature">
+        <i data-lucide="layout-grid" class="feature-icon" style="color: #2A4BD7;"></i>
+        <h3>The board, not a lecture</h3>
+        <p>No push notifications shaming you. Just a check-in grid the pod can glance at — you decide what to do with it.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="pod-card">
+      <div class="pod-card-copy">
+        <span class="kicker">Today's board</span>
+        <h3>"No-scroll mornings" · Day 14</h3>
+        <p>Five people, one rule: phone stays in the other room until breakfast's done. Here's who's checked in today.</p>
+        <a class="btn btn-primary" href="#" data-modal-open>Start your own pod</a>
+      </div>
+      <div class="pod-members">
+        <div class="member-row">
+          <div class="avatar" style="background:#2A4BD7;color:#fff;">M</div>
+          <div class="name">Maya</div>
+          <div class="status done mono">checked in</div>
+        </div>
+        <div class="member-row">
+          <div class="avatar" style="background:#2A4BD7;color:#fff;">A</div>
+          <div class="name">Amir</div>
+          <div class="status done mono">checked in</div>
+        </div>
+        <div class="member-row">
+          <div class="avatar" style="background:#C4432A;color:#fff;">J</div>
+          <div class="name">Jules</div>
+          <div class="status missed mono">missed day 9</div>
+        </div>
+        <div class="member-row">
+          <div class="avatar" style="background:#EEF1F6;color:#8890A0;border:1px solid var(--line-strong);">R</div>
+          <div class="name">Rae</div>
+          <div class="status waiting mono">waiting</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="cta-band">
+  <h2>Find your five. Pick the habit. Hold the line together.</h2>
+  <p>Free to start. No card required to make a pod.</p>
+  <a class="btn btn-primary" href="#" style="padding:14px 28px; font-size:15px;" data-modal-open>Start a pod — free</a>
+</div>
+
+<footer>
+  <div class="footer-inner">
+    <div class="logo">
+      <i data-lucide="link" class="logo-mark" style="color: #2A4BD7;"></i>
+      Knot
+    </div>
+    <p>© 2026 Knot. A habit is easier to keep than a promise, when both are shared.</p>
+  </div>
+</footer>
+
+<div class="modal-overlay" id="podModal" aria-hidden="true">
+  <div class="modal-panel" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <button class="modal-close" id="modalClose" aria-label="Close">
+      <i data-lucide="x" style="width: 16px; height: 16px;"></i>
+    </button>
+    
+    <!-- Step 0: Initial Choice -->
+    <div class="modal-step is-active" data-step="choice">
+      <div class="modal-head">
+        <span class="modal-eyebrow">Get started — takes a minute</span>
+        <h2 id="modalTitle">New pod, or one already in motion?</h2>
+        <p>Pick one and we'll get you set up.</p>
+      </div>
+      <div class="modal-cards">
+        <button class="option-card" data-choice="join">
+          <div class="option-icon">
+            <i data-lucide="users" style="width: 20px; height: 20px; color: #2A4BD7;"></i>
+          </div>
+          <i data-lucide="arrow-up-right" class="option-arrow" style="width: 16px; height: 16px;"></i>
+          <h3>Join a pod</h3>
+          <p>Got an invite code? Drop in and pick up the streak where it stands.</p>
+          <div class="option-check">
+            <i data-lucide="check" style="width: 26px; height: 26px; color: #fff;"></i>
+          </div>
+        </button>
+        <button class="option-card" data-choice="start">
+          <div class="option-icon">
+            <i data-lucide="plus" style="width: 20px; height: 20px; color: #2A4BD7;"></i>
+          </div>
+          <i data-lucide="arrow-up-right" class="option-arrow" style="width: 16px; height: 16px;"></i>
+          <h3>Start a pod</h3>
+          <p>Name the habit, set the daily bar, and invite your people.</p>
+          <div class="option-check">
+            <i data-lucide="check" style="width: 26px; height: 26px; color: #fff;"></i>
+          </div>
+        </button>
+      </div>
+    </div>
+
+    <!-- Join Flow: Step 1 - Invite Code -->
+    <div class="modal-step" data-step="join-code">
+      <div class="modal-head">
+        <span class="modal-eyebrow">Join a pod</span>
+        <h2 id="modalTitle">Enter your invite code</h2>
+        <p>Got a 6-digit code from a friend? Drop it in below.</p>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="inviteCode">Invite code</label>
+        <input type="text" id="inviteCode" class="form-input code-input" placeholder="ABC123" maxlength="6" pattern="[A-Za-z0-9]{6}">
+        <p class="form-help">6 characters, letters and numbers only</p>
+      </div>
+      <div class="form-actions">
+        <button class="btn btn-ghost" data-back="choice">Back</button>
+        <button class="btn btn-primary" data-next="join-signup">Continue</button>
+      </div>
+    </div>
+
+    <!-- Join Flow: Step 2 - Signup -->
+    <div class="modal-step" data-step="join-signup">
+      <div class="modal-head">
+        <span class="modal-eyebrow">Join a pod</span>
+        <h2 id="modalTitle">Create your account</h2>
+        <p>One last step before you join the pod.</p>
+      </div>
+      
+      <div class="social-only" id="join-social-only">
+        <button class="social-btn github-btn" data-github="join">
+          <svg xmlns=".http://www.w3.org/2000/svg" shape-rendering="geometricPrecision" text-rendering="geometricPrecision" image-rendering="optimizeQuality" fill-rule="evenodd" clip-rule="evenodd" viewBox="0 0 512 499.368"><path fill="#fff" fill-rule="nonzero" d="M256.003 0C114.555 0 0 114.555 0 256.003c0 113.286 73.28 208.961 175.038 242.865 12.796 2.247 17.586-5.433 17.586-12.153 0-6.077-.309-26.225-.309-47.686-64.313 11.844-80.941-15.674-86.058-30.055-2.896-7.37-15.359-30.1-26.269-36.177-8.948-4.808-21.752-16.652-.31-16.961 20.168-.309 34.574 18.564 39.382 26.244 23.038 38.732 59.839 27.828 74.555 21.101 2.227-16.627 8.947-27.828 16.318-34.239-56.968-6.386-116.467-28.471-116.467-126.399 0-27.827 9.907-50.866 26.225-68.787-2.562-6.41-11.51-32.655 2.562-67.853 0 0 21.436-6.72 70.409 26.244 20.483-5.767 42.227-8.638 63.998-8.638 21.751 0 43.52 2.896 63.997 8.638 48.973-33.279 70.39-26.244 70.39-26.244 14.09 35.192 5.117 61.443 2.562 67.853 16.318 17.921 26.244 40.625 26.244 68.787 0 98.237-59.84 119.988-116.801 126.399 9.282 8.014 17.277 23.373 17.277 47.371 0 34.238-.309 61.751-.309 70.389 0 6.721 4.808 14.735 17.586 12.179C438.739 464.964 512 368.955 512 256.003 512 114.555 397.445 0 256.003 0z"/></svg>
+          Continue with GitHub
+        </button>
+        
+        <div class="divider">
+          <div class="divider-line"></div>
+          <span class="divider-text">or</span>
+          <div class="divider-line"></div>
+        </div>
+        
+        <button class="social-btn" data-show-email="join">
+          <i data-lucide="mail" style="width: 20px; height: 20px; color: var(--ink);"></i>
+          Continue with email
+        </button>
+      </div>
+      
+      <div class="email-form" id="join-email-form">
+        <div class="form-group">
+          <label class="form-label" for="joinName">Your name</label>
+          <input type="text" id="joinName" class="form-input" placeholder="What should we call you?">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="joinEmail">Email</label>
+          <input type="email" id="joinEmail" class="form-input" placeholder="you@example.com">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="joinPassword">Password</label>
+          <input type="password" id="joinPassword" class="form-input" placeholder="••••••••">
+        </div>
+        <div class="form-actions">
+          <button class="btn btn-ghost" data-back="join-code">Back</button>
+          <button class="btn btn-primary" data-submit="join">Join pod</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Start Flow: Step 1 - Pod Name -->
+    <div class="modal-step" data-step="start-name">
+      <div class="step-indicator">
+        <div class="step-dot is-active"></div>
+        <div class="step-dot"></div>
+        <div class="step-dot"></div>
+        <div class="step-dot"></div>
+      </div>
+      <div class="modal-head">
+        <span class="modal-eyebrow">Start a pod</span>
+        <h2 id="modalTitle">What'll you call it?</h2>
+        <p>Give your pod a name. Something memorable.</p>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="podName">Pod name</label>
+        <input type="text" id="podName" class="form-input" placeholder="The Morning Writers">
+      </div>
+      <div class="form-actions">
+        <button class="btn btn-ghost" data-back="choice">Back</button>
+        <button class="btn btn-primary" data-next="start-habit">Continue</button>
+      </div>
+    </div>
+
+    <!-- Start Flow: Step 2 - Habit -->
+    <div class="modal-step" data-step="start-habit">
+      <div class="step-indicator">
+        <div class="step-dot is-complete"></div>
+        <div class="step-dot is-active"></div>
+        <div class="step-dot"></div>
+        <div class="step-dot"></div>
+      </div>
+      <div class="modal-head">
+        <span class="modal-eyebrow">Start a pod</span>
+        <h2 id="modalTitle">What's the habit?</h2>
+        <p>What is everyone committing to do each day?</p>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="habitName">Habit name</label>
+        <input type="text" id="habitName" class="form-input" placeholder="Write 500 words">
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="habitDescription">Description (optional)</label>
+        <input type="text" id="habitDescription" class="form-input" placeholder="Any context for the pod?">
+      </div>
+      <div class="form-actions">
+        <button class="btn btn-ghost" data-back="start-name">Back</button>
+        <button class="btn btn-primary" data-next="start-frequency">Continue</button>
+      </div>
+    </div>
+
+    <!-- Start Flow: Step 3 - Frequency -->
+    <div class="modal-step" data-step="start-frequency">
+      <div class="step-indicator">
+        <div class="step-dot is-complete"></div>
+        <div class="step-dot is-complete"></div>
+        <div class="step-dot is-active"></div>
+        <div class="step-dot"></div>
+      </div>
+      <div class="modal-head">
+        <span class="modal-eyebrow">Start a pod</span>
+        <h2 id="modalTitle">How often?</h2>
+        <p>Daily check-ins, or something more flexible?</p>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="frequency">Check-in frequency</label>
+        <select id="frequency" class="form-input">
+          <option value="daily">Every day</option>
+          <option value="weekdays">Weekdays only</option>
+          <option value="custom">Custom schedule</option>
+        </select>
+      </div>
+      <div class="form-actions">
+        <button class="btn btn-ghost" data-back="start-habit">Back</button>
+        <button class="btn btn-primary" data-next="start-signup">Continue</button>
+      </div>
+    </div>
+
+    <!-- Start Flow: Step 4 - Signup -->
+    <div class="modal-step" data-step="start-signup">
+      <div class="step-indicator">
+        <div class="step-dot is-complete"></div>
+        <div class="step-dot is-complete"></div>
+        <div class="step-dot is-complete"></div>
+        <div class="step-dot is-active"></div>
+      </div>
+      <div class="modal-head">
+        <span class="modal-eyebrow">Start a pod</span>
+        <h2 id="modalTitle">Create your account</h2>
+        <p>Last step — you'll be the pod admin.</p>
+      </div>
+      
+      <div class="social-only" id="start-social-only">
+        <button class="social-btn github-btn" data-github="start">
+          <svg xmlns=".http://www.w3.org/2000/svg" shape-rendering="geometricPrecision" text-rendering="geometricPrecision" image-rendering="optimizeQuality" fill-rule="evenodd" clip-rule="evenodd" viewBox="0 0 512 499.368"><path fill="#fff" fill-rule="nonzero" d="M256.003 0C114.555 0 0 114.555 0 256.003c0 113.286 73.28 208.961 175.038 242.865 12.796 2.247 17.586-5.433 17.586-12.153 0-6.077-.309-26.225-.309-47.686-64.313 11.844-80.941-15.674-86.058-30.055-2.896-7.37-15.359-30.1-26.269-36.177-8.948-4.808-21.752-16.652-.31-16.961 20.168-.309 34.574 18.564 39.382 26.244 23.038 38.732 59.839 27.828 74.555 21.101 2.227-16.627 8.947-27.828 16.318-34.239-56.968-6.386-116.467-28.471-116.467-126.399 0-27.827 9.907-50.866 26.225-68.787-2.562-6.41-11.51-32.655 2.562-67.853 0 0 21.436-6.72 70.409 26.244 20.483-5.767 42.227-8.638 63.998-8.638 21.751 0 43.52 2.896 63.997 8.638 48.973-33.279 70.39-26.244 70.39-26.244 14.09 35.192 5.117 61.443 2.562 67.853 16.318 17.921 26.244 40.625 26.244 68.787 0 98.237-59.84 119.988-116.801 126.399 9.282 8.014 17.277 23.373 17.277 47.371 0 34.238-.309 61.751-.309 70.389 0 6.721 4.808 14.735 17.586 12.179C438.739 464.964 512 368.955 512 256.003 512 114.555 397.445 0 256.003 0z"/></svg>
+          Continue with GitHub
+        </button>
+        
+        <div class="divider">
+          <div class="divider-line"></div>
+          <span class="divider-text">or</span>
+          <div class="divider-line"></div>
+        </div>
+        
+        <button class="social-btn" data-show-email="start">
+          <i data-lucide="mail" style="width: 20px; height: 20px; color: var(--ink);"></i>
+          Continue with email
+        </button>
+      </div>
+      
+      <div class="email-form" id="start-email-form">
+        <div class="form-group">
+          <label class="form-label" for="startName">Your name</label>
+          <input type="text" id="startName" class="form-input" placeholder="What should we call you?">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="startEmail">Email</label>
+          <input type="email" id="startEmail" class="form-input" placeholder="you@example.com">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="startPassword">Password</label>
+          <input type="password" id="startPassword" class="form-input" placeholder="••••••••">
+        </div>
+        <div class="form-actions">
+          <button class="btn btn-ghost" data-back="start-frequency">Back</button>
+          <button class="btn btn-primary" data-submit="start">Create pod</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  (function(){
+    // Initialize Supabase
+    var SupabaseClient = supabase.createClient(
+      'https://mfjtdrqvmuwtoarkiezi.supabase.co',
+      'sb_publishable_SPhsUI31nYbrrLjPBAaRBw_OkWQ2_Xn'
+    );
+
+    var overlay = document.getElementById('podModal');
+    var closeBtn = document.getElementById('modalClose');
+    var openers = document.querySelectorAll('[data-modal-open]');
+    var cards = overlay.querySelectorAll('.option-card');
+    var steps = overlay.querySelectorAll('.modal-step');
+    var lastFocused = null;
+
+    // Store form data across steps
+    var formData = {
+      join: { code: '', name: '', email: '', password: '' },
+      start: { podName: '', habitName: '', habitDescription: '', frequency: '', name: '', email: '', password: '' }
+    };
+
+    function openModal(e){
+      if(e) e.preventDefault();
+      lastFocused = document.activeElement;
+      overlay.classList.add('is-open');
+      overlay.setAttribute('aria-hidden', 'false');
+      document.body.style.overflow = 'hidden';
+      goToStep('choice');
+      setTimeout(function(){ closeBtn.focus(); }, 300);
+      document.addEventListener('keydown', onKeydown);
+    }
+
+    function closeModal(){
+      overlay.classList.remove('is-open');
+      overlay.setAttribute('aria-hidden', 'true');
+      document.body.style.overflow = '';
+      cards.forEach(function(c){ c.classList.remove('is-selected'); });
+      document.removeEventListener('keydown', onKeydown);
+      if(lastFocused) lastFocused.focus();
+      resetForms();
+    }
+
+    function onKeydown(e){
+      if(e.key === 'Escape') closeModal();
+    }
+
+    function goToStep(stepName){
+      steps.forEach(function(step){
+        step.classList.remove('is-active');
+        if(step.dataset.step === stepName){
+          setTimeout(function(){
+            step.classList.add('is-active');
+          }, 50);
+        }
+      });
+    }
+
+    function resetForms(){
+      var inputs = overlay.querySelectorAll('input, select');
+      inputs.forEach(function(input){
+        input.value = '';
+      });
+      formData = {
+        join: { code: '', name: '', email: '', password: '' },
+        start: { podName: '', habitName: '', habitDescription: '', frequency: '', name: '', email: '', password: '' }
+      };
+    }
+
+    function validateInviteCode(code){
+      return /^[A-Za-z0-9]{6}$/.test(code);
+    }
+
+    async function handleJoinSubmit(){
+      var name = document.getElementById('joinName').value;
+      var email = document.getElementById('joinEmail').value;
+      var password = document.getElementById('joinPassword').value;
+      var code = document.getElementById('inviteCode').value;
+
+      if(!name || !email || !password){
+        alert('Please fill in all fields');
+        return;
+      }
+
+      try{
+        // Sign up user
+        var { data, error } = await SupabaseClient.auth.signUp({
+          email: email,
+          password: password,
+          options: {
+            data: {
+              display_name: name
+            }
+          }
+        });
+
+        if(error) throw error;
+
+        // Verify invite code and join pod
+        // This would query your pods table to find the pod with this invite code
+        // Then add the user to the pod_members table
+        alert('Successfully joined pod! (Connect to backend to complete pod joining)');
+        closeModal();
+      }catch(err){
+        console.error('Error:', err);
+        alert('Error: ' + err.message);
+      }
+    }
+
+    async function handleStartSubmit(){
+      var podName = document.getElementById('podName').value;
+      var habitName = document.getElementById('habitName').value;
+      var habitDescription = document.getElementById('habitDescription').value;
+      var frequency = document.getElementById('frequency').value;
+      var name = document.getElementById('startName').value;
+      var email = document.getElementById('startEmail').value;
+      var password = document.getElementById('startPassword').value;
+
+      if(!podName || !habitName || !name || !email || !password){
+        alert('Please fill in all required fields');
+        return;
+      }
+
+      try{
+        // Sign up user
+        var { data: authData, error: authError } = await SupabaseClient.auth.signUp({
+          email: email,
+          password: password,
+          options: {
+            data: {
+              display_name: name
+            }
+          }
+        });
+
+        if(authError) throw authError;
+
+        // Create pod
+        var { data: podData, error: podError } = await SupabaseClient
+          .from('pods')
+          .insert({
+            name: podName,
+            created_by: authData.user.id,
+            invite_code: generateInviteCode()
+          })
+          .select()
+          .single();
+
+        if(podError) throw podError;
+
+        // Create habit
+        var { error: habitError } = await SupabaseClient
+          .from('habits')
+          .insert({
+            pod_id: podData.id,
+            name: habitName,
+            description: habitDescription,
+            frequency: frequency
+          });
+
+        if(habitError) throw habitError;
+
+        // Add creator as pod member
+        var { error: memberError } = await SupabaseClient
+          .from('pod_members')
+          .insert({
+            pod_id: podData.id,
+            user_id: authData.user.id,
+            role: 'admin'
+          });
+
+        if(memberError) throw memberError;
+
+        alert('Pod created successfully! Invite code: ' + podData.invite_code);
+        closeModal();
+      }catch(err){
+        console.error('Error:', err);
+        alert('Error: ' + err.message);
+      }
+    }
+
+    function generateInviteCode(){
+      var chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+      var code = '';
+      for(var i = 0; i < 6; i++){
+        code += chars.charAt(Math.floor(Math.random() * chars.length));
+      }
+      return code;
+    }
+
+    async function handleGitHubAuth(flow){
+      try{
+        var { data, error } = await SupabaseClient.auth.signInWithOAuth({
+          provider: 'github',
+          options: {
+            redirectTo: window.location.href,
+            queryParams: {
+              flow: flow
+            }
+          }
+        });
+
+        if(error) throw error;
+      }catch(err){
+        console.error('GitHub auth error:', err);
+        alert('Error connecting to GitHub: ' + err.message);
+      }
+    }
+
+    openers.forEach(function(btn){
+      btn.addEventListener('click', openModal);
+    });
+
+    closeBtn.addEventListener('click', closeModal);
+
+    overlay.addEventListener('click', function(e){
+      if(e.target === overlay) closeModal();
+    });
+
+    // Handle choice cards
+    cards.forEach(function(card){
+      card.addEventListener('click', function(){
+        var choice = card.dataset.choice;
+        cards.forEach(function(c){ c.classList.remove('is-selected'); });
+        card.classList.add('is-selected');
+        setTimeout(function(){
+          if(choice === 'join'){
+            goToStep('join-code');
+          } else if(choice === 'start'){
+            goToStep('start-name');
+          }
+          cards.forEach(function(c){ c.classList.remove('is-selected'); });
+        }, 300);
+      });
+    });
+
+    // Handle navigation buttons
+    overlay.addEventListener('click', function(e){
+      var btn = e.target.closest('button');
+      if(!btn) return;
+
+      if(btn.dataset.next){
+        var nextStep = btn.dataset.next;
+        
+        // Validate invite code if going from join-code to join-signup
+        if(nextStep === 'join-signup'){
+          var codeInput = document.getElementById('inviteCode');
+          var code = codeInput.value.toUpperCase();
+          if(!validateInviteCode(code)){
+            codeInput.style.borderColor = 'var(--red)';
+            codeInput.focus();
+            return;
+          }
+          codeInput.value = code;
+          codeInput.style.borderColor = '';
+          formData.join.code = code;
+          // Reset email form visibility
+          document.getElementById('join-social-only').classList.remove('is-hidden');
+          document.getElementById('join-email-form').classList.remove('is-visible');
+        }
+        
+        // Save form data
+        if(nextStep === 'start-habit'){
+          formData.start.podName = document.getElementById('podName').value;
+        }
+        if(nextStep === 'start-frequency'){
+          formData.start.habitName = document.getElementById('habitName').value;
+          formData.start.habitDescription = document.getElementById('habitDescription').value;
+        }
+        if(nextStep === 'start-signup'){
+          formData.start.frequency = document.getElementById('frequency').value;
+          // Reset email form visibility
+          document.getElementById('start-social-only').classList.remove('is-hidden');
+          document.getElementById('start-email-form').classList.remove('is-visible');
+        }
+        
+        goToStep(nextStep);
+      }
+
+      if(btn.dataset.back){
+        var backStep = btn.dataset.back;
+        // Reset email form when going back
+        if(backStep === 'join-code'){
+          document.getElementById('join-social-only').classList.remove('is-hidden');
+          document.getElementById('join-email-form').classList.remove('is-visible');
+        }
+        if(backStep === 'start-frequency'){
+          document.getElementById('start-social-only').classList.remove('is-hidden');
+          document.getElementById('start-email-form').classList.remove('is-visible');
+        }
+        goToStep(backStep);
+      }
+
+      if(btn.dataset.submit){
+        var type = btn.dataset.submit;
+        if(type === 'join'){
+          handleJoinSubmit();
+        } else if(type === 'start'){
+          handleStartSubmit();
+        }
+      }
+
+      // Handle show email toggle
+      if(btn.dataset.showEmail){
+        var flow = btn.dataset.showEmail;
+        if(flow === 'join'){
+          document.getElementById('join-social-only').classList.add('is-hidden');
+          document.getElementById('join-email-form').classList.add('is-visible');
+        } else if(flow === 'start'){
+          document.getElementById('start-social-only').classList.add('is-hidden');
+          document.getElementById('start-email-form').classList.add('is-visible');
+        }
+      }
+
+      // Handle GitHub OAuth
+      if(btn.dataset.github){
+        var flow = btn.dataset.github;
+        handleGitHubAuth(flow);
+      }
+    });
+
+    // Initialize Lucide icons
+    if(typeof lucide !== 'undefined'){
+      lucide.createIcons();
+    }
+  })();
+</script>
+
+</body>
+</html>
