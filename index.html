@@ -1018,7 +1018,7 @@
     <div class="modal-step is-active" data-step="choice">
       <div class="modal-head">
         <span class="modal-eyebrow">Get started — takes a minute</span>
-        <h2 id="modalTitle">New pod, or one already in motion?</h2>
+        <h2>New pod, or one already in motion?</h2>
         <p>Pick one and we'll get you set up.</p>
       </div>
       <div class="modal-cards">
@@ -1051,7 +1051,7 @@
     <div class="modal-step" data-step="join-code">
       <div class="modal-head">
         <span class="modal-eyebrow">Join a pod</span>
-        <h2 id="modalTitle">Enter your invite code</h2>
+        <h2>Enter your invite code</h2>
         <p>Got a 6-digit code from a friend? Drop it in below.</p>
       </div>
       <div class="form-group">
@@ -1069,7 +1069,7 @@
     <div class="modal-step" data-step="join-signup">
       <div class="modal-head">
         <span class="modal-eyebrow">Join a pod</span>
-        <h2 id="modalTitle">Create your account</h2>
+        <h2>Create your account</h2>
         <p>One last step before you join the pod.</p>
       </div>
       
@@ -1124,7 +1124,7 @@
       </div>
       <div class="modal-head">
         <span class="modal-eyebrow">Start a pod</span>
-        <h2 id="modalTitle">What'll you call it?</h2>
+        <h2>What'll you call it?</h2>
         <p>Give your pod a name. Something memorable.</p>
       </div>
       <div class="form-group">
@@ -1147,7 +1147,7 @@
       </div>
       <div class="modal-head">
         <span class="modal-eyebrow">Start a pod</span>
-        <h2 id="modalTitle">What's the habit?</h2>
+        <h2>What's the habit?</h2>
         <p>What is everyone committing to do each day?</p>
       </div>
       <div class="form-group">
@@ -1174,7 +1174,7 @@
       </div>
       <div class="modal-head">
         <span class="modal-eyebrow">Start a pod</span>
-        <h2 id="modalTitle">How often?</h2>
+        <h2>How often?</h2>
         <p>Daily check-ins, or something more flexible?</p>
       </div>
       <div class="form-group">
@@ -1201,7 +1201,7 @@
       </div>
       <div class="modal-head">
         <span class="modal-eyebrow">Start a pod</span>
-        <h2 id="modalTitle">Create your account</h2>
+        <h2>Create your account</h2>
         <p>Last step — you'll be the pod admin.</p>
       </div>
       
@@ -1250,6 +1250,14 @@
 
 <script>
   document.addEventListener('DOMContentLoaded', function(){
+    // Check for CDN load failures
+    if(typeof lucide === 'undefined'){
+      console.warn('Lucide icons failed to load from CDN. Icons may not display correctly.');
+    }
+    if(typeof supabase === 'undefined'){
+      console.warn('Supabase client failed to load from CDN. Authentication features may not work.');
+    }
+
     var overlay = document.getElementById('podModal');
     var closeBtn = document.getElementById('modalClose');
     var openers = document.querySelectorAll('[data-modal-open]');
@@ -1537,8 +1545,13 @@
     }
 
     // Bind modal listeners FIRST (before any Supabase code)
+    console.log('Found ' + openers.length + ' elements with data-modal-open');
     openers.forEach(function(btn){
-      btn.addEventListener('click', openModal);
+      console.log('Binding click listener to:', btn);
+      btn.addEventListener('click', function(e){
+        console.log('Modal opener clicked:', btn);
+        openModal(e);
+      });
     });
 
     closeBtn.addEventListener('click', closeModal);
@@ -1742,7 +1755,7 @@
 
     // Run openmodal check on page load
     checkOpenModalParam();
-  })();
+  });
 </script>
 
 <div class="toast" id="toast"></div>
