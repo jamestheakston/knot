@@ -810,9 +810,14 @@
           .from('user_profiles')
           .select('*')
           .eq('user_id', currentUser.id)
-          .single();
+          .maybeSingle();
 
-        if(error && error.code !== 'PGRST116'){
+        if(error){
+          console.error('Error loading user profile:', error);
+          return;
+        }
+
+        if(!data){
           // Profile doesn't exist, create it
           var { data: newProfile, error: createError } = await client
             .from('user_profiles')
