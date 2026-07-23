@@ -2,7 +2,16 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#F7F8FB">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Knot">
+<meta name="description" content="Knot — A habit, held by your pod. Track daily check-ins and build streaks with your pod.">
+<link rel="manifest" href="/manifest.json">
+<link rel="apple-touch-icon" href="/icon-192x192.png">
+<link rel="icon" type="image/png" sizes="192x192" href="/icon-192x192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="/icon-512x512.png">
 <title>Knot — Dashboard</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -3943,6 +3952,19 @@
 
     // Check auth on load
     checkAuth();
+
+    // Register Service Worker for PWA
+    if('serviceWorker' in navigator){
+      window.addEventListener('load', function(){
+        navigator.serviceWorker.register('/sw.js')
+          .then(function(registration){
+            console.log('[PWA] Service Worker registered with scope:', registration.scope);
+          })
+          .catch(function(error){
+            console.log('[PWA] Service Worker registration failed:', error);
+          });
+      });
+    }
   });
 </script>
 
