@@ -1595,6 +1595,9 @@
 
         if(authError) throw authError;
 
+        console.log('Sign up result:', authData);
+        console.log('Has session:', !!authData.session);
+
         // Store pod data in localStorage for dashboard to create
         var podDataToStore = {
           podName: podName,
@@ -1602,15 +1605,29 @@
           habitDescription: habitDescription,
           frequency: frequency
         };
-        localStorage.setItem('pendingPodCreation', JSON.stringify({
-          ...podDataToStore,
-          timestamp: Date.now()
-        }));
 
-        showToast('Account created! Creating your pod...');
-        setTimeout(function(){
-          window.location.href = 'dashboard.html?createpod=true';
-        }, 1000);
+        if(authData.session){
+          // User is automatically logged in, create pod immediately
+          localStorage.setItem('pendingPodCreation', JSON.stringify({
+            ...podDataToStore,
+            timestamp: Date.now()
+          }));
+          showToast('Account created! Creating your pod...');
+          setTimeout(function(){
+            window.location.href = 'dashboard.html?createpod=true';
+          }, 1000);
+        }else{
+          // User needs to confirm email first - store in authFlow like OAuth
+          localStorage.setItem('authFlow', JSON.stringify({
+            flow: 'start',
+            ...podDataToStore,
+            timestamp: Date.now()
+          }));
+          showToast('Account created! Please check your email to confirm, then your pod will be created.');
+          setTimeout(function(){
+            window.location.href = 'dashboard.html';
+          }, 2000);
+        }
       }catch(err){
         console.error('Error:', err);
         showToast('Error: ' + err.message);
