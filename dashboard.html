@@ -3115,6 +3115,21 @@
       var hasCheckedInToday = streakData.hasCheckedInToday;
       var client = getSupabaseClient();
       
+      // Get pod member count
+      var podMemberCount = 0;
+      try{
+        var { data: members, error: membersError } = await client
+          .from('pod_members')
+          .select('*')
+          .eq('pod_id', currentPod.id);
+        
+        if(!membersError && members){
+          podMemberCount = members.length;
+        }
+      }catch(err){
+        console.error('Error loading pod members:', err);
+      }
+      
       // Get habits for the pod
       var habits = [];
       try{
@@ -3209,7 +3224,7 @@
             </div>
             <div class="overview-stat">
               <div class="stat-label">POD MEMBERS</div>
-              <div class="stat-value">${userPods.length}</div>
+              <div class="stat-value">${podMemberCount}</div>
               <div class="stat-unit">members</div>
             </div>
             <div class="overview-stat">
