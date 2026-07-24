@@ -377,10 +377,9 @@
 
   /* ---------- MISSION SECTION ---------- */
   .mission-content{
-    display: grid;
-    grid-template-columns: 1fr 280px;
-    gap: 60px;
-    align-items: start;
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
   }
   .mission-text{
     color: var(--muted);
@@ -388,9 +387,9 @@
     line-height: 1.7;
   }
   .mission-stats{
-    display: flex;
-    flex-direction: column;
-    gap: 32px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
   }
   .stat{
     text-align: center;
@@ -515,7 +514,7 @@
     .feature-grid{ grid-template-columns: 1fr; }
     .pod-card{ grid-template-columns: 1fr; }
     .nav-links .text-link{ display:none; }
-    .mission-content{ grid-template-columns: 1fr; }
+    .mission-stats{ grid-template-columns: 1fr; }
     .comparison-row{ grid-template-columns: 1fr; gap: 12px; }
     .comparison-header{ display: none; }
     .comparison-app, .comparison-knot{ font-size: 13px; }
