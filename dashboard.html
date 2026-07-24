@@ -2506,8 +2506,11 @@
       // Check for pending pod join from localStorage
       await checkPendingPodJoin();
 
-      // Check for auth flow (OAuth or email confirmation)
+      // Check for auth flow (OAuth or email confirmation) - MUST be before userPods check
       await checkAuthFlow();
+
+      // Reload pods after auth flow processing to ensure we have the latest data
+      await loadUserPods();
 
       if(userPods.length > 0){
         currentPod = userPods[0];
@@ -2682,7 +2685,7 @@
       var client = getSupabaseClient();
       if(!client){
         console.error('No Supabase client available');
-        return;
+        return false;
       }
 
       console.log('handlePodJoinFromCode called with code:', code);
@@ -2696,12 +2699,12 @@
 
         if(joinError){
           console.error('Join RPC error:', joinError);
-          return;
+          return false;
         }
 
         if(!joinResult.success){
           console.error('Join failed:', joinResult.error);
-          return;
+          return false;
         }
 
         console.log('Successfully joined pod with ID:', joinResult.pod_id);
@@ -2723,15 +2726,19 @@
             updatePodSelector();
             updateAdminVisibility();
             navigateTo('overview');
+            return true;
           }
         }else{
           console.error('No pods found after joining');
+          return false;
         }
         
         // Clean URL
         window.history.replaceState({}, document.title, window.location.pathname);
+        return true;
       }catch(err){
         console.error('Error joining pod from code:', err);
+        return false;
       }
     }
 
@@ -2744,8 +2751,12 @@
           
           if(flowData.flow === 'join' && flowData.inviteCode){
             console.log('Handling join flow with invite code:', flowData.inviteCode);
-            await handlePodJoinFromCode(flowData.inviteCode);
+            var joinSuccess = await handlePodJoinFromCode(flowData.inviteCode);
             localStorage.removeItem('authFlow');
+            if(!joinSuccess){
+              console.error('Failed to join pod from auth flow');
+              alert('Failed to join pod. Please try joining manually with your invite code.');
+            }
           }else if(flowData.flow === 'start'){
             console.log('Handling start flow');
             await checkPendingPodCreation();
