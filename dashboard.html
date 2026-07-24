@@ -501,12 +501,14 @@
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
     gap: 32px;
+    margin-bottom: 32px;
   }
   .streak-card-container{
     background: var(--bg-2);
     border-radius: 20px;
     padding: 32px;
     border: 1px solid var(--line);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
   }
   .streak-card-container h3{
     font-family: 'Instrument Serif', serif;
@@ -1039,7 +1041,7 @@
     box-shadow: 0 2px 8px rgba(42, 75, 215, 0.3);
   }
   .btn-primary:hover{
-    background: var(--blue-dark);
+    background: #3a5fd9;
     box-shadow: 0 4px 12px rgba(42, 75, 215, 0.4);
   }
   .btn-ghost{
@@ -2208,12 +2210,15 @@
         
         var dayDiff = Math.floor((today - lastCheckInDate) / (1000 * 60 * 60 * 24));
         
+        // Check if user has checked in today
+        var hasCheckedInToday = dayDiff === 0;
+        
         if(dayDiff > 1){
           // Streak broken, but check if they had a previous streak
           if(checkInDates.length > 0){
             hasPreviousStreak = true;
           }
-          return { personal: 0, group: [], hasPreviousStreak: hasPreviousStreak };
+          return { personal: 0, group: [], hasPreviousStreak: hasPreviousStreak, hasCheckedInToday: false };
         }
 
         // Count consecutive days
@@ -2243,6 +2248,9 @@
         if(membersError) throw membersError;
 
         var groupStreaks = [];
+        var allMembersCheckedInToday = true;
+        var minMemberStreak = Infinity;
+        
         for(var j = 0; j < members.length; j++){
           var memberId = members[j].user_id;
           var { data: memberCheckIns, error: memberCheckInsError } = await client
@@ -2260,16 +2268,47 @@
               .eq('user_id', memberId)
               .maybeSingle();
             
+            // Check if this member checked in today
+            var memberLastCheckIn = new Date(memberCheckIns[0].created_at);
+            memberLastCheckIn.setHours(0, 0, 0, 0);
+            var memberDayDiff = Math.floor((today - memberLastCheckIn) / (1000 * 60 * 60 * 24));
+            var memberCheckedInToday = memberDayDiff === 0;
+            
+            if(!memberCheckedInToday){
+              allMembersCheckedInToday = false;
+            }
+            
             groupStreaks.push({
               user_id: memberId,
               display_name: profile?.display_name || memberId.substring(0, 8),
               streak: memberStreak,
               isCurrentUser: memberId === currentUser.id
             });
+            
+            minMemberStreak = Math.min(minMemberStreak, memberStreak);
+          }else{
+            // Member has no check-ins at all
+            allMembersCheckedInToday = false;
+            minMemberStreak = 0;
+            var { data: profile } = await client
+              .from('user_profiles')
+              .select('display_name')
+              .eq('user_id', memberId)
+              .maybeSingle();
+            
+            groupStreaks.push({
+              user_id: memberId,
+              display_name: profile?.display_name || memberId.substring(0, 8),
+              streak: 0,
+              isCurrentUser: memberId === currentUser.id
+            });
           }
         }
 
-        return { personal: streak, group: groupStreaks, hasPreviousStreak: false };
+        // Group streak only counts if everyone checked in today
+        var groupStreak = allMembersCheckedInToday ? minMemberStreak : 0;
+
+        return { personal: streak, group: groupStreaks, groupStreak: groupStreak, hasPreviousStreak: hasPreviousStreak, hasCheckedInToday: hasCheckedInToday };
       }catch(err){
         console.error('Error loading streak data:', err);
         return { personal: 0, group: [], hasPreviousStreak: false };
@@ -2797,7 +2836,9 @@
       var contentArea = document.getElementById('contentArea');
       var personalStreak = streakData.personal;
       var groupStreaks = streakData.group;
+      var groupStreak = streakData.groupStreak || 0;
       var hasPreviousStreak = streakData.hasPreviousStreak;
+      var hasCheckedInToday = streakData.hasCheckedInToday;
       
       var personalHTML = '';
       if(personalStreak === 0 && hasPreviousStreak){
@@ -2806,15 +2847,16 @@
           <div class="streak-card">
             <img src="/assets/nostreak.png" alt="No streak" class="streak-image nostreak-image">
             <div class="streak-count">0</div>
-            <div class="streak-message">Your streak was interrupted. Check in today to start a new streak!</div>
+            <div class="streak-message">Oh No! Your streak's been reset. Don't worry, you can restart your streak at any time!</div>
           </div>
         `;
-      }else if(personalStreak === 0){
+      }else if(personalStreak === 0 || !hasCheckedInToday){
+        // No streak or haven't checked in today
         personalHTML = `
           <div class="streak-card">
             <img src="/assets/nostreak.png" alt="No streak" class="streak-image nostreak-image">
-            <div class="streak-count">0</div>
-            <div class="streak-message">Start your streak today!</div>
+            <div class="streak-count">${personalStreak}</div>
+            <div class="streak-message">${!hasCheckedInToday ? 'Check in today to continue your streak!' : 'Start your streak today!'}</div>
           </div>
         `;
       }else{
@@ -2828,8 +2870,27 @@
       }
 
       var groupHTML = '';
+      if(groupStreak === 0){
+        groupHTML = `
+          <div class="streak-card">
+            <img src="/assets/nogroupstreak.png" alt="No group streak" class="streak-image nostreak-image">
+            <div class="streak-count">0</div>
+            <div class="streak-message">Waiting for everyone to check in today...</div>
+          </div>
+        `;
+      }else{
+        groupHTML = `
+          <div class="streak-card">
+            <img src="/assets/groupstreak.svg" alt="Group streak" class="streak-image streak-animated">
+            <div class="streak-count">${groupStreak}</div>
+            <div class="streak-message">day group streak</div>
+          </div>
+        `;
+      }
+
+      var compareHTML = '';
       if(groupStreaks.length > 0){
-        groupHTML = groupStreaks.map(function(gs){
+        compareHTML = groupStreaks.map(function(gs){
           return `
             <div class="group-streak-item">
               <div class="group-streak-user">
@@ -2841,7 +2902,7 @@
           `;
         }).join('');
       }else{
-        groupHTML = '<div class="no-check-ins">No streak data yet</div>';
+        compareHTML = '<div class="no-check-ins">No streak data yet</div>';
       }
 
       contentArea.innerHTML = `
@@ -2854,10 +2915,15 @@
             </div>
             <div class="streak-card-container">
               <h3>Group Streak</h3>
-              <p class="streak-card-description">See how your pod members are doing with their streaks. Friendly competition keeps everyone motivated!</p>
-              <div class="group-streak-list">
-                ${groupHTML}
-              </div>
+              <p class="streak-card-description">Your pod's collective streak - it only counts if everyone checks in daily. If one person misses a day, the group streak resets!</p>
+              ${groupHTML}
+            </div>
+          </div>
+          <div class="streak-card-container">
+            <h3>Compare</h3>
+            <p class="streak-card-description">See how your pod members are doing with their streaks. Friendly competition keeps everyone motivated!</p>
+            <div class="group-streak-list">
+              ${compareHTML}
             </div>
           </div>
         </div>
@@ -3944,20 +4010,38 @@
       
       // Clear and render hCaptcha widget
       var widgetContainer = document.getElementById('modalHcaptchaWidget');
-      widgetContainer.innerHTML = '<div class="hcaptcha-loading"><i data-lucide="loader-2"></i></div>';
+      widgetContainer.innerHTML = '<div class="hcaptcha-loading"><i data-lucide="loader-2" class="loading-icon"></i></div>';
       
       if(typeof lucide !== 'undefined'){
         lucide.createIcons();
       }
       
       if(typeof hcaptcha !== 'undefined'){
+        // Reset any existing widget
+        hcaptcha.reset();
+        
         hcaptcha.render('modalHcaptchaWidget', {
           sitekey: '6756a528-fd90-49fc-b01e-80e2b896d9b8',
+          theme: 'light',
           callback: function(){
             // Hide loading spinner when captcha loads
             var loadingSpinner = widgetContainer.querySelector('.hcaptcha-loading');
             if(loadingSpinner){
-              loadingSpinner.remove();
+              loadingSpinner.style.display = 'none';
+            }
+          },
+          'expired-callback': function(){
+            // Show loading spinner again if expired
+            var loadingSpinner = widgetContainer.querySelector('.hcaptcha-loading');
+            if(loadingSpinner){
+              loadingSpinner.style.display = 'flex';
+            }
+          },
+          'error-callback': function(){
+            // Hide loading spinner on error
+            var loadingSpinner = widgetContainer.querySelector('.hcaptcha-loading');
+            if(loadingSpinner){
+              loadingSpinner.style.display = 'none';
             }
           }
         });
