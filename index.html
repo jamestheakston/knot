@@ -485,6 +485,30 @@
     font-size: 13px;
     margin:0;
   }
+  .footer-links{
+    display: flex;
+    gap: 20px;
+  }
+  .footer-links a{
+    color: var(--muted-2);
+    font-size: 13px;
+    text-decoration: none;
+    transition: color 0.2s ease;
+  }
+  .footer-links a:hover{
+    color: var(--blue);
+  }
+  .footer-credit{
+    margin-top: 8px;
+  }
+  .footer-credit a{
+    color: var(--muted-2);
+    text-decoration: none;
+    transition: color 0.2s ease;
+  }
+  .footer-credit a:hover{
+    color: var(--blue);
+  }
 
   /* ---------- RESPONSIVE ---------- */
   @media (max-width: 860px){
@@ -1194,7 +1218,12 @@
       <i data-lucide="link" class="logo-mark" style="color: #2A4BD7;"></i>
       Knot
     </div>
+    <div class="footer-links">
+      <a href="privacy.html">Privacy</a>
+      <a href="terms.html">Terms</a>
+    </div>
     <p>© 2026 Knot. A habit is easier to keep than a promise, when both are shared.</p>
+    <p class="footer-credit">Brought to you by <a href="https://jamestheakston.pages.dev" target="_blank" rel="noopener">James Theakston</a></p>
   </div>
 </footer>
 
