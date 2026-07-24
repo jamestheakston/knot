@@ -2511,11 +2511,18 @@
         updatePodSelector();
         updateAdminVisibility();
         
-        // Handle shortcut actions
+        // Check URL hash for navigation
+        var hash = window.location.hash.replace('#', '');
+        var validSections = ['overview', 'members', 'check-ins', 'streak', 'pod-settings', 'habits', 'invite', 'profile', 'account'];
+        
+        // Handle shortcut actions from URL parameters
         if(action === 'checkin'){
           navigateTo('check-ins');
         }else if(action === 'streak'){
           navigateTo('streak');
+        }else if(hash && validSections.includes(hash)){
+          // Navigate to the section specified in the hash
+          navigateTo(hash);
         }else{
           // Load overview section by default
           navigateTo('overview');
