@@ -484,6 +484,41 @@
     max-width: 400px;
   }
 
+  /* ---------- ADMIN BADGE ---------- */
+  .admin-badge-message{
+    background: linear-gradient(135deg, var(--blue-soft), var(--blue));
+    border-radius: 12px;
+    padding: 16px 24px;
+    margin-bottom: 24px;
+    border: 1px solid var(--blue);
+  }
+  .admin-badge-content{
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    color: var(--blue);
+  }
+  .admin-badge-content i{
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+  .admin-badge-text{
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .admin-badge-text strong{
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--blue);
+  }
+  .admin-badge-text span{
+    font-size: 13px;
+    color: var(--blue);
+    opacity: 0.9;
+    line-height: 1.4;
+  }
+
   /* ---------- NO PODS MODAL ---------- */
   .no-pods-modal-overlay{
     position: fixed;
@@ -1125,6 +1160,17 @@
     letter-spacing: 0.05em;
     color: var(--ink);
     font-weight: 500;
+  }
+  .reset-invite-section{
+    margin-top: 24px;
+    padding-top: 24px;
+    border-top: 1px solid var(--line);
+  }
+  .reset-invite-warning{
+    margin-top: 12px;
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.5;
   }
 
   /* ---------- INVITE SECTION ---------- */
@@ -3056,6 +3102,11 @@
           return;
         }
         
+        // Show admin badge for admins on admin pages
+        if(adminOnlySections.includes(section) && isAdmin){
+          showAdminBadge();
+        }
+        
         switch(section){
           case 'overview':
             loadOverview();
@@ -3094,13 +3145,37 @@
       var contentArea = document.getElementById('contentArea');
       contentArea.innerHTML = `
         <div class="admin-only-message">
-          <div class="admin-only-icon">
-            <i data-lucide="info" style="width: 32px; height: 32px;"></i>
+          <div class="admin-only-icon admin-badge">
+            <i data-lucide="shield-check" style="width: 32px; height: 32px;"></i>
           </div>
-          <h3>Only admins can view this page</h3>
+          <h3>Admin Access Required</h3>
           <p>This page contains administrative features that are only accessible to pod administrators. If you need to make changes to your pod's settings or habits, please contact your pod admin.</p>
         </div>
       `;
+      
+      if(typeof lucide !== 'undefined'){
+        lucide.createIcons();
+      }
+    }
+
+    function showAdminBadge(){
+      var contentArea = document.getElementById('contentArea');
+      var existingBadge = document.getElementById('adminBadge');
+      if(existingBadge) return;
+      
+      var badge = document.createElement('div');
+      badge.id = 'adminBadge';
+      badge.className = 'admin-badge-message';
+      badge.innerHTML = `
+        <div class="admin-badge-content">
+          <i data-lucide="shield-check" style="width: 20px; height: 20px;"></i>
+          <div class="admin-badge-text">
+            <strong>Only you can see this page</strong>
+            <span>This page contains administrative features that are only accessible to pod administrators. Regular members cannot view or access these settings.</span>
+          </div>
+        </div>
+      `;
+      contentArea.insertBefore(badge, contentArea.firstChild);
       
       if(typeof lucide !== 'undefined'){
         lucide.createIcons();
@@ -4063,6 +4138,13 @@
                   <li>Once they join, they'll appear in the Members section</li>
                 </ol>
               </div>
+              <div class="reset-invite-section">
+                <button class="btn btn-ghost" id="resetInviteBtn" style="color: var(--red); border-color: var(--red);">
+                  <i data-lucide="refresh-cw" style="width: 16px; height: 16px; margin-right: 8px;"></i>
+                  Reset Invite Code
+                </button>
+                <p class="reset-invite-warning">This will invalidate your current invite code. Current members will not be affected, but anyone with the old code will no longer be able to join.</p>
+              </div>
             </div>
           </div>
         </div>
@@ -4082,6 +4164,36 @@
           document.getElementById('copyInviteLarge').textContent = 'Copy Code';
         }, 2000);
       });
+
+      document.getElementById('resetInviteBtn').addEventListener('click', function(){
+        if(confirm('Are you sure you want to reset your invite code? This will invalidate your current invite code. Current members will not be affected, but anyone with the old code will no longer be able to join.')){
+          handleResetInviteCode();
+        }
+      });
+
+      if(typeof lucide !== 'undefined'){
+        lucide.createIcons();
+      }
+    }
+
+    async function handleResetInviteCode(){
+      var client = getSupabaseClient();
+      try{
+        var newCode = generateInviteCode();
+        var { error } = await client
+          .from('pods')
+          .update({ invite_code: newCode })
+          .eq('id', currentPod.id);
+
+        if(error) throw error;
+
+        currentPod.inviteCode = newCode;
+        alert('Invite code reset successfully! Your new code is: ' + newCode);
+        loadInvite(); // Reload the invite section to show the new code
+      }catch(err){
+        console.error('Error resetting invite code:', err);
+        alert('Error resetting invite code: ' + err.message);
+      }
     }
 
     function showEmailInviteModal(){
