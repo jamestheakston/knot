@@ -486,21 +486,22 @@
 
   /* ---------- ADMIN BADGE ---------- */
   .admin-badge-message{
-    background: linear-gradient(135deg, var(--blue-soft), var(--blue));
+    background: var(--bg-3);
     border-radius: 12px;
     padding: 16px 24px;
     margin-bottom: 24px;
-    border: 1px solid var(--blue);
+    border: 1px solid var(--line);
   }
   .admin-badge-content{
     display: flex;
     align-items: flex-start;
     gap: 12px;
-    color: var(--blue);
+    color: var(--ink);
   }
   .admin-badge-content i{
     flex-shrink: 0;
     margin-top: 2px;
+    color: var(--blue);
   }
   .admin-badge-text{
     display: flex;
@@ -510,12 +511,12 @@
   .admin-badge-text strong{
     font-weight: 600;
     font-size: 14px;
-    color: var(--blue);
+    color: var(--ink);
   }
   .admin-badge-text span{
     font-size: 13px;
-    color: var(--blue);
-    opacity: 0.9;
+    color: var(--muted);
+    opacity: 1;
     line-height: 1.4;
   }
 
@@ -3155,7 +3156,7 @@
       contentArea.innerHTML = `
         <div class="admin-only-message">
           <div class="admin-only-icon admin-badge">
-            <i data-lucide="shield-check" style="width: 32px; height: 32px;"></i>
+            <i data-lucide="info" style="width: 32px; height: 32px;"></i>
           </div>
           <h3>Admin Access Required</h3>
           <p>This page contains administrative features that are only accessible to pod administrators. If you need to make changes to your pod's settings or habits, please contact your pod admin.</p>
@@ -3177,7 +3178,7 @@
       badge.className = 'admin-badge-message';
       badge.innerHTML = `
         <div class="admin-badge-content">
-          <i data-lucide="shield-check" style="width: 20px; height: 20px;"></i>
+          <i data-lucide="info" style="width: 20px; height: 20px;"></i>
           <div class="admin-badge-text">
             <strong>Only you can see this page</strong>
             <span>This page contains administrative features that are only accessible to pod administrators. Regular members cannot view or access these settings.</span>
@@ -3827,7 +3828,7 @@
       contentArea.innerHTML = `
         <div class="admin-badge-message">
           <div class="admin-badge-content">
-            <i data-lucide="shield-check" style="width: 20px; height: 20px;"></i>
+            <i data-lucide="info" style="width: 20px; height: 20px;"></i>
             <div class="admin-badge-text">
               <strong>Only you can see this page</strong>
               <span>This page contains administrative features that are only accessible to pod administrators. Regular members cannot view or access these settings.</span>
@@ -3911,7 +3912,7 @@
         contentArea.innerHTML = `
           <div class="admin-badge-message">
             <div class="admin-badge-content">
-              <i data-lucide="shield-check" style="width: 20px; height: 20px;"></i>
+              <i data-lucide="info" style="width: 20px; height: 20px;"></i>
               <div class="admin-badge-text">
                 <strong>Only you can see this page</strong>
                 <span>This page contains administrative features that are only accessible to pod administrators. Regular members cannot view or access these settings.</span>
