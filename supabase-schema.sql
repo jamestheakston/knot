@@ -306,3 +306,6 @@ BEGIN
   RETURN json_build_object('success', true, 'pod_id', pod_uuid);
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Grant execute permission for join_pod_via_invite_code
+GRANT EXECUTE ON FUNCTION public.join_pod_via_invite_code TO authenticated;

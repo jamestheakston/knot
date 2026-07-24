@@ -1471,7 +1471,7 @@
       var password = document.getElementById('joinPassword').value;
       var code = document.getElementById('inviteCode').value;
 
-      if(!name || !email || !password){
+      if(!name || !email || !password || !code){
         showToast('Please fill in all fields');
         return;
       }
@@ -1485,19 +1485,7 @@
       setButtonLoading(btn, true);
 
       try{
-        // First verify the invite code exists
-        var { data: pod, error: podError } = await client
-          .from('pods')
-          .select('*')
-          .eq('invite_code', code)
-          .maybeSingle();
-
-        if(podError || !pod){
-          showToast('Invalid invite code. Please check and try again.');
-          return;
-        }
-
-        // Sign up user
+        // Sign up user first
         var { data, error } = await client.auth.signUp({
           email: email,
           password: password,
@@ -1514,17 +1502,38 @@
 
         // Check if we have a session (auto-login) or need email confirmation
         if(data.session){
-          // User is automatically logged in
+          // User is automatically logged in, join the pod via RPC
           showToast('Account created! Joining pod...');
+          var { data: joinResult, error: joinError } = await client.rpc('join_pod_via_invite_code', { invite_code_param: code });
+          
+          if(joinError){
+            console.error('Join error:', joinError);
+            showToast('Error joining pod: ' + joinError.message);
+            setTimeout(function(){
+              window.location.href = 'dashboard.html';
+            }, 1000);
+            return;
+          }
+          
+          if(!joinResult.success){
+            showToast(joinResult.error || 'Failed to join pod');
+            setTimeout(function(){
+              window.location.href = 'dashboard.html';
+            }, 1000);
+            return;
+          }
+          
+          showToast('Successfully joined pod!');
           setTimeout(function(){
-            window.location.href = 'dashboard.html?joinpod=true&code=' + code;
+            window.location.href = 'dashboard.html';
           }, 1000);
         }else{
           // User needs to confirm email first
           showToast('Account created! Please check your email to confirm, then join the pod.');
           // Store the join code for after email confirmation
           localStorage.setItem('pendingPodJoin', JSON.stringify({
-            inviteCode: code
+            inviteCode: code,
+            timestamp: Date.now()
           }));
           setTimeout(function(){
             window.location.href = 'dashboard.html';
@@ -1581,7 +1590,10 @@
           habitDescription: habitDescription,
           frequency: frequency
         };
-        localStorage.setItem('pendingPodCreation', JSON.stringify(podDataToStore));
+        localStorage.setItem('pendingPodCreation', JSON.stringify({
+          ...podDataToStore,
+          timestamp: Date.now()
+        }));
 
         showToast('Account created! Creating your pod...');
         setTimeout(function(){
@@ -1628,10 +1640,19 @@
             habitDescription: habitDescription,
             frequency: frequency
           };
-          localStorage.setItem('pendingPodCreation', JSON.stringify(podDataToStore));
-          localStorage.setItem('authFlow', 'start');
+          localStorage.setItem('pendingPodCreation', JSON.stringify({
+            ...podDataToStore,
+            timestamp: Date.now()
+          }));
+          localStorage.setItem('authFlow', JSON.stringify({
+            flow: 'start',
+            timestamp: Date.now()
+          }));
         } else if(flow === 'join'){
-          localStorage.setItem('authFlow', 'join');
+          localStorage.setItem('authFlow', JSON.stringify({
+            flow: 'join',
+            timestamp: Date.now()
+          }));
         }
         
         var { data, error } = await client.auth.signInWithOAuth({
@@ -1672,10 +1693,19 @@
             habitDescription: habitDescription,
             frequency: frequency
           };
-          localStorage.setItem('pendingPodCreation', JSON.stringify(podDataToStore));
-          localStorage.setItem('authFlow', 'start');
+          localStorage.setItem('pendingPodCreation', JSON.stringify({
+            ...podDataToStore,
+            timestamp: Date.now()
+          }));
+          localStorage.setItem('authFlow', JSON.stringify({
+            flow: 'start',
+            timestamp: Date.now()
+          }));
         } else if(flow === 'join'){
-          localStorage.setItem('authFlow', 'join');
+          localStorage.setItem('authFlow', JSON.stringify({
+            flow: 'join',
+            timestamp: Date.now()
+          }));
         }
         
         var { data, error } = await client.auth.signInWithOAuth({
@@ -1851,6 +1881,28 @@
     }
 
     // Check for auth errors in URL
+    function cleanupStaleLocalStorage(){
+      var keys = ['pendingPodJoin', 'pendingPodCreation', 'authFlow'];
+      var tenMinutesAgo = Date.now() - (10 * 60 * 1000);
+      
+      keys.forEach(function(key){
+        var value = localStorage.getItem(key);
+        if(value){
+          try{
+            var parsed = JSON.parse(value);
+            if(parsed.timestamp && parsed.timestamp < tenMinutesAgo){
+              console.log('Removing stale localStorage key:', key);
+              localStorage.removeItem(key);
+            }
+          }catch(e){
+            // If we can't parse it, remove it anyway
+            console.log('Removing invalid localStorage key:', key);
+            localStorage.removeItem(key);
+          }
+        }
+      });
+    }
+
     function checkAuthErrors(){
       var urlParams = new URLSearchParams(window.location.search);
       var hashParams = new URLSearchParams(window.location.hash.substring(1));
@@ -1910,7 +1962,8 @@
       }, 5000);
     }
 
-    // Run auth error check on page load
+    // Run cleanup and auth error check on page load
+    cleanupStaleLocalStorage();
     checkAuthErrors();
 
     // Check for openmodal parameter

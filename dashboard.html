@@ -2244,80 +2244,24 @@
       console.log('Current user:', currentUser);
 
       try{
-        // Verify the invite code exists using the security definer function
-        var { data: exists, error: checkError } = await client
-          .rpc('check_invite_code_exists', { invite_code_param: code });
-
-        console.log('Invite code check result:', exists, checkError);
-
-        if(checkError){
-          console.error('Invite code check error:', checkError);
-          return;
-        }
-
-        if(!exists){
-          console.error('Invalid invite code:', code);
-          return;
-        }
+        // Use the RPC to join the pod (bypasses RLS)
+        var { data: joinResult, error: joinError } = await client.rpc('join_pod_via_invite_code', { invite_code_param: code });
         
-        // Get the pod details
-        var { data: pod, error: podError } = await client
-          .from('pods')
-          .select('*')
-          .eq('invite_code', code)
-          .maybeSingle();
-
-        console.log('Pod lookup result:', pod, podError);
-
-        if(podError){
-          console.error('Pod lookup error:', podError);
-          return;
-        }
-
-        if(!pod){
-          console.error('Pod not found for code:', code);
-          return;
-        }
-
-        // Check if already a member
-        var { data: existingMember, error: memberError } = await client
-          .from('pod_members')
-          .select('*')
-          .eq('pod_id', pod.id)
-          .eq('user_id', currentUser.id)
-          .maybeSingle();
-
-        console.log('Existing member check:', existingMember, memberError);
-
-        if(memberError){
-          console.error('Member check error:', memberError);
-        }
-
-        if(existingMember){
-          console.log('Already a member of this pod');
-          return;
-        }
-
-        // Join the pod
-        console.log('Attempting to join pod:', pod.id, 'for user:', currentUser.id);
-        var { data: joinData, error: joinError } = await client
-          .from('pod_members')
-          .insert({
-            pod_id: pod.id,
-            user_id: currentUser.id,
-            role: 'member'
-          })
-          .select()
-          .single();
-
-        console.log('Join result:', joinData, joinError);
+        console.log('Join RPC result:', joinResult, joinError);
 
         if(joinError){
-          console.error('Join error:', joinError);
-          throw joinError;
+          console.error('Join RPC error:', joinError);
+          showToast('Error joining pod: ' + joinError.message);
+          return;
         }
 
-        console.log('Successfully joined pod:', pod.name);
+        if(!joinResult.success){
+          console.error('Join failed:', joinResult.error);
+          showToast(joinResult.error || 'Failed to join pod');
+          return;
+        }
+
+        console.log('Successfully joined pod with ID:', joinResult.pod_id);
         
         // Reload pods to show the newly joined pod
         await loadUserPods();
@@ -2326,7 +2270,7 @@
         
         if(userPods.length > 0){
           currentPod = userPods.find(function(p){
-            return p.id === pod.id;
+            return p.id === joinResult.pod_id;
           });
           
           console.log('Current pod set to:', currentPod);
@@ -2341,10 +2285,13 @@
           console.error('No pods found after joining');
         }
         
+        showToast('Successfully joined pod!');
+        
         // Clean URL
         window.history.replaceState({}, document.title, window.location.pathname);
       }catch(err){
         console.error('Error joining pod from code:', err);
+        showToast('Error joining pod: ' + (err.message || 'Please try again.'));
       }
     }
 
@@ -3846,6 +3793,7 @@
           <div class="settings-card">
             <h3>Danger Zone</h3>
             <div class="settings-actions">
+              <button class="btn btn-ghost" id="resetSessionBtn">Reset Session</button>
               <button class="btn btn-ghost" id="logoutBtn">Log Out</button>
             </div>
           </div>
@@ -3856,6 +3804,7 @@
         lucide.createIcons();
       }
 
+      document.getElementById('resetSessionBtn').addEventListener('click', handleResetSession);
       document.getElementById('logoutBtn').addEventListener('click', handleLogout);
 
       // Social connection buttons
@@ -4116,12 +4065,46 @@
       window.location.href = 'index.html';
     }
 
+    async function handleResetSession(){
+      if(!confirm('Are you sure you want to reset your session? This will clear all local data and sign you out.')){
+        return;
+      }
+      
+      localStorage.clear();
+      var client = getSupabaseClient();
+      await client.auth.signOut();
+      window.location.href = 'index.html';
+    }
+
+    function cleanupStaleLocalStorage(){
+      var keys = ['pendingPodJoin', 'pendingPodCreation', 'authFlow'];
+      var tenMinutesAgo = Date.now() - (10 * 60 * 1000);
+      
+      keys.forEach(function(key){
+        var value = localStorage.getItem(key);
+        if(value){
+          try{
+            var parsed = JSON.parse(value);
+            if(parsed.timestamp && parsed.timestamp < tenMinutesAgo){
+              console.log('Removing stale localStorage key:', key);
+              localStorage.removeItem(key);
+            }
+          }catch(e){
+            // If we can't parse it, remove it anyway
+            console.log('Removing invalid localStorage key:', key);
+            localStorage.removeItem(key);
+          }
+        }
+      });
+    }
+
     // Initialize Lucide icons
     if(typeof lucide !== 'undefined'){
       lucide.createIcons();
     }
 
-    // Check auth on load
+    // Run cleanup and check auth on load
+    cleanupStaleLocalStorage();
     checkAuth();
   });
 </script>
