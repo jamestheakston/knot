@@ -2597,6 +2597,9 @@
       // Handle case where user_upgraded might be a boolean or other type
       var isUpgraded = userProfile.user_upgraded === true || userProfile.user_upgraded === 'true';
       var limit = isUpgraded ? 2 : 1;
+      
+      console.log('canCreateMorePods check:', { createdPods, limit, isUpgraded, userPods: userPods.length });
+      
       return createdPods < limit;
     }
 
