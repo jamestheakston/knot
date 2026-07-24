@@ -2758,9 +2758,18 @@
               alert('Failed to join pod. Please try joining manually with your invite code.');
             }
           }else if(flowData.flow === 'start'){
-            console.log('Handling start flow');
-            await checkPendingPodCreation();
+            console.log('Handling start flow with pod data:', flowData);
+            // Create pod from the auth flow data
+            var podData = {
+              podName: flowData.podName,
+              habitName: flowData.habitName,
+              habitDescription: flowData.habitDescription,
+              frequency: flowData.frequency
+            };
+            await createPodFromSignup(podData);
             localStorage.removeItem('authFlow');
+            // Reload pods after creating
+            await loadUserPods();
           }else{
             console.log('Unknown or expired auth flow, removing');
             localStorage.removeItem('authFlow');
