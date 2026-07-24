@@ -2484,6 +2484,7 @@
       var joinCode = urlParams.get('code');
       var isLinking = urlParams.get('link');
       var action = urlParams.get('action');
+      var removedFromPod = urlParams.get('removed');
 
       // Check for pending pod join from URL parameters BEFORE showing no pods placeholder
       if(shouldJoinPod === 'true' && joinCode){
@@ -2497,19 +2498,19 @@
         }
       }
       
-      // Clear URL parameters after processing
-      if(shouldJoinPod || joinCode || shouldCreatePod || isLinking || action){
-        window.history.replaceState({}, document.title, window.location.pathname);
-      }
-      
-      // Check for pending pod creation
-      await checkPendingPodCreation();
+      // Check for pending pod creation (pass the param instead of re-reading URL)
+      await checkPendingPodCreation(shouldCreatePod);
       
       // Check for pending pod join from localStorage
       await checkPendingPodJoin();
 
       // Check for auth flow (OAuth or email confirmation) - MUST be before userPods check
       await checkAuthFlow();
+
+      // Clear URL parameters after all processing is done
+      if(shouldJoinPod || joinCode || shouldCreatePod || isLinking || action || removedFromPod){
+        window.history.replaceState({}, document.title, window.location.pathname);
+      }
 
       if(userPods.length > 0){
         currentPod = userPods[0];
@@ -2537,14 +2538,9 @@
         // If linking account, show success message
         if(isLinking){
           alert('Account linked successfully!');
-          // Remove link parameter from URL
-          window.history.replaceState({}, document.title, window.location.pathname);
         }
       }else{
         // User has no pods - check if they were removed from a pod
-        var urlParams = new URLSearchParams(window.location.search);
-        var removedFromPod = urlParams.get('removed');
-        
         if(removedFromPod){
           // Redirect to removed page with pod name
           window.location.href = 'removed.html?pod=' + encodeURIComponent(removedFromPod);
@@ -2611,10 +2607,8 @@
       return createdPods < limit;
     }
 
-    async function checkPendingPodCreation(){
-      var urlParams = new URLSearchParams(window.location.search);
-      var shouldCreatePod = urlParams.get('createpod');
-      
+    async function checkPendingPodCreation(shouldCreatePod){
+      // Use the passed parameter instead of re-reading URL
       if(shouldCreatePod === 'true'){
         // Refresh session to ensure we have the latest user data
         var client = getSupabaseClient();
@@ -2636,8 +2630,6 @@
             var podData = JSON.parse(pendingPodData);
             await createPodFromSignup(podData);
             localStorage.removeItem('pendingPodCreation');
-            // Clean URL AFTER successful creation
-            window.history.replaceState({}, document.title, window.location.pathname);
             // Reload pods to show the newly created pod
             var { data: pods, error } = await client
               .from('pod_members')
