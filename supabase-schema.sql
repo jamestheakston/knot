@@ -276,9 +276,10 @@ RETURNS JSON AS $$
 DECLARE
   pod_uuid UUID;
   result JSON;
+  member_count INTEGER;
 BEGIN
-  -- Get pod by invite code
-  SELECT id INTO pod_uuid FROM pods WHERE invite_code = invite_code_param;
+  -- Get pod by invite code with row lock to prevent concurrent modifications
+  SELECT id INTO pod_uuid FROM pods WHERE invite_code = invite_code_param FOR UPDATE;
   
   IF pod_uuid IS NULL THEN
     RETURN json_build_object('success', false, 'error', 'Invalid invite code');
@@ -292,10 +293,10 @@ BEGIN
     RETURN json_build_object('success', false, 'error', 'Already a member of this pod');
   END IF;
   
-  -- Check if pod is full (max 5 members)
-  IF (
-    SELECT COUNT(*) FROM pod_members WHERE pod_id = pod_uuid
-  ) >= 5 THEN
+  -- Check if pod is full (max 5 members) with lock to prevent race conditions
+  SELECT COUNT(*) INTO member_count FROM pod_members WHERE pod_id = pod_uuid FOR UPDATE;
+  
+  IF member_count >= 5 THEN
     RETURN json_build_object('success', false, 'error', 'Pod is full (max 5 members)');
   END IF;
   
@@ -304,6 +305,9 @@ BEGIN
   VALUES (pod_uuid, auth.uid(), 'member');
   
   RETURN json_build_object('success', true, 'pod_id', pod_uuid);
+EXCEPTION
+  WHEN OTHERS THEN
+    RETURN json_build_object('success', false, 'error', SQLERRM);
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
