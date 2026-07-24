@@ -2748,6 +2748,14 @@
           var flowData = JSON.parse(authFlow);
           console.log('Found auth flow:', flowData);
           
+          // Check if auth flow is stale (older than 10 minutes)
+          var tenMinutesAgo = Date.now() - (10 * 60 * 1000);
+          if(flowData.timestamp && flowData.timestamp < tenMinutesAgo){
+            console.log('Auth flow is stale, removing');
+            localStorage.removeItem('authFlow');
+            return;
+          }
+          
           if(flowData.flow === 'join' && flowData.inviteCode){
             console.log('Handling join flow with invite code:', flowData.inviteCode);
             var joinSuccess = await handlePodJoinFromCode(flowData.inviteCode);
@@ -2758,6 +2766,15 @@
             }
           }else if(flowData.flow === 'start'){
             console.log('Handling start flow with pod data:', flowData);
+            
+            // Validate that we have the required pod data
+            if(!flowData.podName || !flowData.habitName){
+              console.error('Auth flow start missing required pod data:', flowData);
+              localStorage.removeItem('authFlow');
+              alert('Your pod creation data is incomplete. Please create a pod manually.');
+              return;
+            }
+            
             // Create pod from the auth flow data
             var podData = {
               podName: flowData.podName,
