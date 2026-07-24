@@ -2711,28 +2711,33 @@
     }
 
     async function handlePodJoinFromCode(code){
+      console.log('=== handlePodJoinFromCode START ===');
+      console.log('Invite code:', code);
+      console.log('Current user:', currentUser);
+      
       var client = getSupabaseClient();
       if(!client){
         console.error('No Supabase client available');
+        console.log('=== handlePodJoinFromCode END (no client) ===');
         return false;
       }
 
-      console.log('handlePodJoinFromCode called with code:', code);
-      console.log('Current user:', currentUser);
-
       try{
         // Use the RPC to join the pod (bypasses RLS)
+        console.log('Calling join_pod_via_invite_code RPC with code:', code);
         var { data: joinResult, error: joinError } = await client.rpc('join_pod_via_invite_code', { invite_code_param: code });
         
         console.log('Join RPC result:', joinResult, joinError);
 
         if(joinError){
           console.error('Join RPC error:', joinError);
+          console.log('=== handlePodJoinFromCode END (RPC error) ===');
           return false;
         }
 
         if(!joinResult.success){
           console.error('Join failed:', joinResult.error);
+          console.log('=== handlePodJoinFromCode END (join failed) ===');
           return false;
         }
 
@@ -2755,39 +2760,49 @@
             updatePodSelector();
             updateAdminVisibility();
             navigateTo('overview');
+            console.log('=== handlePodJoinFromCode END (success) ===');
             return true;
           }
         }else{
           console.error('No pods found after joining');
+          console.log('=== handlePodJoinFromCode END (no pods) ===');
           return false;
         }
         
         // Clean URL
         window.history.replaceState({}, document.title, window.location.pathname);
+        console.log('=== handlePodJoinFromCode END (success) ===');
         return true;
       }catch(err){
         console.error('Error joining pod from code:', err);
+        console.log('=== handlePodJoinFromCode END (exception) ===');
         return false;
       }
     }
 
     async function checkAuthFlow(){
+      console.log('=== checkAuthFlow START ===');
       var authFlow = localStorage.getItem('authFlow');
+      console.log('authFlow from localStorage:', authFlow);
+      
       if(authFlow){
         try{
           var flowData = JSON.parse(authFlow);
-          console.log('Found auth flow:', flowData);
+          console.log('Parsed authFlow:', flowData);
+          console.log('Flow type:', flowData.flow);
           
           // Check if auth flow is stale (older than 10 minutes)
           var tenMinutesAgo = Date.now() - (10 * 60 * 1000);
           if(flowData.timestamp && flowData.timestamp < tenMinutesAgo){
-            console.log('Auth flow is stale, removing');
+            console.log('Auth flow is stale (timestamp:', flowData.timestamp, ', now:', Date.now() + '), removing');
             localStorage.removeItem('authFlow');
+            console.log('=== checkAuthFlow END (stale) ===');
             return;
           }
           
           if(flowData.flow === 'join' && flowData.inviteCode){
-            console.log('Handling join flow with invite code:', flowData.inviteCode);
+            console.log('=== JOIN FLOW ===');
+            console.log('Invite code:', flowData.inviteCode);
             console.log('About to call handlePodJoinFromCode with code:', flowData.inviteCode);
             var joinSuccess = await handlePodJoinFromCode(flowData.inviteCode);
             console.log('handlePodJoinFromCode returned:', joinSuccess);
@@ -2795,15 +2810,24 @@
             if(!joinSuccess){
               console.error('Failed to join pod from auth flow');
               alert('Failed to join pod. Please try joining manually with your invite code.');
+            }else{
+              console.log('Successfully joined pod via auth flow');
             }
           }else if(flowData.flow === 'start'){
-            console.log('Handling start flow with pod data:', flowData);
+            console.log('=== START FLOW ===');
+            console.log('Pod data:', {
+              podName: flowData.podName,
+              habitName: flowData.habitName,
+              habitDescription: flowData.habitDescription,
+              frequency: flowData.frequency
+            });
             
             // Validate that we have the required pod data
             if(!flowData.podName || !flowData.habitName){
               console.error('Auth flow start missing required pod data:', flowData);
               localStorage.removeItem('authFlow');
               alert('Your pod creation data is incomplete. Please create a pod manually.');
+              console.log('=== checkAuthFlow END (missing data) ===');
               return;
             }
             
@@ -2814,8 +2838,10 @@
               habitDescription: flowData.habitDescription,
               frequency: flowData.frequency
             };
+            console.log('About to call createPodFromSignup with podData:', podData);
             await createPodFromSignup(podData);
             localStorage.removeItem('authFlow');
+            console.log('Successfully created pod via auth flow');
             // Note: createPodFromSignup already reloads pods internally
           }else{
             console.log('Unknown or expired auth flow, removing');
@@ -2825,7 +2851,11 @@
           console.error('Error processing auth flow:', err);
           localStorage.removeItem('authFlow');
         }
+      }else{
+        console.log('No authFlow found in localStorage');
       }
+      
+      console.log('=== checkAuthFlow END ===');
     }
 
     async function checkPendingPodJoin(){
@@ -2912,14 +2942,22 @@
     }
 
     async function createPodFromSignup(podData){
+      console.log('=== createPodFromSignup START ===');
+      console.log('Pod data:', podData);
+      
       var client = getSupabaseClient();
-      if(!client) return;
+      if(!client){
+        console.error('No Supabase client available');
+        console.log('=== createPodFromSignup END (no client) ===');
+        return;
+      }
 
       try{
         // Ensure user is authenticated
         if(!currentUser || !currentUser.id){
           console.error('User not authenticated, cannot create pod');
           alert('You must be logged in to create a pod. Please refresh the page.');
+          console.log('=== createPodFromSignup END (not authenticated) ===');
           return;
         }
 
@@ -2948,6 +2986,7 @@
             podError = result.error;
             
             if(podError) throw podError;
+            console.log('Pod created successfully with ID:', podResult.id);
             break;
           }catch(err){
             console.error('Pod creation error on attempt ' + (retries + 1) + ':', err.code, err.message, err);
@@ -2963,6 +3002,7 @@
         if(podError) throw podError;
 
         // Add creator as pod member FIRST (before creating habit for RLS)
+        console.log('Adding user as pod admin for pod:', podResult.id);
         var { error: memberError } = await client
           .from('pod_members')
           .insert({
@@ -2972,8 +3012,10 @@
           });
 
         if(memberError) throw memberError;
+        console.log('User added as pod admin successfully');
 
         // Create habit (now that user is pod admin, RLS should allow it)
+        console.log('Creating habit for pod:', podResult.id);
         var { error: habitError } = await client
           .from('habits')
           .insert({
@@ -2984,9 +3026,11 @@
           });
 
         if(habitError) throw habitError;
+        console.log('Habit created successfully');
 
         // Create user profile if it doesn't exist
         try{
+          console.log('Creating/updating user profile');
           var { error: profileError } = await client
             .from('user_profiles')
             .upsert({
@@ -2998,15 +3042,35 @@
           if(profileError && profileError.code !== '23505'){
             throw profileError;
           }
+          console.log('User profile created/updated successfully');
         }catch(err){
           if(err.code !== '23505'){
             console.error('Error creating user profile:', err);
           }
         }
 
+        // Reload pods to show the newly created pod
+        await loadUserPods();
+        console.log('User pods after reload:', userPods);
+        
+        if(userPods.length > 0){
+          currentPod = userPods.find(function(p){
+            return p.id === podResult.id;
+          });
+          
+          if(currentPod){
+            isAdmin = currentPod.role === 'admin';
+            updatePodSelector();
+            updateAdminVisibility();
+            console.log('Current pod set to:', currentPod);
+          }
+        }
+        
+        console.log('=== createPodFromSignup END (success) ===');
       }catch(err){
         console.error('Error creating pod:', err);
         alert('Error creating pod: ' + err.message);
+        console.log('=== createPodFromSignup END (error) ===');
       }
     }
 

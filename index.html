@@ -1669,12 +1669,9 @@
             habitDescription: habitDescription,
             frequency: frequency
           };
-          localStorage.setItem('pendingPodCreation', JSON.stringify({
-            ...podDataToStore,
-            timestamp: Date.now()
-          }));
           localStorage.setItem('authFlow', JSON.stringify({
             flow: 'start',
+            ...podDataToStore,
             timestamp: Date.now()
           }));
         } else if(flow === 'join'){
@@ -1725,12 +1722,9 @@
             habitDescription: habitDescription,
             frequency: frequency
           };
-          localStorage.setItem('pendingPodCreation', JSON.stringify({
-            ...podDataToStore,
-            timestamp: Date.now()
-          }));
           localStorage.setItem('authFlow', JSON.stringify({
             flow: 'start',
+            ...podDataToStore,
             timestamp: Date.now()
           }));
         } else if(flow === 'join'){
