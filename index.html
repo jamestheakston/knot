@@ -1660,8 +1660,11 @@
             timestamp: Date.now()
           }));
         } else if(flow === 'join'){
+          // Store the invite code for joining after OAuth
+          var inviteCode = document.getElementById('inviteCode').value;
           localStorage.setItem('authFlow', JSON.stringify({
             flow: 'join',
+            inviteCode: inviteCode,
             timestamp: Date.now()
           }));
         }
@@ -1713,8 +1716,11 @@
             timestamp: Date.now()
           }));
         } else if(flow === 'join'){
+          // Store the invite code for joining after OAuth
+          var inviteCode = document.getElementById('inviteCode').value;
           localStorage.setItem('authFlow', JSON.stringify({
             flow: 'join',
+            inviteCode: inviteCode,
             timestamp: Date.now()
           }));
         }
@@ -1950,10 +1956,14 @@
           window.location.href = 'dashboard.html?createpod=true';
           return;
         } else if(parsedAuthFlow && parsedAuthFlow.flow === 'join'){
-          // Redirect to dashboard normally
-          console.log('Redirecting to dashboard for join flow');
+          // Redirect to dashboard with join code
+          console.log('Redirecting to dashboard for join flow with code:', parsedAuthFlow.inviteCode);
+          var joinUrl = 'dashboard.html';
+          if(parsedAuthFlow.inviteCode){
+            joinUrl += '?joinpod=true&code=' + parsedAuthFlow.inviteCode;
+          }
           localStorage.removeItem('authFlow');
-          window.location.href = 'dashboard.html';
+          window.location.href = joinUrl;
           return;
         } else {
           console.log('No valid auth flow found, redirecting to dashboard');
