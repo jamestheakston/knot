@@ -1499,36 +1499,46 @@
         if(error) throw error;
 
         console.log('Sign up result:', data);
+        console.log('Has session:', !!data.session);
 
         // Check if we have a session (auto-login) or need email confirmation
         if(data.session){
           // User is automatically logged in, join the pod via RPC
+          console.log('User has session, joining pod via RPC');
           showToast('Account created! Joining pod...');
           var { data: joinResult, error: joinError } = await client.rpc('join_pod_via_invite_code', { invite_code_param: code });
+          
+          console.log('Join RPC result:', joinResult, joinError);
           
           if(joinError){
             console.error('Join error:', joinError);
             showToast('Error joining pod: ' + joinError.message);
             setTimeout(function(){
+              console.log('Redirecting to dashboard after join error');
               window.location.href = 'dashboard.html';
             }, 1000);
             return;
           }
           
           if(!joinResult.success){
+            console.error('Join failed:', joinResult.error);
             showToast(joinResult.error || 'Failed to join pod');
             setTimeout(function(){
+              console.log('Redirecting to dashboard after join failure');
               window.location.href = 'dashboard.html';
             }, 1000);
             return;
           }
           
+          console.log('Join successful, redirecting to dashboard');
           showToast('Successfully joined pod!');
           setTimeout(function(){
+            console.log('Executing redirect to dashboard');
             window.location.href = 'dashboard.html';
           }, 1000);
         }else{
           // User needs to confirm email first
+          console.log('No session, email confirmation required');
           showToast('Account created! Please check your email to confirm, then join the pod.');
           // Store the join code for after email confirmation
           localStorage.setItem('pendingPodJoin', JSON.stringify({
@@ -1536,11 +1546,12 @@
             timestamp: Date.now()
           }));
           setTimeout(function(){
+            console.log('Redirecting to dashboard for email confirmation');
             window.location.href = 'dashboard.html';
           }, 2000);
         }
       }catch(err){
-        console.error('Error:', err);
+        console.error('Error in handleJoinSubmit:', err);
         showToast('Error: ' + err.message);
       }finally{
         setButtonLoading(btn, false);
