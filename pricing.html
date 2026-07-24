@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="description" content="Simple pricing for Knot. Free to create one pod, Pod Plus for £0.99/month for two pods.">
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%232A4BD7' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71'/><path d='M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71'/></svg>">
+<link rel="icon" type="image/svg+xml" media="(prefers-color-scheme: dark)" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23FFFFFF' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71'/><path d='M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71'/></svg>">
+<title>Knot — Pricing</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Work+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@latest"></script>
+<style>
+  :root{
+    --bg: #F7F8FB;
+    --bg-2: #FFFFFF;
+    --bg-3: #EEF1F6;
+    --ink: #151922;
+    --muted: #5B6472;
+    --muted-2: #8890A0;
+    --blue: #2A4BD7;
+    --blue-bright: #1B37AE;
+    --blue-soft: #EAEFFF;
+    --red: #C4432A;
+    --line: rgba(21,25,34,0.10);
+    --line-strong: rgba(21,25,34,0.18);
+  }
+
+  *{ box-sizing: border-box; }
+  html{ scroll-behavior: smooth; }
+  body{
+    margin:0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'Work Sans', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    line-height: 1.5;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+  h1,h2,h3{
+    font-family: 'Instrument Serif', serif;
+    font-weight: 400;
+    margin: 0;
+    letter-spacing: -0.01em;
+  }
+  a{ color: inherit; }
+  .mono{ font-family: 'IBM Plex Mono', monospace; }
+
+  ::selection{ background: var(--blue); color: #fff; }
+
+  :focus-visible{
+    outline: 2px solid var(--blue);
+    outline-offset: 3px;
+    border-radius: 4px;
+  }
+
+  .wrap{
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: 0 32px;
+  }
+
+  /* ---------- NAV ---------- */
+  nav{
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    background: rgba(247,248,251,0.85);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--line);
+  }
+  .nav-inner{
+    display:flex;
+    align-items:center;
+    justify-content: space-between;
+    padding: 20px 32px;
+    max-width: 1120px;
+    margin: 0 auto;
+  }
+  .logo{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    font-family:'Instrument Serif', serif;
+    font-size: 24px;
+    font-weight:400;
+    text-decoration:none;
+    color: var(--ink);
+  }
+  .logo-mark{
+    width: 22px; height: 22px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+  .nav-links{
+    display:flex;
+    align-items:center;
+    gap: 28px;
+  }
+  .nav-links a.text-link{
+    font-size: 14.5px;
+    color: var(--muted);
+    text-decoration:none;
+    transition: color 0.2s ease;
+  }
+  .nav-links a.text-link:hover{ color: var(--ink); }
+
+  .btn{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    gap: 8px;
+    padding: 11px 20px;
+    border-radius: 8px;
+    font-size: 14.5px;
+    font-weight: 500;
+    text-decoration:none;
+    cursor:pointer;
+    border: 1px solid transparent;
+    transition: transform 0.15s ease, background 0.2s ease, border-color 0.2s ease;
+    font-family: 'Work Sans', sans-serif;
+  }
+  .btn:active{ transform: scale(0.98); }
+  .btn-primary{
+    background: var(--blue);
+    color: #fff;
+  }
+  .btn-primary:hover{ background: var(--blue-bright); }
+  .btn-ghost{
+    background: transparent;
+    border-color: var(--line-strong);
+    color: var(--ink);
+  }
+  .btn-ghost:hover{ border-color: var(--blue); color: var(--blue); }
+
+  /* ---------- HERO ---------- */
+  .pricing-hero{
+    padding: 120px 32px 80px;
+    text-align: center;
+  }
+  .pricing-hero h1{
+    font-size: clamp(40px, 6vw, 56px);
+    line-height: 1.1;
+    margin-bottom: 20px;
+  }
+  .pricing-hero p{
+    color: var(--muted);
+    font-size: 18px;
+    max-width: 500px;
+    margin: 0 auto;
+  }
+
+  /* ---------- PRICING CARDS ---------- */
+  .pricing-section{
+    padding: 60px 0 120px;
+  }
+  .pricing-grid{
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 32px;
+    max-width: 800px;
+    margin: 0 auto;
+  }
+  .pricing-card{
+    background: var(--bg-2);
+    border: 1px solid var(--line);
+    border-radius: 20px;
+    padding: 40px;
+    position: relative;
+  }
+  .pricing-card.featured{
+    border-color: var(--blue);
+    box-shadow: 0 0 0 3px var(--blue-soft);
+  }
+  .pricing-card.featured::before{
+    content: 'Most popular';
+    position: absolute;
+    top: -12px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--blue);
+    color: #fff;
+    padding: 6px 16px;
+    border-radius: 100px;
+    font-size: 12px;
+    font-weight: 500;
+  }
+  .pricing-card h3{
+    font-size: 24px;
+    margin-bottom: 8px;
+  }
+  .pricing-card .price{
+    font-size: 48px;
+    font-weight: 600;
+    margin: 24px 0;
+    color: var(--ink);
+  }
+  .pricing-card .price span{
+    font-size: 18px;
+    font-weight: 400;
+    color: var(--muted);
+  }
+  .pricing-card .description{
+    color: var(--muted);
+    font-size: 15px;
+    margin-bottom: 32px;
+  }
+  .pricing-card .features{
+    list-style: none;
+    padding: 0;
+    margin: 0 0 32px;
+  }
+  .pricing-card .features li{
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--line);
+    font-size: 15px;
+  }
+  .pricing-card .features li:last-child{
+    border-bottom: none;
+  }
+  .pricing-card .features li i{
+    color: var(--blue);
+    flex-shrink: 0;
+  }
+  .pricing-card .features li.dimmed{
+    color: var(--muted-2);
+  }
+  .pricing-card .features li.dimmed i{
+    color: var(--muted-2);
+  }
+
+  /* ---------- FOOTER ---------- */
+  footer{
+    border-top: 1px solid var(--line);
+    padding: 28px 32px 40px;
+    margin-top: auto;
+  }
+  .footer-inner{
+    max-width: 1120px;
+    margin: 0 auto;
+    display:flex;
+    justify-content: space-between;
+    align-items:center;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+  .footer-inner .logo{ font-size: 18px; }
+  .footer-inner p{
+    color: var(--muted-2);
+    font-size: 13px;
+    margin:0;
+  }
+  .footer-links{
+    display: flex;
+    gap: 20px;
+  }
+  .footer-links a{
+    color: var(--muted-2);
+    font-size: 13px;
+    text-decoration: none;
+    transition: color 0.2s ease;
+  }
+  .footer-links a:hover{
+    color: var(--blue);
+  }
+
+  /* ---------- RESPONSIVE ---------- */
+  @media (max-width: 768px){
+    .pricing-grid{ grid-template-columns: 1fr; }
+    .nav-links .text-link{ display:none; }
+    .pricing-hero h1{ font-size: 36px; }
+  }
+</style>
+</head>
+<body>
+<nav>
+  <div class="nav-inner">
+    <a href="index.html" class="logo">
+      <i data-lucide="link" class="logo-mark" style="color: #2A4BD7;"></i>
+      Knot
+    </a>
+    <div class="nav-links">
+      <a href="index.html" class="text-link">Home</a>
+      <a href="pricing.html" class="text-link" style="color: var(--blue);">Pricing</a>
+      <a href="index.html" class="btn btn-primary" data-modal-open>Start a pod</a>
+    </div>
+  </div>
+</nav>
+
+<div class="pricing-hero">
+  <h1>Simple pricing, no surprises</h1>
+  <p>Free to create one pod. Pod Plus for £0.99/month to unlock a second pod.</p>
+</div>
+
+<section class="pricing-section">
+  <div class="wrap">
+    <div class="pricing-grid">
+      <div class="pricing-card">
+        <h3>Free</h3>
+        <div class="price">£0<span>/month</span></div>
+        <p class="description">Perfect for getting started with your first pod.</p>
+        <ul class="features">
+          <li><i data-lucide="check" width="18" height="18"></i> 1 pod</li>
+          <li><i data-lucide="check" width="18" height="18"></i> Up to 5 members per pod</li>
+          <li><i data-lucide="check" width="18" height="18"></i> Daily check-ins</li>
+          <li><i data-lucide="check" width="18" height="18"></i> Shared streak tracking</li>
+          <li><i data-lucide="check" width="18" height="18"></i> Invite codes</li>
+          <li class="dimmed"><i data-lucide="x" width="18" height="18"></i> 1 pod limit</li>
+        </ul>
+        <a href="index.html" class="btn btn-ghost" style="width: 100%;" data-modal-open>Get started free</a>
+      </div>
+      
+      <div class="pricing-card featured">
+        <h3>Pod Plus</h3>
+        <div class="price">£0.99<span>/month</span></div>
+        <p class="description">For users who want to run multiple pods.</p>
+        <ul class="features">
+          <li><i data-lucide="check" width="18" height="18"></i> 2 pods</li>
+          <li><i data-lucide="check" width="18" height="18"></i> Up to 5 members per pod</li>
+          <li><i data-lucide="check" width="18" height="18"></i> Daily check-ins</li>
+          <li><i data-lucide="check" width="18" height="18"></i> Shared streak tracking</li>
+          <li><i data-lucide="check" width="18" height="18"></i> Invite codes</li>
+          <li><i data-lucide="check" width="18" height="18"></i> Priority support</li>
+        </ul>
+        <a href="index.html" class="btn btn-primary" style="width: 100%;" data-modal-open>Upgrade to Pod Plus</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="footer-inner">
+    <div class="logo">
+      <i data-lucide="link" class="logo-mark" style="color: #2A4BD7;"></i>
+      Knot
+    </div>
+    <div class="footer-links">
+      <a href="privacy.html">Privacy</a>
+      <a href="terms.html">Terms</a>
+    </div>
+    <p>© 2026 Knot. A habit is easier to keep than a promise, when both are shared.</p>
+  </div>
+</footer>
+
+<script>
+  lucide.createIcons();
+  
+  // Modal functionality (same as index.html)
+  document.querySelectorAll('[data-modal-open]').forEach(function(btn){
+    btn.addEventListener('click', function(e){
+      e.preventDefault();
+      window.location.href = 'index.html';
+    });
+  });
+</script>
+</body>
+</html>
