@@ -472,6 +472,35 @@
   }
 
   /* ---------- STREAK DISPLAY ---------- */
+  .streak-section{
+    padding: 32px 0;
+  }
+  .streak-cards{
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 32px;
+  }
+  .streak-card-container{
+    background: var(--bg-2);
+    border-radius: 20px;
+    padding: 32px;
+    border: 1px solid var(--line);
+  }
+  .streak-card-container h3{
+    font-family: 'Instrument Serif', serif;
+    font-size: 24px;
+    font-weight: 400;
+    color: var(--ink);
+    margin-bottom: 24px;
+  }
+  .streak-card{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 20px;
+  }
   .streak-display{
     display: flex;
     flex-direction: column;
@@ -881,6 +910,47 @@
     background: var(--bg-2);
     border-radius: 16px;
     border: 1px dashed var(--line);
+  }
+
+  /* ---------- BUTTONS ---------- */
+  .btn{
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px 24px;
+    border-radius: 10px;
+    font-size: 15px;
+    font-weight: 600;
+    font-family: 'Work Sans', sans-serif;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: none;
+    text-decoration: none;
+    gap: 8px;
+  }
+  .btn:hover{
+    transform: translateY(-1px);
+  }
+  .btn:active{
+    transform: translateY(0);
+  }
+  .btn-primary{
+    background: var(--blue);
+    color: #fff;
+    box-shadow: 0 2px 8px rgba(42, 75, 215, 0.3);
+  }
+  .btn-primary:hover{
+    background: var(--blue-dark);
+    box-shadow: 0 4px 12px rgba(42, 75, 215, 0.4);
+  }
+  .btn-ghost{
+    background: transparent;
+    color: var(--ink);
+    border: 1px solid var(--line);
+  }
+  .btn-ghost:hover{
+    background: var(--bg-2);
+    border-color: var(--line-strong);
   }
   .btn-sm{
     padding: 8px 16px;
@@ -1952,7 +2022,7 @@
 
     async function loadStreakData(){
       var client = getSupabaseClient();
-      if(!client || !currentPod) return 0;
+      if(!client || !currentPod) return { personal: 0, group: [], hasPreviousStreak: false };
 
       try{
         // Get check-ins for the current pod and user
@@ -1966,11 +2036,12 @@
         if(error) throw error;
 
         if(!checkIns || checkIns.length === 0){
-          return 0;
+          return { personal: 0, group: [], hasPreviousStreak: false };
         }
 
         // Calculate current streak
         var streak = 0;
+        var hasPreviousStreak = false;
         var today = new Date();
         today.setHours(0, 0, 0, 0);
         
@@ -1988,8 +2059,11 @@
         var dayDiff = Math.floor((today - lastCheckInDate) / (1000 * 60 * 60 * 24));
         
         if(dayDiff > 1){
-          // Streak broken
-          return 0;
+          // Streak broken, but check if they had a previous streak
+          if(checkInDates.length > 0){
+            hasPreviousStreak = true;
+          }
+          return { personal: 0, group: [], hasPreviousStreak: hasPreviousStreak };
         }
 
         // Count consecutive days
@@ -2010,11 +2084,86 @@
           }
         }
 
-        return streak;
+        // Get group streak data
+        var { data: members, error: membersError } = await client
+          .from('pod_members')
+          .select('user_id')
+          .eq('pod_id', currentPod.id);
+
+        if(membersError) throw membersError;
+
+        var groupStreaks = [];
+        for(var j = 0; j < members.length; j++){
+          var memberId = members[j].user_id;
+          var { data: memberCheckIns, error: memberCheckInsError } = await client
+            .from('check_ins')
+            .select('created_at')
+            .eq('pod_id', currentPod.id)
+            .eq('user_id', memberId)
+            .order('created_at', { ascending: false });
+
+          if(!memberCheckInsError && memberCheckIns && memberCheckIns.length > 0){
+            var memberStreak = calculateMemberStreak(memberCheckIns);
+            var { data: profile } = await client
+              .from('user_profiles')
+              .select('display_name')
+              .eq('user_id', memberId)
+              .maybeSingle();
+            
+            groupStreaks.push({
+              user_id: memberId,
+              display_name: profile?.display_name || memberId.substring(0, 8),
+              streak: memberStreak,
+              isCurrentUser: memberId === currentUser.id
+            });
+          }
+        }
+
+        return { personal: streak, group: groupStreaks, hasPreviousStreak: false };
       }catch(err){
         console.error('Error loading streak data:', err);
+        return { personal: 0, group: [], hasPreviousStreak: false };
+      }
+    }
+
+    function calculateMemberStreak(checkIns){
+      var checkInDates = checkIns.map(function(ci){
+        return new Date(ci.created_at);
+      }).sort(function(a, b){
+        return b - a;
+      });
+
+      var today = new Date();
+      today.setHours(0, 0, 0, 0);
+      
+      var lastCheckIn = checkInDates[0];
+      var lastCheckInDate = new Date(lastCheckIn);
+      lastCheckInDate.setHours(0, 0, 0, 0);
+      
+      var dayDiff = Math.floor((today - lastCheckInDate) / (1000 * 60 * 60 * 24));
+      
+      if(dayDiff > 1){
         return 0;
       }
+
+      var streak = 1;
+      var currentDate = lastCheckInDate;
+      
+      for(var i = 1; i < checkInDates.length; i++){
+        var prevDate = new Date(checkInDates[i]);
+        prevDate.setHours(0, 0, 0, 0);
+        var prevDay = new Date(currentDate);
+        prevDay.setDate(prevDay.getDate() - 1);
+        
+        if(prevDate.getTime() === prevDay.getTime()){
+          streak++;
+          currentDate = prevDate;
+        }else{
+          break;
+        }
+      }
+
+      return streak;
     }
 
     async function loadUserPods(){
@@ -2444,7 +2593,7 @@
             pod_id: podResult.id,
             name: podData.habitName,
             description: podData.habitDescription,
-            frequency: podData.frequency
+            frequency: 'daily'
           });
 
         if(habitError) throw habitError;
@@ -2493,26 +2642,73 @@
       modal.classList.remove('is-open');
     }
 
-    function displayStreak(streak){
+    function displayStreak(streakData){
       var contentArea = document.getElementById('contentArea');
+      var personalStreak = streakData.personal;
+      var groupStreaks = streakData.group;
+      var hasPreviousStreak = streakData.hasPreviousStreak;
       
-      if(streak === 0){
-        contentArea.innerHTML = `
-          <div class="streak-display">
+      var personalHTML = '';
+      if(personalStreak === 0 && hasPreviousStreak){
+        // Streak broken but had previous streak
+        personalHTML = `
+          <div class="streak-card">
             <img src="/assets/nostreak.png" alt="No streak" class="streak-image nostreak-image">
             <div class="streak-count">0</div>
-            <div class="streak-message">You need to start a streak</div>
+            <div class="streak-message">Your streak was interrupted. Check in today to start a new streak!</div>
+          </div>
+        `;
+      }else if(personalStreak === 0){
+        personalHTML = `
+          <div class="streak-card">
+            <img src="/assets/nostreak.png" alt="No streak" class="streak-image nostreak-image">
+            <div class="streak-count">0</div>
+            <div class="streak-message">Start your streak today!</div>
           </div>
         `;
       }else{
-        contentArea.innerHTML = `
-          <div class="streak-display">
+        personalHTML = `
+          <div class="streak-card">
             <img src="/assets/streak.svg" alt="Streak" class="streak-image streak-animated">
-            <div class="streak-count">${streak}</div>
+            <div class="streak-count">${personalStreak}</div>
             <div class="streak-message">day streak</div>
           </div>
         `;
       }
+
+      var groupHTML = '';
+      if(groupStreaks.length > 0){
+        groupHTML = groupStreaks.map(function(gs){
+          return `
+            <div class="group-streak-item">
+              <div class="group-streak-user">
+                <div class="group-streak-avatar">${gs.display_name.charAt(0).toUpperCase()}</div>
+                <div class="group-streak-name">${gs.display_name}${gs.isCurrentUser ? ' (You)' : ''}</div>
+              </div>
+              <div class="group-streak-value ${gs.streak === 0 ? 'group-streak-broken' : ''}">${gs.streak} days</div>
+            </div>
+          `;
+        }).join('');
+      }else{
+        groupHTML = '<div class="no-check-ins">No streak data yet</div>';
+      }
+
+      contentArea.innerHTML = `
+        <div class="streak-section">
+          <div class="streak-cards">
+            <div class="streak-card-container">
+              <h3>Personal Streak</h3>
+              ${personalHTML}
+            </div>
+            <div class="streak-card-container">
+              <h3>Group Streak</h3>
+              <div class="group-streak-list">
+                ${groupHTML}
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
     }
 
     function navigateTo(section){
@@ -3247,14 +3443,6 @@
               <label class="form-label">Description</label>
               <input type="text" class="form-input" id="habitDescription" placeholder="e.g., 30 minutes of cardio">
             </div>
-            <div class="form-group">
-              <label class="form-label">Frequency</label>
-              <select class="form-input" id="habitFrequency">
-                <option value="Daily">Daily</option>
-                <option value="Weekly">Weekly</option>
-                <option value="Monthly">Monthly</option>
-              </select>
-            </div>
           </div>
           <div class="modal-footer">
             <button class="btn btn-ghost" id="cancelHabitBtn">Cancel</button>
@@ -3302,14 +3490,6 @@
                 <label class="form-label">Description</label>
                 <input type="text" class="form-input" id="habitDescription" value="${habit.description || ''}">
               </div>
-              <div class="form-group">
-                <label class="form-label">Frequency</label>
-                <select class="form-input" id="habitFrequency">
-                  <option value="Daily" ${habit.frequency === 'Daily' ? 'selected' : ''}>Daily</option>
-                  <option value="Weekly" ${habit.frequency === 'Weekly' ? 'selected' : ''}>Weekly</option>
-                  <option value="Monthly" ${habit.frequency === 'Monthly' ? 'selected' : ''}>Monthly</option>
-                </select>
-              </div>
             </div>
             <div class="modal-footer">
               <button class="btn btn-ghost" id="cancelHabitBtn">Cancel</button>
@@ -3336,7 +3516,6 @@
     async function saveHabit(habitId, modal){
       var name = document.getElementById('habitName').value;
       var description = document.getElementById('habitDescription').value;
-      var frequency = document.getElementById('habitFrequency').value;
 
       if(!name){
         alert('Please enter a habit name');
@@ -3348,7 +3527,7 @@
         if(habitId){
           var { error } = await client
             .from('habits')
-            .update({ name: name, description: description, frequency: frequency })
+            .update({ name: name, description: description, frequency: 'daily' })
             .eq('id', habitId);
           if(error) throw error;
         }else{
@@ -3358,7 +3537,7 @@
               pod_id: currentPod.id,
               name: name,
               description: description,
-              frequency: frequency
+              frequency: 'daily'
             });
           if(error) throw error;
         }
