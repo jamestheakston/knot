@@ -113,8 +113,12 @@ GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO authenticated;
 DROP POLICY IF EXISTS "Users can view their own profile" ON user_profiles;
 CREATE POLICY "Users can view their own profile"
   ON user_profiles FOR SELECT
+  USING (user_id = auth.uid());
+
+DROP POLICY IF EXISTS "Users can view podmate profiles (limited)" ON user_profiles;
+CREATE POLICY "Users can view podmate profiles (limited)"
+  ON user_profiles FOR SELECT
   USING (
-    user_id = auth.uid() OR
     user_id IN (
       SELECT user_id FROM pod_members 
       WHERE pod_id IN (
@@ -245,6 +249,23 @@ CREATE POLICY "Pod admins can update member roles"
       AND pm.user_id = auth.uid() 
       AND pm.role = 'admin'
     )
+  )
+  WITH CHECK (
+    -- Only allow updating the role column
+    pod_id = (SELECT pod_id FROM pod_members WHERE id = pod_members.id LIMIT 1)
+    AND user_id = (SELECT user_id FROM pod_members WHERE id = pod_members.id LIMIT 1)
+    AND (
+      -- Prevent demoting the last admin
+      NOT (
+        (SELECT role FROM pod_members WHERE id = pod_members.id LIMIT 1) = 'admin'
+        AND NEW.role != 'admin'
+        AND (
+          SELECT COUNT(*) FROM pod_members 
+          WHERE pod_id = pod_members.pod_id 
+          AND role = 'admin'
+        ) = 1
+      )
+    )
   );
 
 -- Check-ins policies
@@ -321,6 +342,106 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- Grant execute permission for join_pod_via_invite_code
 GRANT EXECUTE ON FUNCTION public.join_pod_via_invite_code TO authenticated;
+
+-- Function to create pod with habit (enforces pod creation limit server-side)
+CREATE OR REPLACE FUNCTION create_pod_with_habit(
+  p_pod_name TEXT,
+  p_habit_name TEXT,
+  p_habit_description TEXT DEFAULT NULL,
+  p_frequency TEXT DEFAULT 'daily'
+)
+RETURNS JSON AS $$
+DECLARE
+  pod_uuid UUID;
+  habit_uuid UUID;
+  user_upgraded BOOLEAN;
+  pod_count INTEGER;
+  pod_limit INTEGER;
+  invite_code TEXT;
+  chars TEXT := 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  i INTEGER;
+BEGIN
+  -- Get user's upgrade status
+  SELECT user_upgraded INTO user_upgraded 
+  FROM user_profiles 
+  WHERE user_id = auth.uid();
+  
+  -- Default to false if no profile exists
+  IF user_upgraded IS NULL THEN
+    user_upgraded := false;
+  END IF;
+  
+  -- Set limit based on upgrade status
+  IF user_upgraded THEN
+    pod_limit := 2;
+  ELSE
+    pod_limit := 1;
+  END IF;
+  
+  -- Count existing pods created by this user
+  SELECT COUNT(*) INTO pod_count 
+  FROM pods 
+  WHERE created_by = auth.uid();
+  
+  -- Check if user is at or above their limit
+  IF pod_count >= pod_limit THEN
+    RETURN json_build_object(
+      'success', false, 
+      'error', 'You have reached your pod creation limit. ' || 
+        CASE WHEN user_upgraded THEN 'Maximum 2 pods for upgraded users.' ELSE 'Maximum 1 pod for free users.' END
+    );
+  END IF;
+  
+  -- Generate unique invite code with retry logic
+  FOR i IN 1..10 LOOP
+    invite_code := '';
+    FOR j IN 1..6 LOOP
+      invite_code := invite_code || substr(chars, floor(random() * length(chars) + 1)::INTEGER, 1);
+    END LOOP;
+    
+    -- Check if code already exists
+    IF NOT EXISTS (SELECT 1 FROM pods WHERE invite_code = invite_code) THEN
+      EXIT;
+    END IF;
+    
+    IF i = 10 THEN
+      RETURN json_build_object('success', false, 'error', 'Failed to generate unique invite code');
+    END IF;
+  END LOOP;
+  
+  -- Create the pod
+  INSERT INTO pods (name, created_by, invite_code)
+  VALUES (p_pod_name, auth.uid(), invite_code)
+  RETURNING id INTO pod_uuid;
+  
+  -- Add creator as admin
+  INSERT INTO pod_members (pod_id, user_id, role)
+  VALUES (pod_uuid, auth.uid(), 'admin');
+  
+  -- Create the habit
+  INSERT INTO habits (pod_id, name, description, frequency)
+  VALUES (pod_uuid, p_habit_name, p_habit_description, p_frequency)
+  RETURNING id INTO habit_uuid;
+  
+  -- Create user profile if it doesn't exist
+  INSERT INTO user_profiles (user_id, user_upgraded)
+  VALUES (auth.uid(), user_upgraded)
+  ON CONFLICT (user_id) DO NOTHING;
+  
+  RETURN json_build_object(
+    'success', true, 
+    'pod_id', pod_uuid,
+    'habit_id', habit_uuid,
+    'invite_code', invite_code
+  );
+EXCEPTION
+  WHEN OTHERS THEN
+    RETURN json_build_object('success', false, 'error', SQLERRM);
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Grant execute permission for create_pod_with_habit
+GRANT EXECUTE ON FUNCTION public.create_pod_with_habit TO authenticated;
 
 -- RLS Policy for pod admins to delete pods
 DROP POLICY IF EXISTS "Pod admins can delete pods" ON pods;

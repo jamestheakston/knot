@@ -2668,40 +2668,7 @@
             var podData = JSON.parse(pendingPodData);
             await createPodFromSignup(podData);
             localStorage.removeItem('pendingPodCreation');
-            // Reload pods to show the newly created pod
-            var { data: pods, error } = await client
-              .from('pod_members')
-              .select(`
-                pod_id,
-                role,
-                pods (
-                  id,
-                  name,
-                  invite_code
-                )
-              `)
-              .eq('user_id', currentUser.id);
-
-            if(!error && pods){
-              userPods = pods.map(function(p){
-                return {
-                  id: p.pods.id,
-                  name: p.pods.name,
-                  inviteCode: p.pods.invite_code,
-                  role: p.role
-                };
-              });
-              
-              if(userPods.length > 0){
-                currentPod = userPods[0];
-                isAdmin = currentPod.role === 'admin';
-                updatePodSelector();
-                updateAdminVisibility();
-                // Display streak for the newly created pod
-                var streak = await loadStreakData();
-                displayStreak(streak);
-              }
-            }
+            // createPodFromSignup already reloads pods internally and sets currentPod/isAdmin
           }catch(err){
             console.error('Error parsing pending pod data:', err);
             localStorage.removeItem('pendingPodCreation');
@@ -2768,11 +2735,6 @@
           console.log('=== handlePodJoinFromCode END (no pods) ===');
           return false;
         }
-        
-        // Clean URL
-        window.history.replaceState({}, document.title, window.location.pathname);
-        console.log('=== handlePodJoinFromCode END (success) ===');
-        return true;
       }catch(err){
         console.error('Error joining pod from code:', err);
         console.log('=== handlePodJoinFromCode END (exception) ===');
@@ -3641,7 +3603,7 @@
       var client = getSupabaseClient();
       try{
         console.log('Removing member:', { userId, podId: currentPod.id });
-        var { data, error, count } = await client
+        var { data, error } = await client
           .from('pod_members')
           .delete()
           .eq('pod_id', currentPod.id)
@@ -3650,9 +3612,9 @@
 
         if(error) throw error;
 
-        console.log('Member removal result:', { data, count });
+        console.log('Member removal result:', { data, dataLength: data ? data.length : 0 });
 
-        if(count === 0){
+        if(!data || data.length === 0){
           console.error('No rows deleted - member may not exist or RLS blocked deletion');
           alert('Failed to remove member. You may not have permission to remove this member, or they may not be in this pod.');
           return;
@@ -4167,7 +4129,7 @@
         document.querySelectorAll('.delete-habit-btn').forEach(function(btn){
           btn.addEventListener('click', function(){
             var habitId = this.dataset.id;
-            if(confirm('Are you sure you want to delete this habit?')){
+            if(confirm('Are you sure you want to delete this habit? This will also permanently delete all check-in history for this habit. This action cannot be undone.')){
               deleteHabit(habitId);
             }
           });
@@ -4417,7 +4379,7 @@
 
       document.getElementById('showCodeBtn').addEventListener('click', function(){
         document.getElementById('inviteCodeDisplay').style.display = 'block';
-        document.getElementById('invite-methods').style.display = 'none';
+        document.querySelector('.invite-methods').style.display = 'none';
       });
 
       document.getElementById('copyInviteLarge').addEventListener('click', function(){
@@ -4752,7 +4714,6 @@
       var identities = currentUser.user_metadata?.identities || currentUser.identities || [];
       var hasGitHub = identities.some(function(id){ return id.provider === 'github'; });
       var hasGoogle = identities.some(function(id){ return id.provider === 'google'; });
-      var hasEmail = identities.some(function(id){ return id.provider === 'email'; });
 
       contentArea.innerHTML = `
         <div class="account-settings-section">
@@ -5062,7 +5023,7 @@
         }else if(action === 'profile'){
           navigateTo('profile');
         }else if(action === 'account'){
-          navigateTo('account-settings');
+          navigateTo('account');
         }
         
         document.getElementById('kebabMenu').classList.remove('is-open');
