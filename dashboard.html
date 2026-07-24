@@ -3449,6 +3449,11 @@
       var contentArea = document.getElementById('contentArea');
       var client = getSupabaseClient();
       
+      if(!currentPod){
+        contentArea.innerHTML = '<div class="error">No pod selected. Please select a pod to view check-ins.</div>';
+        return;
+      }
+      
       try{
         var today = new Date();
         today.setHours(0, 0, 0, 0);
@@ -3579,7 +3584,7 @@
       var client = getSupabaseClient();
       
       try{
-        if(!confirm('Are you sure you want to undo your check-in for today?')) return;
+        if(!confirm('Are you sure you want to undo your check-in for today? This will revert your streak by one day.')) return;
 
         var today = new Date();
         today.setHours(0, 0, 0, 0);
@@ -3593,8 +3598,9 @@
 
         if(error) throw error;
 
-        // Reload check-ins
+        // Reload check-ins and overview to update streak
         loadCheckIns();
+        loadOverview();
       }catch(err){
         console.error('Error undoing check-in:', err);
         alert('Error undoing check-in: ' + err.message);
