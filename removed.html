@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Removed from Pod - Knot</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital,wght@0,400;0,500;0,600;0,700;1,400&family=IBM+Plex+Mono:wght@400;500;600&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    :root{
+      --bg: #F5F6F8;
+      --bg-2: #FFFFFF;
+      --bg-3: #F0F1F3;
+      --ink: #151922;
+      --muted: #5A6372;
+      --muted-2: #8890A0;
+      --blue: #2A4BD7;
+      --blue-bright: #1B37AE;
+      --blue-soft: #EAEFFF;
+      --red: #C4432A;
+      --line: rgba(21,25,34,0.10);
+    }
+    
+    *{ box-sizing: border-box; }
+    body{
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: 'Work Sans', sans-serif;
+      -webkit-font-smoothing: antialiased;
+      line-height: 1.5;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    
+    .removed-container{
+      max-width: 480px;
+      width: 100%;
+      background: var(--bg-2);
+      border-radius: 24px;
+      padding: 48px;
+      text-align: center;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+      border: 1px solid var(--line);
+    }
+    
+    .removed-icon{
+      width: 80px;
+      height: 80px;
+      background: var(--red);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 24px;
+      color: #fff;
+    }
+    
+    .removed-icon i{
+      width: 40px;
+      height: 40px;
+    }
+    
+    h1{
+      font-family: 'Instrument Serif', serif;
+      font-size: 28px;
+      font-weight: 400;
+      margin: 0 0 16px;
+      letter-spacing: -0.01em;
+    }
+    
+    p{
+      font-size: 15px;
+      color: var(--muted);
+      line-height: 1.6;
+      margin: 0 0 32px;
+    }
+    
+    .pod-name{
+      font-weight: 600;
+      color: var(--ink);
+    }
+    
+    .btn{
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 12px 24px;
+      border-radius: 10px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      transition: all 0.2s ease;
+      text-decoration: none;
+    }
+    
+    .btn-primary{
+      background: var(--blue);
+      color: #fff;
+    }
+    
+    .btn-primary:hover{
+      background: var(--blue-bright);
+    }
+    
+    .btn-ghost{
+      background: transparent;
+      color: var(--muted);
+      border: 1px solid var(--line);
+    }
+    
+    .btn-ghost:hover{
+      background: var(--bg-3);
+      color: var(--ink);
+    }
+    
+    .actions{
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+  </style>
+</head>
+<body>
+  <div class="removed-container">
+    <div class="removed-icon">
+      <i data-lucide="user-x"></i>
+    </div>
+    <h1>Removed from Pod</h1>
+    <p>You have been removed from the pod <span class="pod-name" id="podName">...</span>. If you believe this is an error, please contact the pod administrator.</p>
+    <div class="actions">
+      <a href="index.html" class="btn btn-primary">Join or Create a New Pod</a>
+      <a href="javascript:history.back()" class="btn btn-ghost">Go Back</a>
+    </div>
+  </div>
+  
+  <script>
+    // Get pod name from URL parameter
+    var urlParams = new URLSearchParams(window.location.search);
+    var podName = urlParams.get('pod');
+    
+    if(podName){
+      document.getElementById('podName').textContent = podName;
+    }else{
+      document.getElementById('podName').textContent = 'this pod';
+    }
+    
+    // Initialize Lucide icons
+    if(typeof lucide !== 'undefined'){
+      lucide.createIcons();
+    }
+  </script>
+</body>
+</html>

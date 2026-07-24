@@ -2535,13 +2535,15 @@
           window.history.replaceState({}, document.title, window.location.pathname);
         }
       }else{
-        // Only show no pods placeholder if not linking an account
-        if(!isLinking){
-          showNoPodsPlaceholder();
+        // User has no pods - check if they were removed from a pod
+        var urlParams = new URLSearchParams(window.location.search);
+        var removedFromPod = urlParams.get('removed');
+        
+        if(removedFromPod){
+          // Redirect to removed page with pod name
+          window.location.href = 'removed.html?pod=' + encodeURIComponent(removedFromPod);
         }else{
-          // If linking account but no pods, this is an error state
-          alert('Account linked successfully, but you are not in any pods.');
-          window.history.replaceState({}, document.title, window.location.pathname);
+          // Show no pods placeholder
           showNoPodsPlaceholder();
         }
       }
@@ -3477,6 +3479,7 @@
 
       var client = getSupabaseClient();
       try{
+        console.log('Removing member:', { userId, podId: currentPod.id });
         var { error } = await client
           .from('pod_members')
           .delete()
@@ -3485,7 +3488,8 @@
 
         if(error) throw error;
 
-        alert(displayName + ' has been removed from the pod');
+        console.log('Member removed successfully');
+        alert(displayName + ' has been removed from the pod. They will be redirected when they next visit the dashboard.');
         loadMembers(); // Reload the members list
       }catch(err){
         console.error('Error removing member:', err);
