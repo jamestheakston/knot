@@ -3112,6 +3112,7 @@
       var contentArea = document.getElementById('contentArea');
       var streakData = await loadStreakData();
       var streak = streakData.personal;
+      var hasCheckedInToday = streakData.hasCheckedInToday;
       var client = getSupabaseClient();
       
       // Get habits for the pod
@@ -3222,8 +3223,8 @@
             <div class="overview-card">
               <h3>Today's Progress</h3>
               <div class="streak-display">
-                ${streak === 0 
-                  ? '<img src="/assets/nostreak.png" alt="No streak" class="streak-image nostreak-image"><div class="streak-count">0</div><div class="streak-message">Start your streak today!</div>'
+                ${streak === 0 || !hasCheckedInToday
+                  ? '<img src="/assets/nostreak.png" alt="No streak" class="streak-image nostreak-image"><div class="streak-count">' + streak + '</div><div class="streak-message">' + (!hasCheckedInToday ? 'Check in today to continue your streak!' : 'Start your streak today!') + '</div>'
                   : '<img src="/assets/streak.svg" alt="Streak" class="streak-image streak-animated"><div class="streak-count">' + streak + '</div><div class="streak-message">day streak</div>'
                 }
               </div>
