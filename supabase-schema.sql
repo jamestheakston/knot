@@ -321,3 +321,22 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- Grant execute permission for join_pod_via_invite_code
 GRANT EXECUTE ON FUNCTION public.join_pod_via_invite_code TO authenticated;
+
+-- RLS Policy for pod admins to delete pods
+DROP POLICY IF EXISTS "Pod admins can delete pods" ON pods;
+CREATE POLICY "Pod admins can delete pods"
+  ON pods FOR DELETE
+  USING (created_by = auth.uid());
+
+-- RLS Policy for pod admins to remove members
+DROP POLICY IF EXISTS "Pod admins can remove members" ON pod_members;
+CREATE POLICY "Pod admins can remove members"
+  ON pod_members FOR DELETE
+  USING (
+    EXISTS (
+      SELECT 1 FROM pod_members pm
+      WHERE pm.pod_id = pod_members.pod_id
+      AND pm.user_id = auth.uid()
+      AND pm.role = 'admin'
+    )
+  );

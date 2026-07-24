@@ -520,6 +520,31 @@
     line-height: 1.4;
   }
 
+  /* ---------- DANGER ZONE ---------- */
+  .danger-zone{
+    margin-top: 48px;
+    padding-top: 32px;
+    border-top: 1px solid var(--line);
+  }
+  .danger-zone h3{
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--red);
+    margin-bottom: 8px;
+  }
+  .danger-zone p{
+    font-size: 14px;
+    color: var(--muted);
+    margin-bottom: 16px;
+  }
+  .btn-danger{
+    background: var(--red);
+    color: #fff;
+  }
+  .btn-danger:hover{
+    background: #a83822;
+  }
+
   /* ---------- NO PODS MODAL ---------- */
   .no-pods-modal-overlay{
     position: fixed;
@@ -2507,6 +2532,9 @@
       // Check for auth flow (OAuth or email confirmation) - MUST be before userPods check
       await checkAuthFlow();
 
+      // Load user profile BEFORE updatePodSelector so userProfile is available
+      await loadUserProfile();
+
       // Clear URL parameters after all processing is done
       if(shouldJoinPod || joinCode || shouldCreatePod || isLinking || action || removedFromPod){
         window.history.replaceState({}, document.title, window.location.pathname);
@@ -2549,9 +2577,6 @@
           showNoPodsPlaceholder();
         }
       }
-      
-      // Load user profile
-      await loadUserProfile();
     }
 
     async function loadUserProfile(){
@@ -2584,8 +2609,15 @@
           if(createError) throw createError;
           userProfile = newProfile;
         }else{
+          // Normalize user_upgraded to boolean if it's stored as string
+          if(typeof data.user_upgraded === 'string'){
+            data.user_upgraded = data.user_upgraded === 'true';
+          }
           userProfile = data;
         }
+        
+        console.log('User profile loaded:', userProfile);
+        console.log('user_upgraded value:', userProfile.user_upgraded, 'type:', typeof userProfile.user_upgraded);
       }catch(err){
         console.error('Error loading user profile:', err);
       }
@@ -2594,12 +2626,15 @@
     function canCreateMorePods(){
       if(!userProfile) return false;
       
+      console.log('canCreateMorePods check - userProfile:', userProfile);
+      console.log('canCreateMorePods check - user_upgraded:', userProfile.user_upgraded, 'type:', typeof userProfile.user_upgraded);
+      
       var createdPods = userPods.filter(function(pod){
         return pod.role === 'admin';
       }).length;
       
-      // Handle case where user_upgraded might be a boolean or other type
-      var isUpgraded = userProfile.user_upgraded === true || userProfile.user_upgraded === 'true';
+      // user_upgraded is now normalized to boolean in loadUserProfile
+      var isUpgraded = userProfile.user_upgraded === true;
       var limit = isUpgraded ? 2 : 1;
       
       console.log('canCreateMorePods check:', { createdPods, limit, isUpgraded, userPods: userPods.length });
@@ -3537,13 +3572,22 @@
       var client = getSupabaseClient();
       try{
         console.log('Removing member:', { userId, podId: currentPod.id });
-        var { error } = await client
+        var { data, error, count } = await client
           .from('pod_members')
           .delete()
           .eq('pod_id', currentPod.id)
-          .eq('user_id', userId);
+          .eq('user_id', userId)
+          .select();
 
         if(error) throw error;
+
+        console.log('Member removal result:', { data, count });
+
+        if(count === 0){
+          console.error('No rows deleted - member may not exist or RLS blocked deletion');
+          alert('Failed to remove member. You may not have permission to remove this member, or they may not be in this pod.');
+          return;
+        }
 
         console.log('Member removed successfully');
         alert(displayName + ' has been removed from the pod. They will be redirected when they next visit the dashboard.');
@@ -3908,6 +3952,11 @@
               <button class="btn btn-primary" id="savePodSettings">Save Changes</button>
             </div>
           </div>
+          <div class="danger-zone">
+            <h3>Danger Zone</h3>
+            <p>These actions are irreversible. Please be careful.</p>
+            <button class="btn btn-danger" id="deletePodBtn">Delete Pod</button>
+          </div>
         </div>
       `;
 
@@ -3924,6 +3973,47 @@
       });
 
       document.getElementById('savePodSettings').addEventListener('click', handleSavePodSettings);
+      document.getElementById('deletePodBtn').addEventListener('click', handleDeletePod);
+    }
+
+    async function handleDeletePod(){
+      if(!confirm('Are you sure you want to delete this pod? This action cannot be undone and will permanently delete:\n\n• The pod\n• All habits\n• All check-ins\n• All member access\n\nAll members will lose access to this pod immediately.')){
+        return;
+      }
+
+      var client = getSupabaseClient();
+      try{
+        console.log('Deleting pod:', currentPod.id);
+        var { error } = await client
+          .from('pods')
+          .delete()
+          .eq('id', currentPod.id);
+
+        if(error) throw error;
+
+        console.log('Pod deleted successfully');
+        alert('Pod deleted successfully');
+
+        // Reload user pods
+        await loadUserPods();
+
+        if(userPods.length > 0){
+          // Switch to another pod
+          currentPod = userPods[0];
+          isAdmin = currentPod.role === 'admin';
+          updatePodSelector();
+          updateAdminVisibility();
+          navigateTo('overview');
+        }else{
+          // No pods left, show no pods placeholder
+          currentPod = null;
+          isAdmin = false;
+          showNoPodsPlaceholder();
+        }
+      }catch(err){
+        console.error('Error deleting pod:', err);
+        alert('Error deleting pod: ' + err.message);
+      }
     }
 
     async function loadHabits(){
