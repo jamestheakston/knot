@@ -2,7 +2,7 @@ User-agent: *
 Allow: /
 
 # Sitemap
-Sitemap: https://knot.app/sitemap.xml
+Sitemap: https://knotapp.pages.dev/sitemap.xml
 
 # Crawl-delay
 Crawl-delay: 1
