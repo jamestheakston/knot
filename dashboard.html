@@ -3574,8 +3574,8 @@
         }
 
         // Calculate new streak and show modal
-        var streak = await loadStreakData();
-        showStreakModal(streak);
+        var streakData = await loadStreakData();
+        showStreakModal(streakData.personal);
 
         // Reload check-ins
         loadCheckIns();
