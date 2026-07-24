@@ -258,7 +258,7 @@ CREATE POLICY "Pod admins can update member roles"
       -- Prevent demoting the last admin
       NOT (
         (SELECT role FROM pod_members WHERE id = pod_members.id LIMIT 1) = 'admin'
-        AND NEW.role != 'admin'
+        AND role != 'admin'
         AND (
           SELECT COUNT(*) FROM pod_members 
           WHERE pod_id = pod_members.pod_id 
