@@ -375,6 +375,78 @@
   .status.waiting{ background: rgba(21,25,34,0.06); color: var(--muted); }
   .status.missed{ background: rgba(196,67,42,0.12); color: var(--red); }
 
+  /* ---------- MISSION SECTION ---------- */
+  .mission-content{
+    display: grid;
+    grid-template-columns: 1fr 280px;
+    gap: 60px;
+    align-items: start;
+  }
+  .mission-text{
+    color: var(--muted);
+    font-size: 16px;
+    line-height: 1.7;
+  }
+  .mission-stats{
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+  }
+  .stat{
+    text-align: center;
+    padding: 24px;
+    background: var(--bg-2);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+  }
+  .stat-number{
+    font-size: 48px;
+    color: var(--blue);
+    margin-bottom: 8px;
+  }
+  .stat-label{
+    font-size: 13px;
+    color: var(--muted);
+  }
+
+  /* ---------- COMPARISON SECTION ---------- */
+  .comparison-table{
+    background: var(--bg-2);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    overflow: hidden;
+  }
+  .comparison-row{
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--line);
+    align-items: center;
+  }
+  .comparison-row:last-child{
+    border-bottom: none;
+  }
+  .comparison-header{
+    background: var(--bg-3);
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--ink);
+  }
+  .comparison-feature{
+    font-size: 14px;
+    color: var(--ink);
+    font-weight: 500;
+  }
+  .comparison-app{
+    font-size: 14px;
+    color: var(--muted);
+  }
+  .comparison-knot{
+    font-size: 14px;
+    color: var(--blue);
+    font-weight: 500;
+  }
+
   /* ---------- CTA FOOTER ---------- */
   .cta-band{
     text-align:center;
@@ -419,6 +491,10 @@
     .feature-grid{ grid-template-columns: 1fr; }
     .pod-card{ grid-template-columns: 1fr; }
     .nav-links .text-link{ display:none; }
+    .mission-content{ grid-template-columns: 1fr; }
+    .comparison-row{ grid-template-columns: 1fr; gap: 12px; }
+    .comparison-header{ display: none; }
+    .comparison-app, .comparison-knot{ font-size: 13px; }
   }
   @media (max-width: 640px){
     .modal-panel{
@@ -1023,6 +1099,84 @@
           <div class="name">Rae</div>
           <div class="status waiting mono">waiting</div>
         </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="mission">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="kicker">Why Knot exists</span>
+      <h2>Habit apps failed because they forgot the people.</h2>
+      <p>We built Knot to bring back what actually works: a small group of people who notice when you're not there.</p>
+    </div>
+    <div class="mission-content">
+      <div class="mission-text">
+        <p>Most habit trackers are designed for isolation — streaks you freeze, badges you earn, notifications that guilt you into opening the app. They're built around the idea that willpower is a muscle you can train alone.</p>
+        <p style="margin-top: 20px;">But the research says something different: the people who stick with habits aren't the ones with the most self-discipline. They're the ones with social accountability. A running group shows up when you don't feel like it. A writing partner waits for your draft. A pod notices when you miss a day.</p>
+        <p style="margin-top: 20px;">Knot is built around that reality. No gamification, no streak freezes, no premium tiers that unlock better motivation. Just a shared board for a small group of people who agreed to hold the line together.</p>
+      </div>
+      <div class="mission-stats">
+        <div class="stat">
+          <div class="stat-number mono">5</div>
+          <div class="stat-label">People per pod</div>
+        </div>
+        <div class="stat">
+          <div class="stat-number mono">1</div>
+          <div class="stat-label">Shared streak</div>
+        </div>
+        <div class="stat">
+          <div class="stat-number mono">0</div>
+          <div class="stat-label">Gamification tricks</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="comparison">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="kicker">Knot vs the rest</span>
+      <h2>What's different</h2>
+      <p>Most habit apps are built for individual streaks. Knot is built for group accountability.</p>
+    </div>
+    <div class="comparison-table">
+      <div class="comparison-row comparison-header">
+        <div class="comparison-feature">Feature</div>
+        <div class="comparison-app">Habit Apps</div>
+        <div class="comparison-knot">Knot</div>
+      </div>
+      <div class="comparison-row">
+        <div class="comparison-feature">Streak model</div>
+        <div class="comparison-app">Individual streaks you can freeze</div>
+        <div class="comparison-knot">One shared streak — breaks if anyone misses</div>
+      </div>
+      <div class="comparison-row">
+        <div class="comparison-feature">Group size</div>
+        <div class="comparison-app">Unlimited or no groups</div>
+        <div class="comparison-knot">Capped at 5 — small enough that everyone notices</div>
+      </div>
+      <div class="comparison-row">
+        <div class="comparison-feature">Notifications</div>
+        <div class="comparison-app">Push notifications, reminders, guilt trips</div>
+        <div class="comparison-knot">No push notifications — just the board</div>
+      </div>
+      <div class="comparison-row">
+        <div class="comparison-feature">Gamification</div>
+        <div class="comparison-app">Badges, levels, streak freezes, premium unlocks</div>
+        <div class="comparison-knot">None — the accountability is the group, not points</div>
+      </div>
+      <div class="comparison-row">
+        <div class="comparison-feature">Privacy</div>
+        <div class="comparison-app">Often social, sometimes public leaderboards</div>
+        <div class="comparison-knot">Private pods — only your people see your check-ins</div>
+      </div>
+      <div class="comparison-row">
+        <div class="comparison-feature">Cost</div>
+        <div class="comparison-app">Free tier limited, premium for full features</div>
+        <div class="comparison-knot">Free to start — $5/month for 2 pods instead of 1</div>
       </div>
     </div>
   </div>
