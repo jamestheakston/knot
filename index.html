@@ -1915,6 +1915,7 @@
     }
 
     function checkAuthErrors(){
+      console.log('checkAuthErrors called');
       var urlParams = new URLSearchParams(window.location.search);
       var hashParams = new URLSearchParams(window.location.hash.substring(1));
       var error = urlParams.get('error') || hashParams.get('error');
@@ -1922,16 +1923,40 @@
       var errorType = urlParams.get('error_type') || hashParams.get('error_type');
       var accessToken = hashParams.get('access_token');
       var authFlow = localStorage.getItem('authFlow');
+      
+      console.log('checkAuthErrors - accessToken:', !!accessToken);
+      console.log('checkAuthErrors - error:', error);
+      console.log('checkAuthErrors - authFlow:', authFlow);
+
+      // Parse authFlow if it's JSON
+      var parsedAuthFlow = null;
+      if(authFlow){
+        try{
+          parsedAuthFlow = JSON.parse(authFlow);
+          console.log('Parsed authFlow:', parsedAuthFlow);
+        }catch(e){
+          console.log('authFlow is not JSON, using as-is');
+          parsedAuthFlow = { flow: authFlow };
+        }
+      }
 
       // Handle successful GitHub auth redirect
       if(accessToken && !error){
-        if(authFlow === 'start'){
+        console.log('Access token found, checking auth flow');
+        if(parsedAuthFlow && parsedAuthFlow.flow === 'start'){
           // Redirect to dashboard with createpod parameter
+          console.log('Redirecting to dashboard with createpod=true');
           localStorage.removeItem('authFlow');
           window.location.href = 'dashboard.html?createpod=true';
           return;
-        } else if(authFlow === 'join'){
+        } else if(parsedAuthFlow && parsedAuthFlow.flow === 'join'){
           // Redirect to dashboard normally
+          console.log('Redirecting to dashboard for join flow');
+          localStorage.removeItem('authFlow');
+          window.location.href = 'dashboard.html';
+          return;
+        } else {
+          console.log('No valid auth flow found, redirecting to dashboard');
           localStorage.removeItem('authFlow');
           window.location.href = 'dashboard.html';
           return;
@@ -1940,6 +1965,7 @@
 
       if(error){
         var message = errorDescription || 'Authentication error occurred';
+        console.log('Auth error:', message);
         
         // Check if user already exists
         if(errorType === 'user_exists' || message.toLowerCase().includes('already exists') || message.toLowerCase().includes('already registered')){
