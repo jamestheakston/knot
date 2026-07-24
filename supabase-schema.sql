@@ -113,7 +113,15 @@ GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO authenticated;
 DROP POLICY IF EXISTS "Users can view their own profile" ON user_profiles;
 CREATE POLICY "Users can view their own profile"
   ON user_profiles FOR SELECT
-  USING (user_id = auth.uid());
+  USING (
+    user_id = auth.uid() OR
+    user_id IN (
+      SELECT user_id FROM pod_members 
+      WHERE pod_id IN (
+        SELECT pod_id FROM pod_members WHERE user_id = auth.uid()
+      )
+    )
+  );
 
 DROP POLICY IF EXISTS "Users can insert their own profile" ON user_profiles;
 CREATE POLICY "Users can insert their own profile"
