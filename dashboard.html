@@ -416,10 +416,32 @@
   /* ---------- LOADING ---------- */
   .loading{
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
     min-height: 200px;
     color: var(--muted);
+    gap: 16px;
+  }
+  .loading-icon{
+    width: 48px;
+    height: 48px;
+    animation: spin 1s linear infinite;
+  }
+  @keyframes spin{
+    from{ transform: rotate(0deg); }
+    to{ transform: rotate(360deg); }
+  }
+  .loading-text{
+    font-size: 16px;
+    font-weight: 500;
+  }
+  .loading-text.slow{
+    font-size: 14px;
+    color: var(--muted-2);
+    text-align: center;
+    max-width: 300px;
+    line-height: 1.5;
   }
 
   /* ---------- NO PODS MODAL ---------- */
@@ -493,6 +515,12 @@
     color: var(--ink);
     margin-bottom: 24px;
   }
+  .streak-card-description{
+    font-size: 14px;
+    color: var(--muted);
+    line-height: 1.6;
+    margin-bottom: 24px;
+  }
   .streak-card{
     display: flex;
     flex-direction: column;
@@ -538,6 +566,69 @@
   /* ---------- OVERVIEW SECTION ---------- */
   .overview-section{
     padding: 32px 0;
+  }
+  .overview-grid{
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 24px;
+    margin-bottom: 32px;
+  }
+  .overview-card{
+    background: var(--bg-2);
+    border-radius: 20px;
+    padding: 32px;
+    border: 1px solid var(--line);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  }
+  .overview-card h3{
+    font-family: 'Instrument Serif', serif;
+    font-size: 24px;
+    font-weight: 400;
+    color: var(--ink);
+    margin-bottom: 24px;
+  }
+  .overview-description{
+    font-size: 14px;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+  .check-ins-list{
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .check-in-item{
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    background: var(--bg-3);
+    border-radius: 10px;
+  }
+  .check-in-avatar{
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--blue), var(--blue-bright));
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 600;
+    flex-shrink: 0;
+  }
+  .check-in-info{
+    flex: 1;
+  }
+  .check-in-name{
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--ink);
+  }
+  .check-in-time{
+    font-size: 12px;
+    color: var(--muted);
   }
   .overview-header{
     display: grid;
@@ -656,6 +747,14 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
+  }
+  .habits-limit-message{
+    font-size: 14px;
+    color: var(--muted);
+    background: var(--bg-3);
+    padding: 12px 16px;
+    border-radius: 8px;
+    border: 1px solid var(--line);
   }
   .habit-row{
     display: flex;
@@ -2750,10 +2849,12 @@
           <div class="streak-cards">
             <div class="streak-card-container">
               <h3>Personal Streak</h3>
+              <p class="streak-card-description">Your individual streak shows how many consecutive days you've checked in to your pod's habit. Keep it going by checking in every day!</p>
               ${personalHTML}
             </div>
             <div class="streak-card-container">
               <h3>Group Streak</h3>
+              <p class="streak-card-description">See how your pod members are doing with their streaks. Friendly competition keeps everyone motivated!</p>
               <div class="group-streak-list">
                 ${groupHTML}
               </div>
@@ -2817,10 +2918,31 @@
 
       // Load section content
       var contentArea = document.getElementById('contentArea');
-      contentArea.innerHTML = '<div class="loading">Loading...</div>';
+      contentArea.innerHTML = `
+        <div class="loading">
+          <i data-lucide="loader-2" class="loading-icon"></i>
+          <div class="loading-text" id="loadingText">Loading...</div>
+        </div>
+      `;
+      
+      if(typeof lucide !== 'undefined'){
+        lucide.createIcons();
+      }
+
+      // Show slow loading message after 4 seconds
+      var loadingTimeout = setTimeout(function(){
+        var loadingText = document.getElementById('loadingText');
+        if(loadingText){
+          loadingText.textContent = "This is taking longer than usual. We appreciate your patience while we fetch your data!";
+          loadingText.classList.add('slow');
+        }
+      }, 4000);
 
       // Use a timeout to ensure the loading state is set before async operations
       setTimeout(function(){
+        // Clear loading timeout when content starts loading
+        clearTimeout(loadingTimeout);
+        
         switch(section){
           case 'overview':
             loadOverview();
@@ -2858,7 +2980,8 @@
     async function loadOverview(){
       console.log('Loading overview');
       var contentArea = document.getElementById('contentArea');
-      var streak = await loadStreakData();
+      var streakData = await loadStreakData();
+      var streak = streakData.personal;
       var client = getSupabaseClient();
       
       // Get habits for the pod
@@ -2876,6 +2999,45 @@
         console.error('Error loading habits:', err);
       }
 
+      // Get today's check-ins
+      var todayCheckIns = [];
+      try{
+        var today = new Date();
+        today.setHours(0, 0, 0, 0);
+        var tomorrow = new Date(today);
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        
+        var { data: checkInsData, error: checkInsError } = await client
+          .from('check_ins')
+          .select('*')
+          .eq('pod_id', currentPod.id)
+          .gte('created_at', today.toISOString())
+          .lt('created_at', tomorrow.toISOString());
+        
+        if(!checkInsError && checkInsData){
+          todayCheckIns = checkInsData;
+        }
+      }catch(err){
+        console.error('Error loading check-ins:', err);
+      }
+
+      // Get user profiles for check-ins
+      var checkInsWithProfiles = [];
+      for(var i = 0; i < todayCheckIns.length; i++){
+        var ci = todayCheckIns[i];
+        var { data: profile } = await client
+          .from('user_profiles')
+          .select('display_name')
+          .eq('user_id', ci.user_id)
+          .maybeSingle();
+        
+        checkInsWithProfiles.push({
+          ...ci,
+          displayName: profile?.display_name || ci.user_id.substring(0, 8),
+          isCurrentUser: ci.user_id === currentUser.id
+        });
+      }
+
       var habitsHTML = habits.map(function(habit){
         return `
           <div class="habit-item">
@@ -2890,6 +3052,21 @@
           </div>
         `;
       }).join('');
+
+      var checkInsHTML = checkInsWithProfiles.map(function(ci){
+        var time = new Date(ci.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        return `
+          <div class="check-in-item">
+            <div class="check-in-avatar">${ci.displayName.charAt(0).toUpperCase()}</div>
+            <div class="check-in-info">
+              <div class="check-in-name">${ci.displayName}${ci.isCurrentUser ? ' (You)' : ''}</div>
+              <div class="check-in-time">${time}</div>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      var hasCheckedInToday = checkInsWithProfiles.some(function(ci){ return ci.isCurrentUser; });
 
       contentArea.innerHTML = `
         <div class="overview-section">
@@ -2910,25 +3087,59 @@
               <div class="stat-unit">active</div>
             </div>
           </div>
-          <div class="streak-display">
-            ${streak === 0 
-              ? '<img src="/assets/nostreak.png" alt="No streak" class="streak-image nostreak-image"><div class="streak-count">0</div><div class="streak-message">You need to start a streak</div>'
-              : '<img src="/assets/streak.svg" alt="Streak" class="streak-image streak-animated"><div class="streak-count">' + streak + '</div><div class="streak-message">day streak</div>'
-            }
+
+          <div class="overview-grid">
+            <div class="overview-card">
+              <h3>Today's Progress</h3>
+              <div class="streak-display">
+                ${streak === 0 
+                  ? '<img src="/assets/nostreak.png" alt="No streak" class="streak-image nostreak-image"><div class="streak-count">0</div><div class="streak-message">Start your streak today!</div>'
+                  : '<img src="/assets/streak.svg" alt="Streak" class="streak-image streak-animated"><div class="streak-count">' + streak + '</div><div class="streak-message">day streak</div>'
+                }
+              </div>
+              <div class="check-in-action">
+                ${hasCheckedInToday 
+                  ? '<div class="check-in-status checked-in">✓ Checked in today</div>'
+                  : '<button class="btn btn-primary" id="overviewCheckInBtn">Check in today</button>'
+                }
+              </div>
+            </div>
+
+            <div class="overview-card">
+              <h3>Today's Check-ins</h3>
+              ${checkInsWithProfiles.length > 0 
+                ? '<div class="check-ins-list">' + checkInsHTML + '</div>'
+                : '<div class="no-check-ins">No check-ins yet today</div>'
+              }
+            </div>
           </div>
+
           ${habits.length > 0 ? `
-            <div class="habits-section">
-              <h3>Your Habits</h3>
+            <div class="overview-card">
+              <h3>Your Pod's Habit</h3>
               <div class="habits-list">
                 ${habitsHTML}
               </div>
             </div>
-          ` : ''}
+          ` : `
+            <div class="overview-card">
+              <h3>No Habits Yet</h3>
+              <p class="overview-description">Your pod doesn't have any habits yet. Ask your pod admin to create one!</p>
+            </div>
+          `}
         </div>
       `;
 
       if(typeof lucide !== 'undefined'){
         lucide.createIcons();
+      }
+
+      // Add event listener for check-in button
+      var checkInBtn = document.getElementById('overviewCheckInBtn');
+      if(checkInBtn){
+        checkInBtn.addEventListener('click', function(){
+          navigateTo('check-ins');
+        });
       }
     }
 
@@ -3441,10 +3652,10 @@
         contentArea.innerHTML = `
           <div class="habits-section">
             <div class="habits-header">
-              <button class="btn btn-primary" id="addHabitBtn">
-                <i data-lucide="plus" style="width: 16px; height: 16px; margin-right: 8px;"></i>
-                Add Habit
-              </button>
+              ${habits.length >= 1 
+                ? '<p class="habits-limit-message">Your pod can only have one habit. Edit or delete the existing habit to make changes.</p>'
+                : '<button class="btn btn-primary" id="addHabitBtn"><i data-lucide="plus" style="width: 16px; height: 16px; margin-right: 8px;"></i>Add Habit</button>'
+              }
             </div>
             <div class="habits-list">
               ${habits.length > 0 ? habitsHTML : '<div class="no-habits">No habits yet. Click "Add Habit" to create one.</div>'}
@@ -3456,8 +3667,11 @@
           lucide.createIcons();
         }
 
-        // Add event listeners
-        document.getElementById('addHabitBtn').addEventListener('click', showAddHabitModal);
+        // Add event listeners only if add button exists
+        var addHabitBtn = document.getElementById('addHabitBtn');
+        if(addHabitBtn){
+          addHabitBtn.addEventListener('click', showAddHabitModal);
+        }
         
         document.querySelectorAll('.edit-habit-btn').forEach(function(btn){
           btn.addEventListener('click', function(){
@@ -3578,7 +3792,21 @@
       }
 
       var client = getSupabaseClient();
+      
       try{
+        // Check if pod already has a habit (only when creating new habit)
+        if(!habitId){
+          var { data: existingHabits, error: checkError } = await client
+            .from('habits')
+            .select('id')
+            .eq('pod_id', currentPod.id);
+          
+          if(!checkError && existingHabits && existingHabits.length > 0){
+            alert('Your pod can only have one habit. Please edit or delete the existing habit first.');
+            return;
+          }
+        }
+        
         if(habitId){
           var { error } = await client
             .from('habits')
