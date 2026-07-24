@@ -197,7 +197,7 @@
   .sidebar-nav{
     flex: 1;
     padding: 20px 0;
-    overflow-y: auto;
+    overflow-y: hidden;
   }
 
   .nav-section{
@@ -1029,6 +1029,25 @@
   .hcaptcha-container{
     margin-top: 20px;
   }
+  .hcaptcha-box{
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 24px;
+    background: var(--bg-2);
+  }
+  .hcaptcha-box-title{
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .hcaptcha-box-title i{
+    width: 18px;
+    height: 18px;
+  }
   .hcaptcha-message{
     font-size: 13px;
     color: var(--muted);
@@ -1037,6 +1056,24 @@
   }
   .hcaptcha-widget{
     margin-bottom: 8px;
+    position: relative;
+    min-height: 78px;
+  }
+  .hcaptcha-loading{
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg-2);
+    border-radius: 4px;
+  }
+  .hcaptcha-loading i{
+    animation: spin 1s linear infinite;
+  }
+  @keyframes spin{
+    from{ transform: rotate(0deg); }
+    to{ transform: rotate(360deg); }
   }
   .hcaptcha-thanks{
     font-size: 12px;
@@ -1187,6 +1224,10 @@
     max-width: 640px;
     border: 1px solid var(--line);
     box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+    margin-bottom: 32px;
+  }
+  .settings-card:last-child{
+    margin-bottom: 0;
   }
   .settings-card h3{
     font-size: 28px;
@@ -1750,9 +1791,19 @@
       </div>
       <div class="form-group">
         <div class="hcaptcha-container">
-          <div class="hcaptcha-message">We know, inconvenient, but it helps us stop the bots.</div>
-          <div class="hcaptcha-widget" id="modalHcaptchaWidget"></div>
-          <div class="hcaptcha-thanks">Thanks for helping us create a robot-free experience 🙏</div>
+          <div class="hcaptcha-box">
+            <div class="hcaptcha-box-title">
+              <i data-lucide="shield"></i>
+              CAPTCHA
+            </div>
+            <div class="hcaptcha-message">We know, inconvenient, but it helps us stop the bots.</div>
+            <div class="hcaptcha-widget" id="modalHcaptchaWidget">
+              <div class="hcaptcha-loading">
+                <i data-lucide="loader-2"></i>
+              </div>
+            </div>
+            <div class="hcaptcha-thanks">Thanks for helping us create a robot-free experience 🙏</div>
+          </div>
         </div>
       </div>
     </div>
@@ -2219,6 +2270,11 @@
         }
       }
       
+      // Clear URL parameters after processing
+      if(shouldJoinPod || joinCode || shouldCreatePod || isLinking || action){
+        window.history.replaceState({}, document.title, window.location.pathname);
+      }
+      
       // Check for pending pod creation
       await checkPendingPodCreation();
       
@@ -2234,12 +2290,8 @@
         // Handle shortcut actions
         if(action === 'checkin'){
           navigateTo('check-ins');
-          // Remove action parameter from URL
-          window.history.replaceState({}, document.title, window.location.pathname);
         }else if(action === 'streak'){
           navigateTo('streak');
-          // Remove action parameter from URL
-          window.history.replaceState({}, document.title, window.location.pathname);
         }else{
           // Load overview section by default
           navigateTo('overview');
@@ -2759,6 +2811,9 @@
       document.getElementById('pageTitle').textContent = titles[section] || 'Overview';
       document.getElementById('pageSubtitle').textContent = subtitles[section] || '';
       document.getElementById('pageEyebrow').textContent = eyebrows[section] || 'DASHBOARD';
+
+      // Update URL hash
+      window.location.hash = section;
 
       // Load section content
       var contentArea = document.getElementById('contentArea');
@@ -3661,11 +3716,22 @@
       
       // Clear and render hCaptcha widget
       var widgetContainer = document.getElementById('modalHcaptchaWidget');
-      widgetContainer.innerHTML = '';
+      widgetContainer.innerHTML = '<div class="hcaptcha-loading"><i data-lucide="loader-2"></i></div>';
+      
+      if(typeof lucide !== 'undefined'){
+        lucide.createIcons();
+      }
       
       if(typeof hcaptcha !== 'undefined'){
         hcaptcha.render('modalHcaptchaWidget', {
-          sitekey: '6756a528-fd90-49fc-b01e-80e2b896d9b8'
+          sitekey: '6756a528-fd90-49fc-b01e-80e2b896d9b8',
+          callback: function(){
+            // Hide loading spinner when captcha loads
+            var loadingSpinner = widgetContainer.querySelector('.hcaptcha-loading');
+            if(loadingSpinner){
+              loadingSpinner.remove();
+            }
+          }
         });
       }
     }
@@ -4282,6 +4348,23 @@
     // Run cleanup and check auth on load
     cleanupStaleLocalStorage();
     checkAuth();
+
+    // Handle hash-based navigation on page load
+    window.addEventListener('hashchange', function(){
+      var hash = window.location.hash.substring(1);
+      if(hash){
+        navigateTo(hash);
+      }
+    });
+
+    // Check for hash on initial load
+    var initialHash = window.location.hash.substring(1);
+    if(initialHash){
+      // Delay navigation to ensure auth is checked first
+      setTimeout(function(){
+        navigateTo(initialHash);
+      }, 100);
+    }
   });
 </script>
 
