@@ -2532,6 +2532,9 @@
       // Check for auth flow (OAuth or email confirmation) - MUST be before userPods check
       await checkAuthFlow();
 
+      // Load user pods AFTER auth flow processing so joined/created pods are reflected
+      await loadUserPods();
+
       // Load user profile BEFORE updatePodSelector so userProfile is available
       await loadUserProfile();
 
@@ -2785,7 +2788,9 @@
           
           if(flowData.flow === 'join' && flowData.inviteCode){
             console.log('Handling join flow with invite code:', flowData.inviteCode);
+            console.log('About to call handlePodJoinFromCode with code:', flowData.inviteCode);
             var joinSuccess = await handlePodJoinFromCode(flowData.inviteCode);
+            console.log('handlePodJoinFromCode returned:', joinSuccess);
             localStorage.removeItem('authFlow');
             if(!joinSuccess){
               console.error('Failed to join pod from auth flow');

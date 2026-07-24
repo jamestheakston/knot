@@ -1945,51 +1945,8 @@
       var error = urlParams.get('error') || hashParams.get('error');
       var errorDescription = urlParams.get('error_description') || hashParams.get('error_description');
       var errorType = urlParams.get('error_type') || hashParams.get('error_type');
-      var accessToken = hashParams.get('access_token');
-      var authFlow = localStorage.getItem('authFlow');
       
-      console.log('checkAuthErrors - accessToken:', !!accessToken);
       console.log('checkAuthErrors - error:', error);
-      console.log('checkAuthErrors - authFlow:', authFlow);
-
-      // Parse authFlow if it's JSON
-      var parsedAuthFlow = null;
-      if(authFlow){
-        try{
-          parsedAuthFlow = JSON.parse(authFlow);
-          console.log('Parsed authFlow:', parsedAuthFlow);
-        }catch(e){
-          console.log('authFlow is not JSON, using as-is');
-          parsedAuthFlow = { flow: authFlow };
-        }
-      }
-
-      // Handle successful GitHub auth redirect
-      if(accessToken && !error){
-        console.log('Access token found, checking auth flow');
-        if(parsedAuthFlow && parsedAuthFlow.flow === 'start'){
-          // Redirect to dashboard with createpod parameter
-          console.log('Redirecting to dashboard with createpod=true');
-          localStorage.removeItem('authFlow');
-          window.location.href = 'dashboard.html?createpod=true';
-          return;
-        } else if(parsedAuthFlow && parsedAuthFlow.flow === 'join'){
-          // Redirect to dashboard with join code
-          console.log('Redirecting to dashboard for join flow with code:', parsedAuthFlow.inviteCode);
-          var joinUrl = 'dashboard.html';
-          if(parsedAuthFlow.inviteCode){
-            joinUrl += '?joinpod=true&code=' + parsedAuthFlow.inviteCode;
-          }
-          localStorage.removeItem('authFlow');
-          window.location.href = joinUrl;
-          return;
-        } else {
-          console.log('No valid auth flow found, redirecting to dashboard');
-          localStorage.removeItem('authFlow');
-          window.location.href = 'dashboard.html';
-          return;
-        }
-      }
 
       if(error){
         var message = errorDescription || 'Authentication error occurred';
@@ -2030,6 +1987,42 @@
     // Run cleanup and auth error check on page load
     cleanupStaleLocalStorage();
     checkAuthErrors();
+
+    // Check for session and redirect to dashboard if authFlow exists
+    async function checkSessionAndRedirect(){
+      var client = getSupabaseClient();
+      if(!client) return;
+
+      try{
+        var { data: { session }, error } = await client.auth.getSession();
+        if(error){
+          console.error('Error getting session:', error);
+          return;
+        }
+
+        if(session){
+          console.log('User has session, checking for authFlow');
+          var authFlow = localStorage.getItem('authFlow');
+          if(authFlow){
+            try{
+              var parsedAuthFlow = JSON.parse(authFlow);
+              console.log('Found authFlow:', parsedAuthFlow);
+              
+              if(parsedAuthFlow.flow === 'join' || parsedAuthFlow.flow === 'start'){
+                console.log('Redirecting to dashboard to handle auth flow');
+                window.location.href = 'dashboard.html';
+              }
+            }catch(e){
+              console.error('Error parsing authFlow:', e);
+            }
+          }
+        }
+      }catch(err){
+        console.error('Error in checkSessionAndRedirect:', err);
+      }
+    }
+
+    checkSessionAndRedirect();
 
     // Check for openmodal parameter
     function checkOpenModalParam(){
