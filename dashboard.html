@@ -3430,6 +3430,7 @@
           
           var role = member.role || 'member';
           var joinedDate = new Date(member.joined_at).toLocaleDateString();
+          var canRemove = isAdmin && member.user_id !== currentUser.id;
           
           return `
             <div class="member-card">
@@ -3442,6 +3443,7 @@
                   <span class="member-joined">Joined ${joinedDate}</span>
                 </div>
               </div>
+              ${canRemove ? '<button class="btn btn-ghost btn-sm remove-member-btn" data-user-id="' + member.user_id + '" data-display-name="' + displayName + '">Remove</button>' : ''}
             </div>
           `;
         }).join('');
@@ -3456,9 +3458,43 @@
             </div>
           </div>
         `;
+
+        // Add event listeners for remove buttons
+        if(isAdmin){
+          document.querySelectorAll('.remove-member-btn').forEach(function(btn){
+            btn.addEventListener('click', function(){
+              var userId = this.getAttribute('data-user-id');
+              var displayName = this.getAttribute('data-display-name');
+              handleRemoveMember(userId, displayName);
+            });
+          });
+        }
       }catch(err){
         console.error('Error loading members:', err);
         contentArea.innerHTML = '<div class="error">Error loading members</div>';
+      }
+    }
+
+    async function handleRemoveMember(userId, displayName){
+      if(!confirm('Are you sure you want to remove ' + displayName + ' from this pod? This action cannot be undone.')){
+        return;
+      }
+
+      var client = getSupabaseClient();
+      try{
+        var { error } = await client
+          .from('pod_members')
+          .delete()
+          .eq('pod_id', currentPod.id)
+          .eq('user_id', userId);
+
+        if(error) throw error;
+
+        alert(displayName + ' has been removed from the pod');
+        loadMembers(); // Reload the members list
+      }catch(err){
+        console.error('Error removing member:', err);
+        alert('Error removing member: ' + err.message);
       }
     }
 
