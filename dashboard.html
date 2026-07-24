@@ -2506,6 +2506,9 @@
       // Check for pending pod join from localStorage
       await checkPendingPodJoin();
 
+      // Check for auth flow (OAuth or email confirmation)
+      await checkAuthFlow();
+
       if(userPods.length > 0){
         currentPod = userPods[0];
         isAdmin = currentPod.role === 'admin';
@@ -2729,6 +2732,32 @@
         window.history.replaceState({}, document.title, window.location.pathname);
       }catch(err){
         console.error('Error joining pod from code:', err);
+      }
+    }
+
+    async function checkAuthFlow(){
+      var authFlow = localStorage.getItem('authFlow');
+      if(authFlow){
+        try{
+          var flowData = JSON.parse(authFlow);
+          console.log('Found auth flow:', flowData);
+          
+          if(flowData.flow === 'join' && flowData.inviteCode){
+            console.log('Handling join flow with invite code:', flowData.inviteCode);
+            await handlePodJoinFromCode(flowData.inviteCode);
+            localStorage.removeItem('authFlow');
+          }else if(flowData.flow === 'start'){
+            console.log('Handling start flow');
+            await checkPendingPodCreation();
+            localStorage.removeItem('authFlow');
+          }else{
+            console.log('Unknown or expired auth flow, removing');
+            localStorage.removeItem('authFlow');
+          }
+        }catch(err){
+          console.error('Error processing auth flow:', err);
+          localStorage.removeItem('authFlow');
+        }
       }
     }
 

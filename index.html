@@ -1540,8 +1540,9 @@
           // User needs to confirm email first
           console.log('No session, email confirmation required');
           showToast('Account created! Please check your email to confirm, then join the pod.');
-          // Store the join code for after email confirmation
-          localStorage.setItem('pendingPodJoin', JSON.stringify({
+          // Store the join code for after email confirmation using the same flow as OAuth
+          localStorage.setItem('authFlow', JSON.stringify({
+            flow: 'join',
             inviteCode: code,
             timestamp: Date.now()
           }));
