@@ -3192,6 +3192,12 @@
     async function loadOverview(){
       console.log('Loading overview');
       var contentArea = document.getElementById('contentArea');
+      
+      if(!currentPod){
+        contentArea.innerHTML = '<div class="error">No pod selected. Please select a pod to view overview.</div>';
+        return;
+      }
+      
       var streakData = await loadStreakData();
       var streak = streakData.personal;
       var hasCheckedInToday = streakData.hasCheckedInToday;
@@ -3534,7 +3540,6 @@
                 <div class="check-in-user-name">${ci.displayName}${ci.isCurrentUser ? ' (You)' : ''}</div>
                 <div class="check-in-user-time">${time}</div>
               </div>
-              ${ci.isCurrentUser ? '<button class="btn btn-ghost btn-sm uncheck-in-btn">Undo</button>' : ''}
             </div>
           `;
         }).join('');
@@ -3575,42 +3580,9 @@
         if(!checkedInToday){
           document.getElementById('checkInBtn').addEventListener('click', showCheckInConfirm);
         }
-
-        if(checkedInToday){
-          document.querySelectorAll('.uncheck-in-btn').forEach(function(btn){
-            btn.addEventListener('click', handleUncheckIn);
-          });
-        }
       }catch(err){
         console.error('Error loading check-ins:', err);
         contentArea.innerHTML = '<div class="error">Error loading check-ins</div>';
-      }
-    }
-
-    async function handleUncheckIn(){
-      var client = getSupabaseClient();
-      
-      try{
-        if(!confirm('Are you sure you want to undo your check-in for today? This will revert your streak by one day.')) return;
-
-        var today = new Date();
-        today.setHours(0, 0, 0, 0);
-
-        var { error } = await client
-          .from('check_ins')
-          .delete()
-          .eq('pod_id', currentPod.id)
-          .eq('user_id', currentUser.id)
-          .gte('created_at', today.toISOString());
-
-        if(error) throw error;
-
-        // Reload check-ins and overview to update streak
-        loadCheckIns();
-        loadOverview();
-      }catch(err){
-        console.error('Error undoing check-in:', err);
-        alert('Error undoing check-in: ' + err.message);
       }
     }
 
