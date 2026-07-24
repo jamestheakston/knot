@@ -2062,6 +2062,8 @@
       if(shouldJoinPod === 'true' && joinCode){
         try{
           await handlePodJoinFromCode(joinCode);
+          // Clear any pending pod join data since we just handled it via URL
+          localStorage.removeItem('pendingPodJoin');
         }catch(err){
           console.error('Error during pod join from URL:', err);
           // Don't block initialization if pod join fails
@@ -2251,13 +2253,11 @@
 
         if(joinError){
           console.error('Join RPC error:', joinError);
-          showToast('Error joining pod: ' + joinError.message);
           return;
         }
 
         if(!joinResult.success){
           console.error('Join failed:', joinResult.error);
-          showToast(joinResult.error || 'Failed to join pod');
           return;
         }
 
@@ -2285,13 +2285,10 @@
           console.error('No pods found after joining');
         }
         
-        showToast('Successfully joined pod!');
-        
         // Clean URL
         window.history.replaceState({}, document.title, window.location.pathname);
       }catch(err){
         console.error('Error joining pod from code:', err);
-        showToast('Error joining pod: ' + (err.message || 'Please try again.'));
       }
     }
 
