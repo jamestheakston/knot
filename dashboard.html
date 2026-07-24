@@ -2594,7 +2594,9 @@
         return pod.role === 'admin';
       }).length;
       
-      var limit = userProfile.user_upgraded ? 2 : 1;
+      // Handle case where user_upgraded might be a boolean or other type
+      var isUpgraded = userProfile.user_upgraded === true || userProfile.user_upgraded === 'true';
+      var limit = isUpgraded ? 2 : 1;
       return createdPods < limit;
     }
 
@@ -4680,7 +4682,8 @@
       var createdPods = userPods.filter(function(pod){
         return pod.role === 'admin';
       }).length;
-      var limit = userProfile && userProfile.user_upgraded ? 2 : 1;
+      var isUpgraded = userProfile && (userProfile.user_upgraded === true || userProfile.user_upgraded === 'true');
+      var limit = isUpgraded ? 2 : 1;
       
       if(!canCreate){
         createOption.innerHTML = '<i data-lucide="crown" style="color: #FFD700; width: 16px; height: 16px;"></i> Create new Pod';
