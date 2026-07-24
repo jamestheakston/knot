@@ -278,8 +278,8 @@ DECLARE
   result JSON;
   member_count INTEGER;
 BEGIN
-  -- Get pod by invite code with row lock to prevent concurrent modifications
-  SELECT id INTO pod_uuid FROM pods WHERE invite_code = invite_code_param FOR UPDATE;
+  -- Get pod by invite code
+  SELECT id INTO pod_uuid FROM pods WHERE invite_code = invite_code_param;
   
   IF pod_uuid IS NULL THEN
     RETURN json_build_object('success', false, 'error', 'Invalid invite code');
@@ -293,8 +293,8 @@ BEGIN
     RETURN json_build_object('success', false, 'error', 'Already a member of this pod');
   END IF;
   
-  -- Check if pod is full (max 5 members) with lock to prevent race conditions
-  SELECT COUNT(*) INTO member_count FROM pod_members WHERE pod_id = pod_uuid FOR UPDATE;
+  -- Check if pod is full (max 5 members)
+  SELECT COUNT(*) INTO member_count FROM pod_members WHERE pod_id = pod_uuid;
   
   IF member_count >= 5 THEN
     RETURN json_build_object('success', false, 'error', 'Pod is full (max 5 members)');
