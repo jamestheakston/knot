@@ -2247,7 +2247,7 @@
       currentUser = session.user;
       console.log('User authenticated:', currentUser.email);
       await loadUserData();
-      await loadUserPods();
+      await initializeDashboard();
     }
 
     async function loadUserData(){
@@ -2474,7 +2474,9 @@
       });
 
       console.log('User pods array:', userPods);
+    }
 
+    async function initializeDashboard(){
       // Check for pending pod creation BEFORE redirecting
       var urlParams = new URLSearchParams(window.location.search);
       var shouldCreatePod = urlParams.get('createpod');
@@ -2508,9 +2510,6 @@
 
       // Check for auth flow (OAuth or email confirmation) - MUST be before userPods check
       await checkAuthFlow();
-
-      // Reload pods after auth flow processing to ensure we have the latest data
-      await loadUserPods();
 
       if(userPods.length > 0){
         currentPod = userPods[0];
@@ -2768,8 +2767,7 @@
             };
             await createPodFromSignup(podData);
             localStorage.removeItem('authFlow');
-            // Reload pods after creating
-            await loadUserPods();
+            // Note: createPodFromSignup already reloads pods internally
           }else{
             console.log('Unknown or expired auth flow, removing');
             localStorage.removeItem('authFlow');
