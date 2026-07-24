@@ -3114,11 +3114,6 @@
           return;
         }
         
-        // Show admin badge for admins on admin pages
-        if(adminOnlySections.includes(section) && isAdmin){
-          showAdminBadge();
-        }
-        
         switch(section){
           case 'overview':
             loadOverview();
@@ -3826,6 +3821,15 @@
       }
 
       contentArea.innerHTML = `
+        <div class="admin-badge-message">
+          <div class="admin-badge-content">
+            <i data-lucide="shield-check" style="width: 20px; height: 20px;"></i>
+            <div class="admin-badge-text">
+              <strong>Only you can see this page</strong>
+              <span>This page contains administrative features that are only accessible to pod administrators. Regular members cannot view or access these settings.</span>
+            </div>
+          </div>
+        </div>
         <div class="pod-settings-section">
           <div class="settings-form">
             <div class="form-group">
@@ -3845,6 +3849,10 @@
           </div>
         </div>
       `;
+
+      if(typeof lucide !== 'undefined'){
+        lucide.createIcons();
+      }
 
       document.getElementById('copyInviteCode').addEventListener('click', function(){
         navigator.clipboard.writeText(currentPod.inviteCode);
@@ -3897,6 +3905,15 @@
         }).join('');
 
         contentArea.innerHTML = `
+          <div class="admin-badge-message">
+            <div class="admin-badge-content">
+              <i data-lucide="shield-check" style="width: 20px; height: 20px;"></i>
+              <div class="admin-badge-text">
+                <strong>Only you can see this page</strong>
+                <span>This page contains administrative features that are only accessible to pod administrators. Regular members cannot view or access these settings.</span>
+              </div>
+            </div>
+          </div>
           <div class="habits-section">
             <div class="habits-header">
               ${habits.length >= 1 
