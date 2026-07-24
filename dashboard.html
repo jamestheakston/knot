@@ -444,6 +444,45 @@
     line-height: 1.5;
   }
 
+  /* ---------- ADMIN ONLY MESSAGE ---------- */
+  .admin-only-message{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 64px 32px;
+    background: var(--bg-2);
+    border-radius: 20px;
+    border: 1px solid var(--line);
+    max-width: 600px;
+    margin: 32px auto;
+  }
+  .admin-only-icon{
+    width: 64px;
+    height: 64px;
+    background: var(--blue-soft);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--blue);
+    margin-bottom: 24px;
+  }
+  .admin-only-message h3{
+    font-family: 'Instrument Serif', serif;
+    font-size: 24px;
+    font-weight: 400;
+    color: var(--ink);
+    margin-bottom: 16px;
+  }
+  .admin-only-message p{
+    font-size: 15px;
+    color: var(--muted);
+    line-height: 1.6;
+    max-width: 400px;
+  }
+
   /* ---------- NO PODS MODAL ---------- */
   .no-pods-modal-overlay{
     position: fixed;
@@ -2311,7 +2350,7 @@
         return { personal: streak, group: groupStreaks, groupStreak: groupStreak, hasPreviousStreak: hasPreviousStreak, hasCheckedInToday: hasCheckedInToday };
       }catch(err){
         console.error('Error loading streak data:', err);
-        return { personal: 0, group: [], hasPreviousStreak: false };
+        return { personal: 0, group: [], groupStreak: 0, hasPreviousStreak: false, hasCheckedInToday: false };
       }
     }
 
@@ -3009,6 +3048,13 @@
         // Clear loading timeout when content starts loading
         clearTimeout(loadingTimeout);
         
+        // Check if section requires admin access
+        var adminOnlySections = ['pod-settings', 'habits'];
+        if(adminOnlySections.includes(section) && !isAdmin){
+          showAdminOnlyMessage();
+          return;
+        }
+        
         switch(section){
           case 'overview':
             loadOverview();
@@ -3041,6 +3087,23 @@
             loadOverview();
         }
       }, 0);
+    }
+
+    function showAdminOnlyMessage(){
+      var contentArea = document.getElementById('contentArea');
+      contentArea.innerHTML = `
+        <div class="admin-only-message">
+          <div class="admin-only-icon">
+            <i data-lucide="info" style="width: 32px; height: 32px;"></i>
+          </div>
+          <h3>Only admins can view this page</h3>
+          <p>This page contains administrative features that are only accessible to pod administrators. If you need to make changes to your pod's settings or habits, please contact your pod admin.</p>
+        </div>
+      `;
+      
+      if(typeof lucide !== 'undefined'){
+        lucide.createIcons();
+      }
     }
 
     async function loadOverview(){
