@@ -4359,7 +4359,41 @@
         // Send deletion confirmation to admin
         sendPodDeletionEmail(currentUser.email, currentPod.name, deletedBy);
         
+        // Delete all check-ins for this pod
+        console.log('Deleting check-ins for pod:', currentPod.id);
+        var { error: checkInsError } = await client
+          .from('check_ins')
+          .delete()
+          .eq('pod_id', currentPod.id);
+        
+        if(checkInsError){
+          console.error('Error deleting check-ins:', checkInsError);
+        }
+
+        // Delete all habits for this pod
+        console.log('Deleting habits for pod:', currentPod.id);
+        var { error: habitsError } = await client
+          .from('habits')
+          .delete()
+          .eq('pod_id', currentPod.id);
+        
+        if(habitsError){
+          console.error('Error deleting habits:', habitsError);
+        }
+
+        // Delete all pod members for this pod
+        console.log('Deleting pod members for pod:', currentPod.id);
+        var { error: membersError } = await client
+          .from('pod_members')
+          .delete()
+          .eq('pod_id', currentPod.id);
+        
+        if(membersError){
+          console.error('Error deleting pod members:', membersError);
+        }
+
         // Delete the pod
+        console.log('Deleting pod:', currentPod.id);
         var { error } = await client
           .from('pods')
           .delete()
@@ -5016,9 +5050,12 @@
           status.className = 'kc-challenge-status is-success';
         }
         
+        // Remove loading state and show tick
+        checkbox.classList.remove('is-loading');
+        checkbox.classList.add('is-checked');
+        
         setTimeout(function(){
           challenge.classList.remove('is-open');
-          checkbox.classList.add('is-checked');
         }, 500);
       }
 
@@ -5028,7 +5065,6 @@
         checkbox.classList.add('is-loading');
         
         setTimeout(function(){
-          checkbox.classList.remove('is-loading');
           challenge.classList.add('is-open');
           loadChallenge(getRandomChallengeType());
         }, 550);
