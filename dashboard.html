@@ -594,6 +594,15 @@
     min-width: 140px;
   }
 
+  /* ---------- SPIN ANIMATION ---------- */
+  .animate-spin{
+    animation: spin 1s linear infinite;
+  }
+  @keyframes spin{
+    from{ transform: rotate(0deg); }
+    to{ transform: rotate(360deg); }
+  }
+
   /* ---------- STREAK DISPLAY ---------- */
   .streak-section{
     padding: 32px 0;
