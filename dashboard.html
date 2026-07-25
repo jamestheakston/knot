@@ -1220,6 +1220,18 @@
     height: 16px;
     accent-color: var(--blue);
   }
+  .info-box{
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    background: var(--blue-soft);
+    border: 1px solid var(--blue);
+    border-radius: 8px;
+    margin: 16px 0;
+    font-size: 14px;
+    color: var(--ink);
+  }
   .reset-invite-section{
     margin-top: 24px;
     padding-top: 24px;
@@ -4490,36 +4502,9 @@
                 <button class="btn btn-ghost" id="copyInviteCode">Copy</button>
               </div>
             </div>
-            <div class="form-group">
-              <label class="form-label">Pod Description</label>
-              <textarea class="form-input" id="podDescriptionInput" rows="3" placeholder="Describe your pod's purpose..."></textarea>
-            </div>
-            <div class="form-group">
-              <label class="form-label">Streak Goal</label>
-              <input type="number" class="form-input" id="streakGoalInput" min="1" max="365" value="30" placeholder="Days">
-              <small class="form-help">Set a target streak for your pod members</small>
-            </div>
-            <div class="form-group">
-              <label class="form-label">Check-in Reminder Time</label>
-              <input type="time" class="form-input" id="reminderTimeInput" value="09:00">
-              <small class="form-help">When to remind members to check in</small>
-            </div>
-            <div class="form-group">
-              <label class="form-label">Privacy Settings</label>
-              <div class="checkbox-group">
-                <label class="checkbox-label">
-                  <input type="checkbox" id="publicPod" checked>
-                  <span>Public Pod (visible to others)</span>
-                </label>
-                <label class="checkbox-label">
-                  <input type="checkbox" id="showStreaks" checked>
-                  <span>Show member streaks</span>
-                </label>
-                <label class="checkbox-label">
-                  <input type="checkbox" id="allowGuestView" checked>
-                  <span>Allow guests to view pod</span>
-                </label>
-              </div>
+            <div class="info-box">
+              <i data-lucide="info" style="width: 18px; height: 18px; color: var(--blue);"></i>
+              <span>Managing habits has moved to the Habits section</span>
             </div>
             <div class="form-actions">
               <button class="btn btn-primary" id="savePodSettings">Save Changes</button>
@@ -4687,6 +4672,10 @@
                 <span>This page contains administrative features that are only accessible to pod administrators. Regular members cannot view or access these settings.</span>
               </div>
             </div>
+          </div>
+          <div class="info-box">
+            <i data-lucide="info" style="width: 18px; height: 18px; color: var(--blue);"></i>
+            <span>Managing members has moved to the Members section</span>
           </div>
           <div class="habits-section">
             <div class="habits-header">
