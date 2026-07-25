@@ -1335,7 +1335,11 @@
     border-color: var(--green);
     background: var(--green);
   }
+  .kc-checkbox i{
+    display: none;
+  }
   .kc-checkbox.is-checked i{
+    display: block;
     width: 18px; height: 18px; color: #fff;
     animation: kc-pop .25s ease;
   }
@@ -4875,12 +4879,15 @@
 
       function getRandomChallengeType(){
         var types = ['slider', 'pattern', 'sequence'];
-        return types[Math.floor(Math.random() * types.length)];
+        var selected = types[Math.floor(Math.random() * types.length)];
+        console.log('Selected challenge type:', selected);
+        return selected;
       }
 
       function loadChallenge(type){
         currentChallengeType = type;
         challengeInner.innerHTML = '';
+        console.log('Loading challenge type:', type);
         
         if(type === 'slider'){
           loadSliderChallenge();
