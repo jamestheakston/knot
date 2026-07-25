@@ -511,7 +511,7 @@
         var { data, error } = await client.auth.signInWithOAuth({
           provider: 'github',
           options: {
-            redirectTo: window.location.origin + '/dashboard.html'
+            redirectTo: window.location.origin + '/dashboard.html?oauth_login=true'
           }
         });
 
@@ -538,7 +538,7 @@
         var { data, error } = await client.auth.signInWithOAuth({
           provider: 'google',
           options: {
-            redirectTo: window.location.origin + '/dashboard.html'
+            redirectTo: window.location.origin + '/dashboard.html?oauth_login=true'
           }
         });
 
