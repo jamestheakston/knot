@@ -1303,7 +1303,8 @@
   .hcaptcha-widget{
     margin-bottom: 8px;
     position: relative;
-    min-height: 78px;
+    min-height: 200px;
+    overflow: visible;
   }
   .hcaptcha-loading{
     position: absolute;
@@ -1625,6 +1626,67 @@
     font-weight: 500;
   }
   .kc-sequence-option:hover{
+    border-color: var(--blue);
+    background: var(--blue-soft);
+  }
+
+  /* Math Challenge Styles */
+  .kc-math-display{
+    font-size: 28px;
+    text-align: center;
+    margin: 20px 0;
+    font-family: 'IBM Plex Mono', monospace;
+    font-weight: 600;
+  }
+  .kc-math-options{
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+    margin-top: 12px;
+  }
+  .kc-math-option{
+    padding: 14px;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    background: var(--bg-2);
+    font-size: 18px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-family: 'IBM Plex Mono', monospace;
+    font-weight: 500;
+  }
+  .kc-math-option:hover{
+    border-color: var(--blue);
+    background: var(--blue-soft);
+  }
+
+  /* Word Challenge Styles */
+  .kc-word-display{
+    font-size: 24px;
+    text-align: center;
+    margin: 20px 0;
+    font-family: 'IBM Plex Mono', monospace;
+    font-weight: 600;
+    letter-spacing: 4px;
+  }
+  .kc-word-options{
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+    margin-top: 12px;
+  }
+  .kc-word-option{
+    padding: 12px;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    background: var(--bg-2);
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-family: 'IBM Plex Mono', monospace;
+    font-weight: 500;
+  }
+  .kc-word-option:hover{
     border-color: var(--blue);
     background: var(--blue-soft);
   }
@@ -2547,6 +2609,7 @@
             Log Out
           </div>
         </div>
+        <div class="gtranslate_wrapper"></div>
       </div>
     </div>
   </aside>
@@ -4984,7 +5047,7 @@
       }
 
       function getRandomChallengeType(){
-        var types = ['slider', 'pattern', 'sequence'];
+        var types = ['slider', 'pattern', 'sequence', 'math', 'word'];
         var selected = types[Math.floor(Math.random() * types.length)];
         console.log('Selected challenge type:', selected);
         return selected;
@@ -5001,6 +5064,10 @@
           loadPatternChallenge();
         }else if(type === 'sequence'){
           loadSequenceChallenge();
+        }else if(type === 'math'){
+          loadMathChallenge();
+        }else if(type === 'word'){
+          loadWordChallenge();
         }
         
         if(typeof lucide !== 'undefined'){
@@ -5260,6 +5327,102 @@
           btn.textContent = option;
           btn.onclick = function(){
             if(option === seq.answer){
+              completeVerification();
+            }else{
+              var status = document.getElementById('kcStatus');
+              status.textContent = 'Try again';
+              status.className = 'kc-challenge-status is-error';
+              setTimeout(function(){
+                status.textContent = '';
+                status.className = 'kc-challenge-status';
+              }, 1500);
+            }
+          };
+          optionsContainer.appendChild(btn);
+        });
+      }
+
+      function loadMathChallenge(){
+        var num1 = Math.floor(Math.random() * 20) + 1;
+        var num2 = Math.floor(Math.random() * 20) + 1;
+        var operations = ['+', '-', '×'];
+        var operation = operations[Math.floor(Math.random() * operations.length)];
+        var answer;
+        
+        if(operation === '+'){
+          answer = num1 + num2;
+        }else if(operation === '-'){
+          answer = num1 - num2;
+        }else if(operation === '×'){
+          answer = num1 * num2;
+        }
+        
+        var options = [answer];
+        while(options.length < 4){
+          var wrongAnswer = answer + Math.floor(Math.random() * 10) - 5;
+          if(wrongAnswer !== answer && wrongAnswer >= 0 && !options.includes(wrongAnswer)){
+            options.push(wrongAnswer);
+          }
+        }
+        var shuffledOptions = options.sort(() => Math.random() - 0.5);
+        
+        challengeInner.innerHTML = `
+          <div class="kc-challenge-title">Solve the math problem</div>
+          <div class="kc-challenge-sub">What is the result?</div>
+          <div class="kc-math-display" id="kcMathDisplay">${num1} ${operation} ${num2} = ?</div>
+          <div class="kc-math-options" id="kcMathOptions"></div>
+          <div class="kc-challenge-status" id="kcStatus">&nbsp;</div>
+        `;
+        
+        var optionsContainer = document.getElementById('kcMathOptions');
+        shuffledOptions.forEach(function(option){
+          var btn = document.createElement('button');
+          btn.className = 'kc-math-option';
+          btn.textContent = option;
+          btn.onclick = function(){
+            if(option === answer){
+              completeVerification();
+            }else{
+              var status = document.getElementById('kcStatus');
+              status.textContent = 'Try again';
+              status.className = 'kc-challenge-status is-error';
+              setTimeout(function(){
+                status.textContent = '';
+                status.className = 'kc-challenge-status';
+              }, 1500);
+            }
+          };
+          optionsContainer.appendChild(btn);
+        });
+      }
+
+      function loadWordChallenge(){
+        var words = [
+          { scrambled: 'TIGER', correct: 'TIGER', options: ['TIGER', 'TIGRE', 'TIGER', 'TIGRE'] },
+          { scrambled: 'APPLE', correct: 'APPLE', options: ['APPLE', 'APPEL', 'APLE', 'APPEL'] },
+          { scrambled: 'HOUSE', correct: 'HOUSE', options: ['HOUSE', 'HOUS', 'HOUSE', 'HOUS'] },
+          { scrambled: 'WATER', correct: 'WATER', options: ['WATER', 'WATR', 'WATER', 'WATR'] },
+          { scrambled: 'BREAD', correct: 'BREAD', options: ['BREAD', 'BRED', 'BREAD', 'BRED'] },
+          { scrambled: 'CHAIR', correct: 'CHAIR', options: ['CHAIR', 'CHAIR', 'CHAIR', 'CHAIR'] }
+        ];
+        var word = words[Math.floor(Math.random() * words.length)];
+        var shuffledOptions = [...word.options].sort(() => Math.random() - 0.5);
+        
+        challengeInner.innerHTML = `
+          <div class="kc-challenge-title">Unscramble the word</div>
+          <div class="kc-challenge-sub">What is the correct spelling?</div>
+          <div class="kc-word-display" id="kcWordDisplay">${word.scrambled}</div>
+          <div class="kc-word-options" id="kcWordOptions"></div>
+          <div class="kc-challenge-status" id="kcStatus">&nbsp;</div>
+        `;
+        
+        var optionsContainer = document.getElementById('kcWordOptions');
+        shuffledOptions.forEach(function(option){
+          var btn = document.createElement('button');
+          btn.className = 'kc-word-option';
+          btn.textContent = option;
+          btn.onclick = function(){
+            if(option === word.correct){
               completeVerification();
             }else{
               var status = document.getElementById('kcStatus');
@@ -5951,6 +6114,9 @@
     }
   });
 </script>
+
+<script>window.gtranslateSettings = {"default_language":"en","languages":["en","fr","it","es"],"globe_color":"#66aaff","wrapper_selector":".gtranslate_wrapper"}</script>
+<script src="https://cdn.gtranslate.net/widgets/latest/globe.js" defer></script>
 
 </body>
 </html>
