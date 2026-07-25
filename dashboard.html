@@ -1352,16 +1352,20 @@
   }
 
   .kc-spinner{
-    width: 20px; height: 20px;
+    width: 18px; height: 18px;
     border: 2.5px solid var(--blue-soft);
     border-top-color: var(--blue);
     border-radius: 50%;
     animation: kc-spin .7s linear infinite;
     display:none;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
   }
   .kc-checkbox.is-loading .kc-spinner{ display:block; }
   .kc-checkbox.is-loading i{ display:none; }
-  @keyframes kc-spin{ to{ transform: rotate(360deg); } }
+  @keyframes kc-spin{ to{ transform: translate(-50%, -50%) rotate(360deg); } }
 
   .kc-label{
     font-size: 14.5px;
@@ -5012,25 +5016,32 @@
       }
 
       function loadPatternChallenge(){
-        var patterns = ['○ ● ○ ● ○', '● ○ ● ○ ●', '○ ○ ● ● ○ ○', '● ● ○ ○ ● ●'];
-        var correctPattern = patterns[Math.floor(Math.random() * patterns.length)];
-        var options = [...patterns].sort(() => Math.random() - 0.5);
+        var patterns = [
+          { sequence: '○ ● ○ ● ○', answer: '●', options: ['○', '●', '○●', '●○'] },
+          { sequence: '● ○ ● ○ ●', answer: '○', options: ['○', '●', '○●', '●○'] },
+          { sequence: '○ ○ ● ● ○ ○', answer: '●●', options: ['○○', '●●', '○●', '●○'] },
+          { sequence: '● ● ○ ○ ● ●', answer: '○○', options: ['○○', '●●', '○●', '●○'] },
+          { sequence: '○ ● ● ○ ●', answer: '○', options: ['○', '●', '○●', '●○'] },
+          { sequence: '● ○ ○ ● ○', answer: '●', options: ['○', '●', '○●', '●○'] }
+        ];
+        var pattern = patterns[Math.floor(Math.random() * patterns.length)];
+        var shuffledOptions = [...pattern.options].sort(() => Math.random() - 0.5);
         
         challengeInner.innerHTML = `
           <div class="kc-challenge-title">Match the pattern</div>
-          <div class="kc-challenge-sub">Select the pattern that continues the sequence.</div>
-          <div class="kc-pattern-display" id="kcPatternDisplay">${correctPattern}</div>
+          <div class="kc-challenge-sub">What comes next in the sequence?</div>
+          <div class="kc-pattern-display" id="kcPatternDisplay">${pattern.sequence} ?</div>
           <div class="kc-pattern-options" id="kcPatternOptions"></div>
           <div class="kc-challenge-status" id="kcStatus">&nbsp;</div>
         `;
         
         var optionsContainer = document.getElementById('kcPatternOptions');
-        options.forEach(function(pattern, index){
+        shuffledOptions.forEach(function(option){
           var btn = document.createElement('button');
           btn.className = 'kc-pattern-option';
-          btn.textContent = pattern;
+          btn.textContent = option;
           btn.onclick = function(){
-            if(pattern === correctPattern){
+            if(option === pattern.answer){
               completeVerification();
             }else{
               var status = document.getElementById('kcStatus');
