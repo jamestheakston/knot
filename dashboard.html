@@ -15,7 +15,7 @@
 <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
 <script src="/api/mail.js"></script>
-<script src="https://js.hcaptcha.com/1/api.js" async defer></script>
+<script src="https://js.hcaptcha.com/1/api.js"></script>
 <style>
   :root{
     --bg: #F7F8FB;
@@ -4447,42 +4447,62 @@
       
       // Clear and render hCaptcha widget
       var widgetContainer = document.getElementById('modalHcaptchaWidget');
+      if(!widgetContainer){
+        console.error('hCaptcha widget container not found');
+        return;
+      }
+      
       widgetContainer.innerHTML = '<div class="hcaptcha-loading"><i data-lucide="loader-2" class="loading-icon"></i></div>';
       
       if(typeof lucide !== 'undefined'){
         lucide.createIcons();
       }
       
-      if(typeof hcaptcha !== 'undefined'){
-        // Reset any existing widget
-        hcaptcha.reset();
-        
-        hcaptcha.render('modalHcaptchaWidget', {
-          sitekey: '6756a528-fd90-49fc-b01e-80e2b896d9b8',
-          theme: 'light',
-          callback: function(){
-            // Hide loading spinner when captcha loads
-            var loadingSpinner = widgetContainer.querySelector('.hcaptcha-loading');
-            if(loadingSpinner){
-              loadingSpinner.style.display = 'none';
-            }
-          },
-          'expired-callback': function(){
-            // Show loading spinner again if expired
-            var loadingSpinner = widgetContainer.querySelector('.hcaptcha-loading');
-            if(loadingSpinner){
-              loadingSpinner.style.display = 'flex';
-            }
-          },
-          'error-callback': function(){
-            // Hide loading spinner on error
-            var loadingSpinner = widgetContainer.querySelector('.hcaptcha-loading');
-            if(loadingSpinner){
-              loadingSpinner.style.display = 'none';
-            }
+      // Wait for hCaptcha to be available and render widget
+      var renderCaptcha = function(){
+        if(typeof hcaptcha !== 'undefined' && hcaptcha.render){
+          try{
+            // Reset any existing widget
+            hcaptcha.reset();
+            
+            hcaptcha.render('modalHcaptchaWidget', {
+              sitekey: '6756a528-fd90-49fc-b01e-80e2b896d9b8',
+              theme: 'light',
+              callback: function(){
+                // Hide loading spinner when captcha loads
+                var loadingSpinner = widgetContainer.querySelector('.hcaptcha-loading');
+                if(loadingSpinner){
+                  loadingSpinner.style.display = 'none';
+                }
+              },
+              'expired-callback': function(){
+                // Show loading spinner again if expired
+                var loadingSpinner = widgetContainer.querySelector('.hcaptcha-loading');
+                if(loadingSpinner){
+                  loadingSpinner.style.display = 'flex';
+                }
+              },
+              'error-callback': function(){
+                // Hide loading spinner on error and show error message
+                var loadingSpinner = widgetContainer.querySelector('.hcaptcha-loading');
+                if(loadingSpinner){
+                  loadingSpinner.style.display = 'none';
+                }
+                widgetContainer.innerHTML = '<div style="color: #C4432A; font-size: 13px; padding: 12px; text-align: center;">CAPTCHA failed to load. Please refresh and try again.</div>';
+              }
+            });
+          }catch(err){
+            console.error('Error rendering hCaptcha:', err);
+            widgetContainer.innerHTML = '<div style="color: #C4432A; font-size: 13px; padding: 12px; text-align: center;">CAPTCHA failed to load. Please refresh and try again.</div>';
           }
-        });
-      }
+        }else{
+          // hCaptcha not loaded yet, try again after a delay
+          setTimeout(renderCaptcha, 100);
+        }
+      };
+      
+      // Start trying to render captcha
+      renderCaptcha();
     }
 
     function hideEmailInviteModal(){
@@ -4595,12 +4615,17 @@
       }
 
       // Verify hCaptcha
+      var captchaValid = true;
       if(typeof hcaptcha !== 'undefined' && hcaptcha.getResponse){
         var captchaResponse = hcaptcha.getResponse();
         if(!captchaResponse){
           alert('Please complete the captcha verification');
           return;
         }
+      }else{
+        // hCaptcha not available, log warning but continue
+        console.warn('hCaptcha not available, proceeding without captcha verification');
+        captchaValid = false;
       }
 
       try{
