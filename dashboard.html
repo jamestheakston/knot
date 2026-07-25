@@ -2881,7 +2881,25 @@
       }
 
       if(userPods.length > 0){
-        currentPod = userPods[0];
+        // Try to load saved pod ID from localStorage
+        var savedPodId = localStorage.getItem('currentPodId');
+        if(savedPodId){
+          var savedPod = userPods.find(function(p){
+            return p.id === savedPodId;
+          });
+          if(savedPod){
+            currentPod = savedPod;
+            console.log('Loaded saved pod:', savedPod.name);
+          }else{
+            // Saved pod not found in user's pods, use first pod
+            currentPod = userPods[0];
+            console.log('Saved pod not found, using first pod');
+            localStorage.removeItem('currentPodId');
+          }
+        }else{
+          // No saved pod, use first pod
+          currentPod = userPods[0];
+        }
         isAdmin = currentPod.role === 'admin';
         updatePodSelector();
         updateAdminVisibility();
@@ -3057,6 +3075,11 @@
             return p.id === joinResult.pod_id;
           });
           
+          if(currentPod){
+            // Save current pod ID to localStorage
+            localStorage.setItem('currentPodId', currentPod.id);
+          }
+          
           console.log('Current pod set to:', currentPod);
           
           if(currentPod){
@@ -3229,6 +3252,10 @@
           if(userPods.length > 0){
             currentPod = userPods[0];
             isAdmin = currentPod.role === 'admin';
+            
+            // Save current pod ID to localStorage
+            localStorage.setItem('currentPodId', currentPod.id);
+            
             updatePodSelector();
             updateAdminVisibility();
             navigateTo('overview');
@@ -3356,6 +3383,11 @@
           currentPod = userPods.find(function(p){
             return p.id === podResult.id;
           });
+          
+          if(currentPod){
+            // Save current pod ID to localStorage
+            localStorage.setItem('currentPodId', currentPod.id);
+          }
           
           if(currentPod){
             isAdmin = currentPod.role === 'admin';
@@ -4411,6 +4443,10 @@
           // Switch to another pod
           currentPod = userPods[0];
           isAdmin = currentPod.role === 'admin';
+          
+          // Save current pod ID to localStorage
+          localStorage.setItem('currentPodId', currentPod.id);
+          
           updatePodSelector();
           updateAdminVisibility();
           navigateTo('overview');
@@ -4418,6 +4454,10 @@
           // No pods left, show no pods placeholder
           currentPod = null;
           isAdmin = false;
+          
+          // Clear saved pod ID from localStorage
+          localStorage.removeItem('currentPodId');
+          
           showNoPodsPlaceholder();
         }
       }catch(err){
@@ -5582,6 +5622,10 @@
     async function switchPod(pod){
       currentPod = pod;
       isAdmin = pod.role === 'admin';
+      
+      // Save current pod ID to localStorage
+      localStorage.setItem('currentPodId', pod.id);
+      
       updatePodSelector();
       updateAdminVisibility();
       document.getElementById('podDropdown').classList.remove('is-open');
