@@ -15,7 +15,6 @@
 <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
 <script src="/api/mail.js"></script>
-<script src="https://js.hcaptcha.com/1/api.js" async defer></script>
 <style>
   :root{
     --bg: #F7F8FB;
@@ -1294,6 +1293,240 @@
     color: var(--muted-2);
     text-align: center;
   }
+
+  /* ---------- CUSTOM KNOT CAPTCHA WIDGET ---------- */
+  .knot-captcha{
+    width: 302px;
+    border: 1px solid var(--line-strong);
+    border-radius: 4px;
+    background: var(--bg-2);
+    box-shadow: 0 1px 3px rgba(21,25,34,0.08);
+    overflow: hidden;
+    user-select: none;
+  }
+
+  .kc-row{
+    display:flex;
+    align-items:center;
+    gap: 14px;
+    padding: 14px 16px;
+  }
+  .kc-checkbox{
+    width: 28px;
+    height: 28px;
+    flex-shrink: 0;
+    border: 2px solid var(--line-strong);
+    border-radius: 4px;
+    background: var(--bg-2);
+    cursor: pointer;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    transition: border-color .15s ease, background .15s ease, transform .1s ease;
+    position: relative;
+  }
+  .kc-checkbox:hover{
+    border-color: var(--blue);
+  }
+  .kc-checkbox:active{
+    transform: scale(0.94);
+  }
+  .kc-checkbox.is-checked{
+    border-color: var(--green);
+    background: var(--green);
+  }
+  .kc-checkbox.is-checked i{
+    width: 18px; height: 18px; color: #fff;
+    animation: kc-pop .25s ease;
+  }
+  .kc-checkbox.is-loading{
+    border-color: var(--blue);
+  }
+  @keyframes kc-pop{
+    from{ transform: scale(0); opacity:0; }
+    to{ transform: scale(1); opacity:1; }
+  }
+
+  .kc-spinner{
+    width: 20px; height: 20px;
+    border: 2.5px solid var(--blue-soft);
+    border-top-color: var(--blue);
+    border-radius: 50%;
+    animation: kc-spin .7s linear infinite;
+    display:none;
+  }
+  .kc-checkbox.is-loading .kc-spinner{ display:block; }
+  .kc-checkbox.is-loading i{ display:none; }
+  @keyframes kc-spin{ to{ transform: rotate(360deg); } }
+
+  .kc-label{
+    font-size: 14.5px;
+    font-weight: 500;
+    color: var(--ink);
+    line-height: 1.3;
+  }
+  .kc-label small{
+    display:block;
+    margin-top: 2px;
+    font-size: 11.5px;
+    color: var(--muted-2);
+    font-weight: 400;
+  }
+
+  .kc-brand{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding: 8px 14px;
+    background: var(--bg-3);
+    border-top: 1px solid var(--line);
+  }
+  .kc-brand-mark{
+    display:flex;
+    align-items:center;
+    gap: 6px;
+  }
+  .kc-brand-mark i{
+    width: 15px; height: 15px;
+    color: var(--blue);
+  }
+  .kc-brand-text{
+    display:flex;
+    flex-direction:column;
+    line-height: 1;
+  }
+  .kc-brand-text .kc-wordmark{
+    font-family: 'Instrument Serif', serif;
+    font-size: 14px;
+    letter-spacing: -0.01em;
+    color: var(--ink);
+  }
+  .kc-brand-text .kc-tagline{
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 8.5px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--muted-2);
+    margin-top: 1px;
+  }
+  .kc-brand-links{
+    display:flex;
+    flex-direction: column;
+    align-items:flex-end;
+    gap: 2px;
+  }
+  .kc-brand-links a{
+    font-size: 9.5px;
+    color: var(--muted-2);
+    text-decoration: none;
+  }
+  .kc-brand-links a:hover{
+    color: var(--blue);
+    text-decoration: underline;
+  }
+
+  .kc-challenge{
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height .3s ease;
+    border-top: 1px solid var(--line);
+  }
+  .kc-challenge.is-open{
+    max-height: 220px;
+  }
+  .kc-challenge-inner{
+    padding: 18px 18px 14px;
+  }
+  .kc-challenge-title{
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: 4px;
+  }
+  .kc-challenge-sub{
+    font-size: 12px;
+    color: var(--muted);
+    margin-bottom: 16px;
+    line-height: 1.4;
+  }
+
+  .kc-slider-track{
+    position: relative;
+    height: 44px;
+    background: var(--bg-3);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    display:flex;
+    align-items:center;
+    padding: 0 4px;
+  }
+  .kc-slider-fill{
+    position:absolute;
+    left:0; top:0; bottom:0;
+    width: 0%;
+    background: var(--blue-soft);
+    border-radius: 7px;
+    transition: none;
+  }
+  .kc-slider-fill.is-snapping{
+    transition: width .25s ease;
+  }
+  .kc-slider-target{
+    position:absolute;
+    right: 6px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    background: var(--bg-2);
+    border: 1.5px dashed var(--line-strong);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color: var(--muted-2);
+    z-index: 1;
+  }
+  .kc-slider-target i{ width:16px; height:16px; }
+  .kc-slider-handle{
+    position: relative;
+    z-index: 2;
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    background: var(--blue);
+    box-shadow: 0 2px 8px rgba(42,75,215,0.35);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:#fff;
+    cursor: grab;
+    touch-action: none;
+  }
+  .kc-slider-handle:active{ cursor: grabbing; }
+  .kc-slider-handle i{ width:16px; height:16px; }
+  .kc-slider-label{
+    position:absolute;
+    left:0; right:0; top:0; bottom:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size: 11.5px;
+    color: var(--muted-2);
+    font-family:'IBM Plex Mono', monospace;
+    letter-spacing: 0.03em;
+    pointer-events:none;
+    z-index: 0;
+  }
+  .kc-slider-label.is-hidden{ display:none; }
+
+  .kc-challenge-status{
+    margin-top: 12px;
+    font-size: 11.5px;
+    color: var(--muted-2);
+    text-align:center;
+    min-height: 14px;
+  }
+  .kc-challenge-status.is-error{ color: var(--red); }
+  .kc-challenge-status.is-success{ color: var(--green); }
   .invite-code-display{
     margin-top: 32px;
   }
@@ -2012,9 +2245,53 @@
             </div>
             <div class="hcaptcha-message">We know, inconvenient, but it helps us stop the bots.</div>
             <div class="hcaptcha-widget" id="modalHcaptchaWidget">
-              <div class="hcaptcha-loading">
-                <i data-lucide="loader-2"></i>
+              <!-- Custom Knot Captcha Widget -->
+              <div class="knot-captcha" id="knotCaptcha">
+                <div class="kc-row">
+                  <div class="kc-checkbox" id="kcCheckbox">
+                    <i data-lucide="check"></i>
+                    <div class="kc-spinner"></div>
+                  </div>
+                  <div class="kc-label">
+                    I'm human
+                    <small>Verify to continue</small>
+                  </div>
+                </div>
+
+                <div class="kc-challenge" id="kcChallenge">
+                  <div class="kc-challenge-inner">
+                    <div class="kc-challenge-title">Tie the knot</div>
+                    <div class="kc-challenge-sub">Drag the loop across to connect it.</div>
+                    <div class="kc-slider-track" id="kcSliderTrack">
+                      <div class="kc-slider-fill" id="kcSliderFill"></div>
+                      <div class="kc-slider-label" id="kcSliderLabel">slide to connect →</div>
+                      <div class="kc-slider-target" id="kcSliderTarget">
+                        <i data-lucide="link"></i>
+                      </div>
+                      <div class="kc-slider-handle" id="kcSliderHandle">
+                        <i data-lucide="link-2"></i>
+                      </div>
+                    </div>
+                    <div class="kc-challenge-status" id="kcStatus">&nbsp;</div>
+                  </div>
+                </div>
+
+                <div class="kc-brand">
+                  <div class="kc-brand-mark">
+                    <i data-lucide="link"></i>
+                    <div class="kc-brand-text">
+                      <span class="kc-wordmark">Knot</span>
+                      <span class="kc-tagline">Human check</span>
+                    </div>
+                  </div>
+                  <div class="kc-brand-links">
+                    <a href="privacy.html" id="kcPrivacy">Privacy</a>
+                    <a href="terms.html" id="kcTerms">Terms</a>
+                  </div>
+                </div>
               </div>
+              <!-- Hidden hCaptcha container for actual verification -->
+              <div id="hiddenHcaptchaContainer" style="display: none;"></div>
             </div>
             <div class="hcaptcha-thanks">Thanks for helping us create a robot-free experience 🙏</div>
           </div>
@@ -4449,101 +4726,228 @@
       document.getElementById('emailInviteModal').classList.add('is-open');
       document.getElementById('modalInviteEmail').value = '';
       
-      // Clear and render hCaptcha widget
-      var widgetContainer = document.getElementById('modalHcaptchaWidget');
-      if(!widgetContainer){
-        console.error('hCaptcha widget container not found');
-        return;
-      }
-      
-      // Remove existing widget by ID if it exists
-      if(modalHcaptchaWidgetId !== null && typeof hcaptcha !== 'undefined' && hcaptcha.reset){
-        console.log('Resetting existing hCaptcha widget with ID:', modalHcaptchaWidgetId);
-        try{
-          hcaptcha.reset(modalHcaptchaWidgetId);
-          modalHcaptchaWidgetId = null;
-        }catch(err){
-          console.error('Error resetting hCaptcha widget:', err);
-        }
-      }
-      
-      // Clear container innerHTML
-      widgetContainer.innerHTML = '<div class="hcaptcha-loading"><i data-lucide="loader-2" class="loading-icon"></i></div>';
-      
-      if(typeof lucide !== 'undefined'){
-        lucide.createIcons();
-      }
-      
-      // Wait for hCaptcha to be available and render widget
-      var renderCaptcha = function(attempts){
-        console.log('renderCaptcha attempt:', attempts, 'hcaptcha defined:', typeof hcaptcha !== 'undefined', 'hcaptcha.render function:', typeof hcaptcha !== 'undefined' && typeof hcaptcha.render === 'function');
-        
-        if(typeof hcaptcha !== 'undefined' && typeof hcaptcha.render === 'function'){
-          try{
-            console.log('Attempting to render hCaptcha widget');
-            modalHcaptchaWidgetId = hcaptcha.render('modalHcaptchaWidget', {
-              sitekey: '6756a528-fd90-49fc-b01e-80e2b896d9b8',
-              theme: 'light',
-              callback: function(){
-                console.log('hCaptcha widget loaded successfully, ID:', modalHcaptchaWidgetId);
-                // Hide loading spinner when captcha loads
-                var loadingSpinner = widgetContainer.querySelector('.hcaptcha-loading');
-                if(loadingSpinner){
-                  loadingSpinner.style.display = 'none';
-                }
-              },
-              'expired-callback': function(){
-                console.log('hCaptcha widget expired');
-                // Show loading spinner again if expired
-                var loadingSpinner = widgetContainer.querySelector('.hcaptcha-loading');
-                if(loadingSpinner){
-                  loadingSpinner.style.display = 'flex';
-                }
-              },
-              'error-callback': function(){
-                console.error('hCaptcha widget error');
-                // Hide loading spinner on error and show error message
-                var loadingSpinner = widgetContainer.querySelector('.hcaptcha-loading');
-                if(loadingSpinner){
-                  loadingSpinner.style.display = 'none';
-                }
-                widgetContainer.innerHTML = '<div style="color: #C4432A; font-size: 13px; padding: 12px; text-align: center;">CAPTCHA failed to load. Please refresh and try again.</div>';
-              }
-            });
-            console.log('hCaptcha render returned widget ID:', modalHcaptchaWidgetId);
-          }catch(err){
-            console.error('Error rendering hCaptcha:', err);
-            widgetContainer.innerHTML = '<div style="color: #C4432A; font-size: 13px; padding: 12px; text-align: center;">CAPTCHA failed to load. Please refresh and try again.</div>';
-          }
-        }else if(attempts < 50){
-          // hCaptcha not loaded yet, try again after a delay (max 5 seconds)
-          console.log('hCaptcha not ready, retrying in 100ms...');
-          setTimeout(function(){
-            renderCaptcha(attempts + 1);
-          }, 100);
-        }else{
-          // Timeout - hCaptcha failed to load
-          console.error('hCaptcha failed to load after 5 seconds');
-          widgetContainer.innerHTML = '<div style="color: #C4432A; font-size: 13px; padding: 12px; text-align: center;">CAPTCHA failed to load. Please refresh and try again.</div>';
-        }
-      };
-      
-      // Start trying to render captcha
-      renderCaptcha(0);
+      // Initialize custom Knot captcha widget
+      initKnotCaptcha();
     }
 
     function hideEmailInviteModal(){
       console.log('hideEmailInviteModal called');
       document.getElementById('emailInviteModal').classList.remove('is-open');
       
-      // Reset and remove widget by ID when modal closes
-      if(modalHcaptchaWidgetId !== null && typeof hcaptcha !== 'undefined' && hcaptcha.reset){
-        console.log('Removing hCaptcha widget with ID:', modalHcaptchaWidgetId);
+      // Reset custom Knot captcha widget
+      resetKnotCaptcha();
+    }
+
+    // Custom Knot Captcha Widget Logic
+    var knotCaptchaVerified = false;
+    var knotCaptchaToken = null;
+    var hcaptchaWidgetId = null;
+
+    function initKnotCaptcha(){
+      var checkbox = document.getElementById('kcCheckbox');
+      var challenge = document.getElementById('kcChallenge');
+      var track = document.getElementById('kcSliderTrack');
+      var fill = document.getElementById('kcSliderFill');
+      var handle = document.getElementById('kcSliderHandle');
+      var target = document.getElementById('kcSliderTarget');
+      var label = document.getElementById('kcSliderLabel');
+      var status = document.getElementById('kcStatus');
+
+      var verified = false;
+      var dragging = false;
+      var startX = 0;
+      var handleStartLeft = 0;
+      var maxDrag = 0;
+
+      function generateToken(){
+        return 'knot_' + Math.random().toString(36).slice(2) + Date.now().toString(36);
+      }
+
+      checkbox.onclick = function(){
+        if(verified || checkbox.classList.contains('is-loading')) return;
+
+        checkbox.classList.add('is-loading');
+        status.textContent = '';
+        status.className = 'kc-challenge-status';
+
+        // Brief "verifying" delay before showing the challenge
+        setTimeout(function(){
+          checkbox.classList.remove('is-loading');
+          challenge.classList.add('is-open');
+          resetSlider();
+        }, 550);
+      };
+
+      function resetSlider(){
+        fill.style.width = '0%';
+        fill.classList.remove('is-snapping');
+        handle.style.transform = 'translateX(0px)';
+        handle.style.left = '4px';
+        handle.style.position = 'absolute';
+        handle.style.top = '50%';
+        handle.style.marginTop = '-18px';
+        label.classList.remove('is-hidden');
+      }
+
+      function getMaxDrag(){
+        return track.clientWidth - handle.clientWidth - 8;
+      }
+
+      function onDragStart(clientX){
+        if(verified) return;
+        dragging = true;
+        startX = clientX;
+        maxDrag = getMaxDrag();
+        var rect = handle.getBoundingClientRect();
+        var trackRect = track.getBoundingClientRect();
+        handleStartLeft = rect.left - trackRect.left;
+        label.classList.add('is-hidden');
+      }
+
+      function onDragMove(clientX){
+        if(!dragging) return;
+        var delta = clientX - startX;
+        var newLeft = Math.min(Math.max(handleStartLeft + delta, 4), maxDrag + 4);
+        handle.style.left = newLeft + 'px';
+        fill.style.width = (newLeft + handle.clientWidth / 2) + 'px';
+      }
+
+      function onDragEnd(){
+        if(!dragging) return;
+        dragging = false;
+
+        var currentLeft = parseFloat(handle.style.left || '4');
+        var success = currentLeft >= maxDrag - 6;
+
+        if(success){
+          handle.style.left = (maxDrag + 4) + 'px';
+          fill.classList.add('is-snapping');
+          fill.style.width = '100%';
+          status.textContent = 'Connected';
+          status.className = 'kc-challenge-status is-success';
+          completeVerification();
+        }else{
+          fill.classList.add('is-snapping');
+          handle.style.left = '4px';
+          fill.style.width = '0%';
+          label.classList.remove('is-hidden');
+          status.textContent = 'Try again — drag all the way across';
+          status.className = 'kc-challenge-status is-error';
+          setTimeout(function(){ fill.classList.remove('is-snapping'); }, 260);
+        }
+      }
+
+      function completeVerification(){
+        verified = true;
+        knotCaptchaVerified = true;
+        knotCaptchaToken = generateToken();
+        
+        // Load hCaptcha in background for actual verification
+        loadHcaptchaInBackground();
+        
+        setTimeout(function(){
+          challenge.classList.remove('is-open');
+          checkbox.classList.add('is-checked');
+        }, 500);
+      }
+
+      // Mouse events
+      handle.addEventListener('mousedown', function(e){
+        onDragStart(e.clientX);
+        e.preventDefault();
+      });
+      document.addEventListener('mousemove', function(e){ onDragMove(e.clientX); });
+      document.addEventListener('mouseup', onDragEnd);
+
+      // Touch events
+      handle.addEventListener('touchstart', function(e){
+        onDragStart(e.touches[0].clientX);
+      }, { passive: true });
+      document.addEventListener('touchmove', function(e){
+        if(dragging) onDragMove(e.touches[0].clientX);
+      }, { passive: true });
+      document.addEventListener('touchend', onDragEnd);
+    }
+
+    function resetKnotCaptcha(){
+      var checkbox = document.getElementById('kcCheckbox');
+      var challenge = document.getElementById('kcChallenge');
+      var track = document.getElementById('kcSliderTrack');
+      var fill = document.getElementById('kcSliderFill');
+      var handle = document.getElementById('kcSliderHandle');
+      var label = document.getElementById('kcSliderLabel');
+      var status = document.getElementById('kcStatus');
+
+      knotCaptchaVerified = false;
+      knotCaptchaToken = null;
+      
+      checkbox.classList.remove('is-checked', 'is-loading');
+      challenge.classList.remove('is-open');
+      fill.style.width = '0%';
+      fill.classList.remove('is-snapping');
+      handle.style.transform = 'translateX(0px)';
+      handle.style.left = '4px';
+      handle.style.position = 'absolute';
+      handle.style.top = '50%';
+      handle.style.marginTop = '-18px';
+      label.classList.remove('is-hidden');
+      status.textContent = '';
+      status.className = 'kc-challenge-status';
+      
+      // Reset hCaptcha widget if it exists
+      if(hcaptchaWidgetId !== null && typeof hcaptcha !== 'undefined' && hcaptcha.reset){
         try{
-          hcaptcha.reset(modalHcaptchaWidgetId);
-          modalHcaptchaWidgetId = null;
+          hcaptcha.reset(hcaptchaWidgetId);
+          hcaptchaWidgetId = null;
         }catch(err){
-          console.error('Error removing hCaptcha widget:', err);
+          console.error('Error resetting hCaptcha widget:', err);
+        }
+      }
+    }
+
+    function loadHcaptchaInBackground(){
+      var hiddenContainer = document.getElementById('hiddenHcaptchaContainer');
+      
+      // Load hCaptcha script if not already loaded
+      if(typeof hcaptcha === 'undefined'){
+        var script = document.createElement('script');
+        script.src = 'https://js.hcaptcha.com/1/api.js';
+        script.async = true;
+        script.defer = true;
+        script.onload = function(){
+          renderHiddenHcaptcha();
+        };
+        document.head.appendChild(script);
+      }else{
+        renderHiddenHcaptcha();
+      }
+    }
+
+    function renderHiddenHcaptcha(){
+      var hiddenContainer = document.getElementById('hiddenHcaptchaContainer');
+      
+      if(typeof hcaptcha !== 'undefined' && hcaptcha.render){
+        try{
+          hcaptchaWidgetId = hcaptcha.render(hiddenContainer, {
+            sitekey: '6756a528-fd90-49fc-b01e-80e2b896d9b8',
+            theme: 'light',
+            size: 'invisible',
+            callback: function(token){
+              console.log('hCaptcha verified with token:', token);
+            },
+            'error-callback': function(){
+              console.error('hCaptcha verification failed');
+            }
+          });
+          
+          // Execute hCaptcha verification
+          setTimeout(function(){
+            if(typeof hcaptcha.execute === 'function'){
+              hcaptcha.execute(hcaptchaWidgetId);
+            }
+          }, 100);
+        }catch(err){
+          console.error('Error rendering hCaptcha:', err);
         }
       }
     }
@@ -4654,19 +5058,10 @@
         return;
       }
 
-      // Verify hCaptcha
-      var captchaValid = true;
-      if(typeof hcaptcha !== 'undefined' && hcaptcha.getResponse){
-        var captchaResponse = hcaptcha.getResponse(modalHcaptchaWidgetId);
-        console.log('hCaptcha response:', captchaResponse ? 'valid' : 'missing');
-        if(!captchaResponse){
-          alert('Please complete the captcha verification');
-          return;
-        }
-      }else{
-        // hCaptcha not available, log warning but continue
-        console.warn('hCaptcha not available, proceeding without captcha verification');
-        captchaValid = false;
+      // Verify custom Knot captcha
+      if(!knotCaptchaVerified){
+        alert('Please complete the captcha verification');
+        return;
       }
 
       try{
@@ -4687,16 +5082,8 @@
           alert('Invite sent successfully to ' + email);
           hideEmailInviteModal();
           
-          // Reset hCaptcha widget by ID if it exists
-          if(modalHcaptchaWidgetId !== null && typeof hcaptcha !== 'undefined' && hcaptcha.reset){
-            console.log('Resetting hCaptcha widget after successful send, ID:', modalHcaptchaWidgetId);
-            try{
-              hcaptcha.reset(modalHcaptchaWidgetId);
-              modalHcaptchaWidgetId = null;
-            }catch(err){
-              console.error('Error resetting hCaptcha widget:', err);
-            }
-          }
+          // Reset custom Knot captcha widget
+          resetKnotCaptcha();
         }else{
           console.error('Error sending invite:', result.error);
           alert('Error sending invite: ' + result.error);
