@@ -4027,6 +4027,30 @@
       var client = getSupabaseClient();
       try{
         console.log('Deleting pod:', currentPod.id);
+        
+        // Get all pod members to send deletion notifications
+        var { data: members, error: membersError } = await client
+          .from('pod_members')
+          .select('user_id, users!inner(email)')
+          .eq('pod_id', currentPod.id);
+        
+        if(membersError){
+          console.error('Error fetching pod members:', membersError);
+        }
+        
+        // Get current user's display name for "deleted by" field
+        var deletedBy = currentUser.user_metadata?.display_name || currentUser.user_metadata?.full_name || currentUser.user_metadata?.name || currentUser.email?.split('@')[0] || currentUser.email;
+        
+        // Send deletion notifications to all members
+        if(members && members.length > 0){
+          members.forEach(function(member){
+            if(member.users && member.users.email && member.users.email !== currentUser.email){
+              sendPodDeletionEmail(member.users.email, currentPod.name, deletedBy);
+            }
+          });
+        }
+        
+        // Delete the pod
         var { error } = await client
           .from('pods')
           .delete()
@@ -4587,10 +4611,12 @@
       }
 
       // Verify hCaptcha
-      var captchaResponse = hcaptcha.getResponse();
-      if(!captchaResponse){
-        alert('Please complete the captcha verification');
-        return;
+      if(typeof hcaptcha !== 'undefined' && hcaptcha.getResponse){
+        var captchaResponse = hcaptcha.getResponse();
+        if(!captchaResponse){
+          alert('Please complete the captcha verification');
+          return;
+        }
       }
 
       try{
@@ -4609,12 +4635,14 @@
         if(result.success){
           alert('Invite sent successfully to ' + email);
           hideEmailInviteModal();
+          
+          // Reset hCaptcha if it exists
+          if(typeof hcaptcha !== 'undefined' && hcaptcha.reset){
+            hcaptcha.reset();
+          }
         }else{
           alert('Error sending invite: ' + result.error);
         }
-        
-        // Reset hCaptcha
-        hcaptcha.reset();
       }catch(err){
         console.error('Error sending email:', err);
         alert('Error sending invite: ' + err.message);

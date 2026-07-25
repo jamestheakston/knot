@@ -482,7 +482,236 @@ function generateLoginEmailHTML(email, loginTime){
   `;
 }
 
-// Send invite email
+// Generate pod deletion email HTML
+function generatePodDeletionEmailHTML(podName, deletedBy, deletionTime){
+  var timeStr = deletionTime.toLocaleString();
+  return `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>Pod deleted on Knot</title>
+  <style>
+    body, table, td, a { -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
+    table, td { mso-table-lspace: 0pt; mso-table-rspace: 0pt; }
+    img { -ms-interpolation-mode: bicubic; border: 0; height: auto; line-height: 100%; outline: none; text-decoration: none; }
+    table { border-collapse: collapse !important; }
+    body { height: 100% !important; margin: 0 !important; padding: 0 !important; width: 100% !important; background-color: #F7F8FB; font-family: 'Work Sans', Helvetica, Arial, sans-serif; color: #151922; }
+
+    .email-container {
+      max-width: 600px;
+      margin: 0 auto;
+      background-color: #FFFFFF;
+      border-radius: 20px;
+      overflow: hidden;
+      border: 1px solid rgba(21, 25, 34, 0.08);
+      box-shadow: 0 10px 30px rgba(21, 25, 34, 0.03);
+    }
+    .header {
+      padding: 40px 40px 28px;
+      text-align: center;
+      border-bottom: 1px solid rgba(21, 25, 34, 0.06);
+      background: linear-gradient(135deg, #8890A0 0%, #5B6472 100%);
+    }
+    .logo-text {
+      font-family: Georgia, serif;
+      font-size: 32px;
+      color: #FFFFFF;
+      font-weight: normal;
+      text-decoration: none;
+      letter-spacing: -0.01em;
+    }
+    .header-subtitle {
+      font-size: 15px;
+      color: rgba(255,255,255,0.9);
+      margin-top: 8px;
+    }
+    .content {
+      padding: 48px 40px;
+    }
+    .eyebrow {
+      font-family: monospace;
+      font-size: 11.5px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #5B6472;
+      background: #EEF1F6;
+      border: 1px solid rgba(91, 100, 114, 0.15);
+      padding: 6px 14px;
+      border-radius: 100px;
+      display: inline-block;
+      margin-bottom: 24px;
+    }
+    h1 {
+      font-family: Georgia, serif;
+      font-size: 34px;
+      font-weight: normal;
+      line-height: 1.15;
+      margin: 0 0 18px 0;
+      color: #151922;
+    }
+    p {
+      font-size: 16px;
+      line-height: 1.65;
+      color: #5B6472;
+      margin: 0 0 24px 0;
+    }
+    .info-box {
+      background: #F7F8FB;
+      border: 1px solid rgba(21, 25, 34, 0.06);
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 32px;
+    }
+    .info-row {
+      margin-bottom: 16px;
+    }
+    .info-row:last-child {
+      margin-bottom: 0;
+    }
+    .info-label {
+      font-size: 12.5px;
+      font-weight: 500;
+      color: #8890A0;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 6px;
+    }
+    .info-value {
+      font-size: 16px;
+      color: #151922;
+      font-weight: 500;
+    }
+    .footer {
+      padding: 28px 40px 36px;
+      text-align: center;
+      background-color: #F7F8FB;
+      border-top: 1px solid rgba(21, 25, 34, 0.06);
+    }
+    .footer p {
+      font-size: 13px;
+      color: #8890A0;
+      margin: 0;
+    }
+
+    @media screen and (max-width: 600px) {
+      .email-container {
+        width: 100% !important;
+        border-radius: 0 !important;
+        border: none !important;
+      }
+      .content {
+        padding: 32px 20px !important;
+      }
+      .header {
+        padding: 32px 20px 20px !important;
+      }
+      .footer {
+        padding: 24px 20px 28px !important;
+      }
+    }
+  </style>
+</head>
+<body style="margin: 0; padding: 40px 0; background-color: #F7F8FB;">
+
+  <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color: #F7F8FB;">
+    <tr>
+      <td align="center" style="padding: 0 16px;">
+        
+        <!-- Email Container -->
+        <table role="presentation" border="0" cellpadding="0" cellspacing="0" class="email-container" width="600" style="background-color: #FFFFFF; border-radius: 20px;">
+          
+          <!-- Header -->
+          <tr>
+            <td class="header" style="padding: 40px 40px 28px; text-align: center; border-bottom: 1px solid rgba(21, 25, 34, 0.06); background: linear-gradient(135deg, #8890A0 0%, #5B6472 100%);">
+              <div class="logo-text" style="font-family: Georgia, serif; font-size: 32px; color: #FFFFFF; font-weight: normal; text-decoration: none;">Knot</div>
+              <div class="header-subtitle" style="font-size: 15px; color: rgba(255,255,255,0.9); margin-top: 8px;">Pod deleted</div>
+            </td>
+          </tr>
+
+          <!-- Main Content -->
+          <tr>
+            <td class="content" style="padding: 48px 40px;">
+              <span class="eyebrow" style="font-family: monospace; font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.08em; color: #5B6472; background: #EEF1F6; padding: 6px 14px; border-radius: 100px; display: inline-block; margin-bottom: 24px;">Pod Notification</span>
+              
+              <h1 style="font-family: Georgia, serif; font-size: 34px; font-weight: normal; line-height: 1.15; margin: 0 0 18px 0; color: #151922;">
+                Your pod <em>"${podName}"</em> has been deleted
+              </h1>
+              
+              <p style="font-size: 16px; line-height: 1.65; color: #5B6472; margin: 0 0 24px 0;">
+                This pod has been removed from Knot. All associated data, including check-ins and streaks, has been permanently deleted.
+              </p>
+
+              <!-- Deletion Details Box -->
+              <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+                <tr>
+                  <td class="info-box" style="background: #F7F8FB; border: 1px solid rgba(21, 25, 34, 0.06); border-radius: 12px; padding: 24px;">
+                    <div class="info-row" style="margin-bottom: 16px;">
+                      <div class="info-label" style="font-size: 12.5px; font-weight: 500; color: #8890A0; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px;">Pod Name</div>
+                      <div class="info-value" style="font-size: 16px; color: #151922; font-weight: 500;">${podName}</div>
+                    </div>
+                    <div class="info-row" style="margin-bottom: 16px;">
+                      <div class="info-label" style="font-size: 12.5px; font-weight: 500; color: #8890A0; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px;">Deleted by</div>
+                      <div class="info-value" style="font-size: 16px; color: #151922; font-weight: 500;">${deletedBy}</div>
+                    </div>
+                    <div class="info-row" style="margin-bottom: 0;">
+                      <div class="info-label" style="font-size: 12.5px; font-weight: 500; color: #8890A0; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px;">Time</div>
+                      <div class="info-value" style="font-size: 16px; color: #151922; font-weight: 500;">${timeStr}</div>
+                    </div>
+                  </td>
+                </tr>
+              </table>
+
+              <p style="font-size: 16px; line-height: 1.65; color: #5B6472; margin: 0;">
+                If you have any questions about this deletion, please contact the pod administrator.
+              </p>
+
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td class="footer" style="padding: 28px 40px 36px; text-align: center; background-color: #F7F8FB; border-top: 1px solid rgba(21, 25, 34, 0.06);">
+              <p style="font-size: 13px; color: #8890A0; margin: 0;">
+                © 2026 Knot. A habit is easier to keep than a promise, when both are shared.
+              </p>
+            </td>
+          </tr>
+
+        </table>
+        
+      </td>
+    </tr>
+  </table>
+
+</body>
+</html>
+  `;
+}
+
+// Send pod deletion notification email
+async function sendPodDeletionEmail(toEmail, podName, deletedBy){
+  try{
+    initEmailJS();
+    
+    var deletionTime = new Date();
+    var emailContent = generatePodDeletionEmailHTML(podName, deletedBy, deletionTime);
+    
+    var templateParams = {
+      toemail: toEmail,
+      fromname: 'Knot Notifications',
+      subject: 'Pod deleted on Knot',
+      email_content: emailContent
+    };
+    
+    await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, templateParams);
+  }catch(err){
+    console.error('Error sending pod deletion notification:', err);
+    // Don't alert user for deletion notifications - silently fail
+  }
+}
 async function sendInviteEmail(toEmail, podName, inviteCode, inviterName){
   try{
     initEmailJS();
