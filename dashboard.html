@@ -15,7 +15,7 @@
 <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
 <script src="/api/mail.js"></script>
-<script src="https://js.hcaptcha.com/1/api.js"></script>
+<script src="https://js.hcaptcha.com/1/api.js" onload="onHcaptchaLoad()" async defer></script>
 <style>
   :root{
     --bg: #F7F8FB;
@@ -2225,6 +2225,15 @@
 </div>
 
 <script>
+  // Global hCaptcha loading state
+  var hCaptchaLoaded = false;
+  
+  // Called when hCaptcha script loads
+  function onHcaptchaLoad(){
+    console.log('hCaptcha loaded successfully');
+    hCaptchaLoaded = true;
+  }
+  
   document.addEventListener('DOMContentLoaded', function(){
     var SupabaseClient = null;
     var currentUser = null;
@@ -4459,8 +4468,8 @@
       }
       
       // Wait for hCaptcha to be available and render widget
-      var renderCaptcha = function(){
-        if(typeof hcaptcha !== 'undefined' && hcaptcha.render){
+      var renderCaptcha = function(attempts){
+        if(typeof hcaptcha !== 'undefined' && hcaptcha.render && hCaptchaLoaded){
           try{
             // Reset any existing widget
             hcaptcha.reset();
@@ -4495,14 +4504,20 @@
             console.error('Error rendering hCaptcha:', err);
             widgetContainer.innerHTML = '<div style="color: #C4432A; font-size: 13px; padding: 12px; text-align: center;">CAPTCHA failed to load. Please refresh and try again.</div>';
           }
+        }else if(attempts < 50){
+          // hCaptcha not loaded yet, try again after a delay (max 5 seconds)
+          setTimeout(function(){
+            renderCaptcha(attempts + 1);
+          }, 100);
         }else{
-          // hCaptcha not loaded yet, try again after a delay
-          setTimeout(renderCaptcha, 100);
+          // Timeout - hCaptcha failed to load
+          console.error('hCaptcha failed to load after 5 seconds');
+          widgetContainer.innerHTML = '<div style="color: #C4432A; font-size: 13px; padding: 12px; text-align: center;">CAPTCHA failed to load. Please refresh and try again.</div>';
         }
       };
       
       // Start trying to render captcha
-      renderCaptcha();
+      renderCaptcha(0);
     }
 
     function hideEmailInviteModal(){
