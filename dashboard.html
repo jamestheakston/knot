@@ -4906,24 +4906,6 @@
   console.log('Loading invite');
   var contentArea = document.getElementById('contentArea');
 
-  contentArea.innerHTML = `
-          <div class="invite-section">
-            <div class="invite-card">
-              <h3>Invite Members</h3>
-              <p>You need to contact your pod admin to invite new members. Only admins can send invitations to join the pod.</p>
-              <div class="admin-contact-info">
-                <i data-lucide="info" style="width: 20px; height: 20px; color: var(--blue);"></i>
-                <span>Ask your admin for the invite code or have them send you an invitation.</span>
-              </div>
-            </div>
-          </div>
-        `;
-        if(typeof lucide !== 'undefined'){
-          lucide.createIcons();
-        }
-        return;
-      }
-
       contentArea.innerHTML = `
         <div class="invite-section">
           <div class="invite-card">
