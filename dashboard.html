@@ -1527,6 +1527,66 @@
   }
   .kc-challenge-status.is-error{ color: var(--red); }
   .kc-challenge-status.is-success{ color: var(--green); }
+
+  /* Pattern Challenge Styles */
+  .kc-pattern-display{
+    font-size: 24px;
+    letter-spacing: 8px;
+    text-align: center;
+    margin: 16px 0;
+    font-family: 'IBM Plex Mono', monospace;
+  }
+  .kc-pattern-options{
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-top: 12px;
+  }
+  .kc-pattern-option{
+    padding: 12px;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    background: var(--bg-2);
+    font-size: 16px;
+    letter-spacing: 4px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-family: 'IBM Plex Mono', monospace;
+  }
+  .kc-pattern-option:hover{
+    border-color: var(--blue);
+    background: var(--blue-soft);
+  }
+
+  /* Sequence Challenge Styles */
+  .kc-sequence-display{
+    font-size: 20px;
+    text-align: center;
+    margin: 16px 0;
+    font-family: 'IBM Plex Mono', monospace;
+    font-weight: 500;
+  }
+  .kc-sequence-options{
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    margin-top: 12px;
+  }
+  .kc-sequence-option{
+    padding: 12px;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    background: var(--bg-2);
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-family: 'IBM Plex Mono', monospace;
+    font-weight: 500;
+  }
+  .kc-sequence-option:hover{
+    border-color: var(--blue);
+    background: var(--blue-soft);
+  }
   .invite-code-display{
     margin-top: 32px;
   }
@@ -2259,20 +2319,8 @@
                 </div>
 
                 <div class="kc-challenge" id="kcChallenge">
-                  <div class="kc-challenge-inner">
-                    <div class="kc-challenge-title">Tie the knot</div>
-                    <div class="kc-challenge-sub">Drag the loop across to connect it.</div>
-                    <div class="kc-slider-track" id="kcSliderTrack">
-                      <div class="kc-slider-fill" id="kcSliderFill"></div>
-                      <div class="kc-slider-label" id="kcSliderLabel">slide to connect →</div>
-                      <div class="kc-slider-target" id="kcSliderTarget">
-                        <i data-lucide="link"></i>
-                      </div>
-                      <div class="kc-slider-handle" id="kcSliderHandle">
-                        <i data-lucide="link-2"></i>
-                      </div>
-                    </div>
-                    <div class="kc-challenge-status" id="kcStatus">&nbsp;</div>
+                  <div class="kc-challenge-inner" id="kcChallengeInner">
+                    <!-- Dynamic challenge content will be inserted here -->
                   </div>
                 </div>
 
@@ -2290,8 +2338,6 @@
                   </div>
                 </div>
               </div>
-              <!-- Hidden hCaptcha container for actual verification -->
-              <div id="hiddenHcaptchaContainer" style="display: none;"></div>
             </div>
             <div class="hcaptcha-thanks">Thanks for helping us create a robot-free experience 🙏</div>
           </div>
@@ -4741,100 +4787,223 @@
     // Custom Knot Captcha Widget Logic
     var knotCaptchaVerified = false;
     var knotCaptchaToken = null;
-    var hcaptchaWidgetId = null;
+    var currentChallengeType = null;
 
     function initKnotCaptcha(){
       var checkbox = document.getElementById('kcCheckbox');
       var challenge = document.getElementById('kcChallenge');
-      var track = document.getElementById('kcSliderTrack');
-      var fill = document.getElementById('kcSliderFill');
-      var handle = document.getElementById('kcSliderHandle');
-      var target = document.getElementById('kcSliderTarget');
-      var label = document.getElementById('kcSliderLabel');
-      var status = document.getElementById('kcStatus');
+      var challengeInner = document.getElementById('kcChallengeInner');
 
       var verified = false;
-      var dragging = false;
-      var startX = 0;
-      var handleStartLeft = 0;
-      var maxDrag = 0;
 
       function generateToken(){
         return 'knot_' + Math.random().toString(36).slice(2) + Date.now().toString(36);
       }
 
-      checkbox.onclick = function(){
-        if(verified || checkbox.classList.contains('is-loading')) return;
-
-        checkbox.classList.add('is-loading');
-        status.textContent = '';
-        status.className = 'kc-challenge-status';
-
-        // Brief "verifying" delay before showing the challenge
-        setTimeout(function(){
-          checkbox.classList.remove('is-loading');
-          challenge.classList.add('is-open');
-          resetSlider();
-        }, 550);
-      };
-
-      function resetSlider(){
-        fill.style.width = '0%';
-        fill.classList.remove('is-snapping');
-        handle.style.transform = 'translateX(0px)';
-        handle.style.left = '4px';
-        handle.style.position = 'absolute';
-        handle.style.top = '50%';
-        handle.style.marginTop = '-18px';
-        label.classList.remove('is-hidden');
+      function getRandomChallengeType(){
+        var types = ['slider', 'pattern', 'sequence'];
+        return types[Math.floor(Math.random() * types.length)];
       }
 
-      function getMaxDrag(){
-        return track.clientWidth - handle.clientWidth - 8;
-      }
-
-      function onDragStart(clientX){
-        if(verified) return;
-        dragging = true;
-        startX = clientX;
-        maxDrag = getMaxDrag();
-        var rect = handle.getBoundingClientRect();
-        var trackRect = track.getBoundingClientRect();
-        handleStartLeft = rect.left - trackRect.left;
-        label.classList.add('is-hidden');
-      }
-
-      function onDragMove(clientX){
-        if(!dragging) return;
-        var delta = clientX - startX;
-        var newLeft = Math.min(Math.max(handleStartLeft + delta, 4), maxDrag + 4);
-        handle.style.left = newLeft + 'px';
-        fill.style.width = (newLeft + handle.clientWidth / 2) + 'px';
-      }
-
-      function onDragEnd(){
-        if(!dragging) return;
-        dragging = false;
-
-        var currentLeft = parseFloat(handle.style.left || '4');
-        var success = currentLeft >= maxDrag - 6;
-
-        if(success){
-          handle.style.left = (maxDrag + 4) + 'px';
-          fill.classList.add('is-snapping');
-          fill.style.width = '100%';
-          status.textContent = 'Connected';
-          status.className = 'kc-challenge-status is-success';
-          completeVerification();
-        }else{
-          fill.classList.add('is-snapping');
-          handle.style.left = '4px';
-          fill.style.width = '0%';
-          label.classList.remove('is-hidden');
-          status.textContent = 'Try again — drag all the way across';
-          status.className = 'kc-challenge-status is-error';
-          setTimeout(function(){ fill.classList.remove('is-snapping'); }, 260);
+      function loadChallenge(type){
+        currentChallengeType = type;
+        challengeInner.innerHTML = '';
+        
+        if(type === 'slider'){
+          loadSliderChallenge();
+        }else if(type === 'pattern'){
+          loadPatternChallenge();
+        }else if(type === 'sequence'){
+          loadSequenceChallenge();
         }
+        
+        if(typeof lucide !== 'undefined'){
+          lucide.createIcons();
+        }
+      }
+
+      function loadSliderChallenge(){
+        challengeInner.innerHTML = `
+          <div class="kc-challenge-title">Tie the knot</div>
+          <div class="kc-challenge-sub">Drag the loop across to connect it.</div>
+          <div class="kc-slider-track" id="kcSliderTrack">
+            <div class="kc-slider-fill" id="kcSliderFill"></div>
+            <div class="kc-slider-label" id="kcSliderLabel">slide to connect →</div>
+            <div class="kc-slider-target" id="kcSliderTarget">
+              <i data-lucide="link"></i>
+            </div>
+            <div class="kc-slider-handle" id="kcSliderHandle">
+              <i data-lucide="link-2"></i>
+            </div>
+          </div>
+          <div class="kc-challenge-status" id="kcStatus">&nbsp;</div>
+        `;
+        
+        initSliderChallenge();
+      }
+
+      function initSliderChallenge(){
+        var track = document.getElementById('kcSliderTrack');
+        var fill = document.getElementById('kcSliderFill');
+        var handle = document.getElementById('kcSliderHandle');
+        var label = document.getElementById('kcSliderLabel');
+        var status = document.getElementById('kcStatus');
+
+        var dragging = false;
+        var startX = 0;
+        var handleStartLeft = 0;
+        var maxDrag = 0;
+
+        function resetSlider(){
+          fill.style.width = '0%';
+          fill.classList.remove('is-snapping');
+          handle.style.transform = 'translateX(0px)';
+          handle.style.left = '4px';
+          handle.style.position = 'absolute';
+          handle.style.top = '50%';
+          handle.style.marginTop = '-18px';
+          label.classList.remove('is-hidden');
+        }
+
+        function getMaxDrag(){
+          return track.clientWidth - handle.clientWidth - 8;
+        }
+
+        function onDragStart(clientX){
+          if(verified) return;
+          dragging = true;
+          startX = clientX;
+          maxDrag = getMaxDrag();
+          var rect = handle.getBoundingClientRect();
+          var trackRect = track.getBoundingClientRect();
+          handleStartLeft = rect.left - trackRect.left;
+          label.classList.add('is-hidden');
+        }
+
+        function onDragMove(clientX){
+          if(!dragging) return;
+          var delta = clientX - startX;
+          var newLeft = Math.min(Math.max(handleStartLeft + delta, 4), maxDrag + 4);
+          handle.style.left = newLeft + 'px';
+          fill.style.width = (newLeft + handle.clientWidth / 2) + 'px';
+        }
+
+        function onDragEnd(){
+          if(!dragging) return;
+          dragging = false;
+
+          var currentLeft = parseFloat(handle.style.left || '4');
+          var success = currentLeft >= maxDrag - 6;
+
+          if(success){
+            handle.style.left = (maxDrag + 4) + 'px';
+            fill.classList.add('is-snapping');
+            fill.style.width = '100%';
+            status.textContent = 'Connected';
+            status.className = 'kc-challenge-status is-success';
+            completeVerification();
+          }else{
+            fill.classList.add('is-snapping');
+            handle.style.left = '4px';
+            fill.style.width = '0%';
+            label.classList.remove('is-hidden');
+            status.textContent = 'Try again — drag all the way across';
+            status.className = 'kc-challenge-status is-error';
+            setTimeout(function(){ fill.classList.remove('is-snapping'); }, 260);
+          }
+        }
+
+        resetSlider();
+
+        handle.addEventListener('mousedown', function(e){
+          onDragStart(e.clientX);
+          e.preventDefault();
+        });
+        document.addEventListener('mousemove', function(e){ onDragMove(e.clientX); });
+        document.addEventListener('mouseup', onDragEnd);
+
+        handle.addEventListener('touchstart', function(e){
+          onDragStart(e.touches[0].clientX);
+        }, { passive: true });
+        document.addEventListener('touchmove', function(e){
+          if(dragging) onDragMove(e.touches[0].clientX);
+        }, { passive: true });
+        document.addEventListener('touchend', onDragEnd);
+      }
+
+      function loadPatternChallenge(){
+        var patterns = ['○ ● ○ ● ○', '● ○ ● ○ ●', '○ ○ ● ● ○ ○', '● ● ○ ○ ● ●'];
+        var correctPattern = patterns[Math.floor(Math.random() * patterns.length)];
+        var options = [...patterns].sort(() => Math.random() - 0.5);
+        
+        challengeInner.innerHTML = `
+          <div class="kc-challenge-title">Match the pattern</div>
+          <div class="kc-challenge-sub">Select the pattern that continues the sequence.</div>
+          <div class="kc-pattern-display" id="kcPatternDisplay">${correctPattern}</div>
+          <div class="kc-pattern-options" id="kcPatternOptions"></div>
+          <div class="kc-challenge-status" id="kcStatus">&nbsp;</div>
+        `;
+        
+        var optionsContainer = document.getElementById('kcPatternOptions');
+        options.forEach(function(pattern, index){
+          var btn = document.createElement('button');
+          btn.className = 'kc-pattern-option';
+          btn.textContent = pattern;
+          btn.onclick = function(){
+            if(pattern === correctPattern){
+              completeVerification();
+            }else{
+              var status = document.getElementById('kcStatus');
+              status.textContent = 'Try again';
+              status.className = 'kc-challenge-status is-error';
+              setTimeout(function(){
+                status.textContent = '';
+                status.className = 'kc-challenge-status';
+              }, 1500);
+            }
+          };
+          optionsContainer.appendChild(btn);
+        });
+      }
+
+      function loadSequenceChallenge(){
+        var sequences = [
+          { start: '2, 4, 6, 8', answer: '10', options: ['9', '10', '11', '12'] },
+          { start: '1, 1, 2, 3, 5', answer: '8', options: ['6', '7', '8', '9'] },
+          { start: '3, 6, 9, 12', answer: '15', options: ['13', '14', '15', '16'] },
+          { start: '1, 4, 9, 16', answer: '25', options: ['20', '21', '25', '36'] }
+        ];
+        var seq = sequences[Math.floor(Math.random() * sequences.length)];
+        var shuffledOptions = [...seq.options].sort(() => Math.random() - 0.5);
+        
+        challengeInner.innerHTML = `
+          <div class="kc-challenge-title">Complete the sequence</div>
+          <div class="kc-challenge-sub">What comes next?</div>
+          <div class="kc-sequence-display" id="kcSequenceDisplay">${seq.start}, ?</div>
+          <div class="kc-sequence-options" id="kcSequenceOptions"></div>
+          <div class="kc-challenge-status" id="kcStatus">&nbsp;</div>
+        `;
+        
+        var optionsContainer = document.getElementById('kcSequenceOptions');
+        shuffledOptions.forEach(function(option){
+          var btn = document.createElement('button');
+          btn.className = 'kc-sequence-option';
+          btn.textContent = option;
+          btn.onclick = function(){
+            if(option === seq.answer){
+              completeVerification();
+            }else{
+              var status = document.getElementById('kcStatus');
+              status.textContent = 'Try again';
+              status.className = 'kc-challenge-status is-error';
+              setTimeout(function(){
+                status.textContent = '';
+                status.className = 'kc-challenge-status';
+              }, 1500);
+            }
+          };
+          optionsContainer.appendChild(btn);
+        });
       }
 
       function completeVerification(){
@@ -4842,8 +5011,11 @@
         knotCaptchaVerified = true;
         knotCaptchaToken = generateToken();
         
-        // Load hCaptcha in background for actual verification
-        loadHcaptchaInBackground();
+        var status = document.getElementById('kcStatus');
+        if(status){
+          status.textContent = 'Verified!';
+          status.className = 'kc-challenge-status is-success';
+        }
         
         setTimeout(function(){
           challenge.classList.remove('is-open');
@@ -4851,105 +5023,31 @@
         }, 500);
       }
 
-      // Mouse events
-      handle.addEventListener('mousedown', function(e){
-        onDragStart(e.clientX);
-        e.preventDefault();
-      });
-      document.addEventListener('mousemove', function(e){ onDragMove(e.clientX); });
-      document.addEventListener('mouseup', onDragEnd);
+      checkbox.onclick = function(){
+        if(verified || checkbox.classList.contains('is-loading')) return;
 
-      // Touch events
-      handle.addEventListener('touchstart', function(e){
-        onDragStart(e.touches[0].clientX);
-      }, { passive: true });
-      document.addEventListener('touchmove', function(e){
-        if(dragging) onDragMove(e.touches[0].clientX);
-      }, { passive: true });
-      document.addEventListener('touchend', onDragEnd);
+        checkbox.classList.add('is-loading');
+        
+        setTimeout(function(){
+          checkbox.classList.remove('is-loading');
+          challenge.classList.add('is-open');
+          loadChallenge(getRandomChallengeType());
+        }, 550);
+      };
     }
 
     function resetKnotCaptcha(){
       var checkbox = document.getElementById('kcCheckbox');
       var challenge = document.getElementById('kcChallenge');
-      var track = document.getElementById('kcSliderTrack');
-      var fill = document.getElementById('kcSliderFill');
-      var handle = document.getElementById('kcSliderHandle');
-      var label = document.getElementById('kcSliderLabel');
-      var status = document.getElementById('kcStatus');
+      var challengeInner = document.getElementById('kcChallengeInner');
 
       knotCaptchaVerified = false;
       knotCaptchaToken = null;
+      currentChallengeType = null;
       
       checkbox.classList.remove('is-checked', 'is-loading');
       challenge.classList.remove('is-open');
-      fill.style.width = '0%';
-      fill.classList.remove('is-snapping');
-      handle.style.transform = 'translateX(0px)';
-      handle.style.left = '4px';
-      handle.style.position = 'absolute';
-      handle.style.top = '50%';
-      handle.style.marginTop = '-18px';
-      label.classList.remove('is-hidden');
-      status.textContent = '';
-      status.className = 'kc-challenge-status';
-      
-      // Reset hCaptcha widget if it exists
-      if(hcaptchaWidgetId !== null && typeof hcaptcha !== 'undefined' && hcaptcha.reset){
-        try{
-          hcaptcha.reset(hcaptchaWidgetId);
-          hcaptchaWidgetId = null;
-        }catch(err){
-          console.error('Error resetting hCaptcha widget:', err);
-        }
-      }
-    }
-
-    function loadHcaptchaInBackground(){
-      var hiddenContainer = document.getElementById('hiddenHcaptchaContainer');
-      
-      // Load hCaptcha script if not already loaded
-      if(typeof hcaptcha === 'undefined'){
-        var script = document.createElement('script');
-        script.src = 'https://js.hcaptcha.com/1/api.js';
-        script.async = true;
-        script.defer = true;
-        script.onload = function(){
-          renderHiddenHcaptcha();
-        };
-        document.head.appendChild(script);
-      }else{
-        renderHiddenHcaptcha();
-      }
-    }
-
-    function renderHiddenHcaptcha(){
-      var hiddenContainer = document.getElementById('hiddenHcaptchaContainer');
-      
-      if(typeof hcaptcha !== 'undefined' && hcaptcha.render){
-        try{
-          hcaptchaWidgetId = hcaptcha.render(hiddenContainer, {
-            sitekey: '6756a528-fd90-49fc-b01e-80e2b896d9b8',
-            theme: 'light',
-            size: 'invisible',
-            callback: function(token){
-              console.log('hCaptcha verified with token:', token);
-            },
-            'error-callback': function(){
-              console.error('hCaptcha verification failed');
-            }
-          });
-          
-          // Execute hCaptcha verification
-          setTimeout(function(){
-            if(typeof hcaptcha.execute === 'function'){
-              hcaptcha.execute(hcaptchaWidgetId);
-            }
-          }, 100);
-        }catch(err){
-          console.error('Error rendering hCaptcha:', err);
-        }
-      }
+      challengeInner.innerHTML = '<!-- Dynamic challenge content will be inserted here -->';
     }
 
     function showJoinPodModal(){
