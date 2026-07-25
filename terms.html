@@ -37,6 +37,62 @@
     -webkit-font-smoothing: antialiased;
     line-height: 1.6;
   }
+  .gtranslate_wrapper{
+    transform: scale(0.7);
+    transform-origin: left center;
+  }
+  footer{
+    border-top: 1px solid var(--line);
+    padding: 28px 32px 40px;
+    margin-top: 48px;
+  }
+  .footer-inner{
+    max-width: 1120px;
+    margin: 0 auto;
+    display:flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+  .footer-inner .logo{ 
+    font-size: 18px; 
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .footer-inner .logo .logo-mark{
+    color: #2A4BD7;
+  }
+  .footer-inner p{
+    color: var(--muted-2);
+    font-size: 13px;
+    margin:0;
+  }
+  .footer-links{
+    display: flex;
+    gap: 20px;
+  }
+  .footer-links a{
+    color: var(--muted-2);
+    font-size: 13px;
+    text-decoration: none;
+    transition: color 0.2s ease;
+  }
+  .footer-links a:hover{
+    color: var(--blue);
+  }
+  .footer-credit{
+    margin-top: 8px;
+  }
+  .footer-credit a{
+    color: var(--muted-2);
+    text-decoration: none;
+    transition: color 0.2s ease;
+  }
+  .footer-credit a:hover{
+    color: var(--blue);
+  }
   h1,h2,h3{
     font-family: 'Instrument Serif', serif;
     font-weight: 400;

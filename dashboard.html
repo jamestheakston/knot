@@ -1232,6 +1232,10 @@
     font-size: 14px;
     color: var(--ink);
   }
+  .gtranslate_wrapper{
+    transform: scale(0.7);
+    transform-origin: left center;
+  }
   .reset-invite-section{
     margin-top: 24px;
     padding-top: 24px;
@@ -1313,10 +1317,13 @@
     font-style: italic;
   }
   .hcaptcha-widget{
-    margin-bottom: 8px;
+    margin-bottom: 0;
     position: relative;
-    min-height: 200px;
+    min-height: 78px;
     overflow: visible;
+  }
+  .hcaptcha-widget.is-open{
+    min-height: 200px;
   }
   .hcaptcha-loading{
     position: absolute;
@@ -1383,9 +1390,13 @@
   }
   .kc-checkbox i{
     display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
   }
   .kc-checkbox.is-checked i{
     display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
     width: 18px; height: 18px; color: #fff;
     animation: kc-pop .25s ease;
   }
@@ -1486,30 +1497,55 @@
     border-top: 1px solid var(--line);
   }
   .kc-challenge.is-open{
-    max-height: 220px;
+    max-height: 180px;
   }
   .kc-challenge-inner{
-    padding: 18px 18px 14px;
+    padding: 12px 14px 10px;
+    position: relative;
+  }
+  .kc-audio-toggle{
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 24px;
+    height: 24px;
+    border: none;
+    background: var(--bg-3);
+    border-radius: 4px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--muted);
+    transition: all 0.2s ease;
+  }
+  .kc-audio-toggle:hover{
+    background: var(--blue-soft);
+    color: var(--blue);
+  }
+  .kc-audio-toggle i{
+    width: 14px;
+    height: 14px;
   }
   .kc-challenge-title{
-    font-size: 13px;
+    font-size: 12px;
     font-weight: 600;
     color: var(--ink);
-    margin-bottom: 4px;
+    margin-bottom: 3px;
   }
   .kc-challenge-sub{
-    font-size: 12px;
+    font-size: 11px;
     color: var(--muted);
-    margin-bottom: 16px;
-    line-height: 1.4;
+    margin-bottom: 12px;
+    line-height: 1.3;
   }
 
   .kc-slider-track{
     position: relative;
-    height: 44px;
+    height: 36px;
     background: var(--bg-3);
     border: 1px solid var(--line);
-    border-radius: 8px;
+    border-radius: 6px;
     display:flex;
     align-items:center;
     padding: 0 4px;
@@ -1699,6 +1735,52 @@
     font-weight: 500;
   }
   .kc-word-option:hover{
+    border-color: var(--blue);
+    background: var(--blue-soft);
+  }
+
+  /* Audio Challenge Styles */
+  .kc-play-audio-btn{
+    width: 100%;
+    padding: 10px;
+    background: var(--blue);
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-size: 13px;
+    margin: 12px 0;
+    transition: background 0.2s ease;
+  }
+  .kc-play-audio-btn:hover{
+    background: var(--blue-bright);
+  }
+  .kc-play-audio-btn:disabled{
+    background: var(--muted);
+    cursor: not-allowed;
+  }
+  .kc-audio-options{
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+    margin-top: 12px;
+  }
+  .kc-audio-option{
+    padding: 10px;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    background: var(--bg-2);
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-family: 'IBM Plex Mono', monospace;
+    font-weight: 500;
+  }
+  .kc-audio-option:hover{
     border-color: var(--blue);
     background: var(--blue-soft);
   }
@@ -4506,6 +4588,43 @@
               <i data-lucide="info" style="width: 18px; height: 18px; color: var(--blue);"></i>
               <span>Managing habits has moved to the Habits section</span>
             </div>
+            <div class="info-box">
+              <i data-lucide="info" style="width: 18px; height: 18px; color: var(--blue);"></i>
+              <span>Managing members has moved to the Members section</span>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Pod Theme</label>
+              <select class="form-input" id="podThemeInput">
+                <option value="light">Light</option>
+                <option value="dark">Dark</option>
+                <option value="auto">Auto (System)</option>
+              </select>
+              <small class="form-help">Choose your preferred color scheme</small>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Timezone</label>
+              <select class="form-input" id="podTimezoneInput">
+                <option value="UTC">UTC</option>
+                <option value="America/New_York">Eastern Time</option>
+                <option value="America/Chicago">Central Time</option>
+                <option value="America/Denver">Mountain Time</option>
+                <option value="America/Los_Angeles">Pacific Time</option>
+                <option value="Europe/London">London</option>
+                <option value="Europe/Paris">Paris</option>
+                <option value="Asia/Tokyo">Tokyo</option>
+                <option value="Australia/Sydney">Sydney</option>
+              </select>
+              <small class="form-help">Set your timezone for accurate check-in tracking</small>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Date Format</label>
+              <select class="form-input" id="podDateFormatInput">
+                <option value="MM/DD/YYYY">MM/DD/YYYY</option>
+                <option value="DD/MM/YYYY">DD/MM/YYYY</option>
+                <option value="YYYY-MM-DD">YYYY-MM-DD</option>
+              </select>
+              <small class="form-help">Choose how dates are displayed</small>
+            </div>
             <div class="form-actions">
               <button class="btn btn-primary" id="savePodSettings">Save Changes</button>
             </div>
@@ -4672,10 +4791,6 @@
                 <span>This page contains administrative features that are only accessible to pod administrators. Regular members cannot view or access these settings.</span>
               </div>
             </div>
-          </div>
-          <div class="info-box">
-            <i data-lucide="info" style="width: 18px; height: 18px; color: var(--blue);"></i>
-            <span>Managing members has moved to the Members section</span>
           </div>
           <div class="habits-section">
             <div class="habits-header">
@@ -5057,6 +5172,8 @@
           loadMathChallenge();
         }else if(type === 'word'){
           loadWordChallenge();
+        }else if(type === 'audio'){
+          loadAudioChallenge();
         }
         
         if(typeof lucide !== 'undefined'){
@@ -5065,6 +5182,18 @@
         
         // Setup audio accessibility button
         setupAudioAccessibility();
+        
+        // Setup audio toggle button
+        setupAudioToggle();
+      }
+
+      function setupAudioToggle(){
+        var audioToggle = document.getElementById('kcAudioToggle');
+        if(!audioToggle) return;
+        
+        audioToggle.onclick = function(){
+          loadChallenge('audio');
+        };
       }
 
       function setupAudioAccessibility(){
@@ -5142,6 +5271,9 @@
 
       function loadSliderChallenge(){
         challengeInner.innerHTML = `
+          <button class="kc-audio-toggle" id="kcAudioToggle" title="Switch to audio challenge">
+            <i data-lucide="volume-2"></i>
+          </button>
           <div class="kc-challenge-title">Tie the knot</div>
           <div class="kc-challenge-sub">Drag the loop across to connect it.</div>
           <div class="kc-slider-track" id="kcSliderTrack">
@@ -5262,6 +5394,9 @@
         var shuffledOptions = [...pattern.options].sort(() => Math.random() - 0.5);
         
         challengeInner.innerHTML = `
+          <button class="kc-audio-toggle" id="kcAudioToggle" title="Switch to audio challenge">
+            <i data-lucide="volume-2"></i>
+          </button>
           <div class="kc-challenge-title">Match the pattern</div>
           <div class="kc-challenge-sub">What comes next in the sequence?</div>
           <div class="kc-pattern-display" id="kcPatternDisplay">${pattern.sequence} ?</div>
@@ -5302,6 +5437,9 @@
         var shuffledOptions = [...seq.options].sort(() => Math.random() - 0.5);
         
         challengeInner.innerHTML = `
+          <button class="kc-audio-toggle" id="kcAudioToggle" title="Switch to audio challenge">
+            <i data-lucide="volume-2"></i>
+          </button>
           <div class="kc-challenge-title">Complete the sequence</div>
           <div class="kc-challenge-sub">What comes next?</div>
           <div class="kc-sequence-display" id="kcSequenceDisplay">${seq.start}, ?</div>
@@ -5356,6 +5494,9 @@
         var shuffledOptions = options.sort(() => Math.random() - 0.5);
         
         challengeInner.innerHTML = `
+          <button class="kc-audio-toggle" id="kcAudioToggle" title="Switch to audio challenge">
+            <i data-lucide="volume-2"></i>
+          </button>
           <div class="kc-challenge-title">Solve the math problem</div>
           <div class="kc-challenge-sub">What is the result?</div>
           <div class="kc-math-display" id="kcMathDisplay">${num1} ${operation} ${num2} = ?</div>
@@ -5385,6 +5526,103 @@
         });
       }
 
+      function loadAudioChallenge(){
+        var audioWords = ['cat', 'dog', 'bird', 'fish', 'tree', 'house', 'car', 'book'];
+        var correctWord = audioWords[Math.floor(Math.random() * audioWords.length)];
+        var options = [correctWord];
+        while(options.length < 4){
+          var wrongWord = audioWords[Math.floor(Math.random() * audioWords.length)];
+          if(wrongWord !== correctWord && !options.includes(wrongWord)){
+            options.push(wrongWord);
+          }
+        }
+        var shuffledOptions = options.sort(() => Math.random() - 0.5);
+        
+        challengeInner.innerHTML = `
+          <button class="kc-audio-toggle" id="kcAudioToggle" title="Switch to visual challenge">
+            <i data-lucide="eye"></i>
+          </button>
+          <div class="kc-challenge-title">Audio Challenge</div>
+          <div class="kc-challenge-sub">Listen and select the word you hear</div>
+          <button class="kc-play-audio-btn" id="kcPlayAudioBtn">
+            <i data-lucide="play"></i>
+            Play Audio
+          </button>
+          <div class="kc-audio-options" id="kcAudioOptions"></div>
+          <div class="kc-challenge-status" id="kcStatus">&nbsp;</div>
+        `;
+        
+        var playBtn = document.getElementById('kcPlayAudioBtn');
+        playBtn.onclick = async function(){
+          playBtn.disabled = true;
+          playBtn.innerHTML = '<i data-lucide="loader-2" class="animate-spin"></i> Loading...';
+          if(typeof lucide !== 'undefined'){
+            lucide.createIcons();
+          }
+          
+          try{
+            var audioUrl = await generateAudioFromText(correctWord);
+            if(audioUrl){
+              var audio = new Audio(audioUrl);
+              audio.onended = function(){
+                playBtn.disabled = false;
+                playBtn.innerHTML = '<i data-lucide="play"></i> Play Again';
+                if(typeof lucide !== 'undefined'){
+                  lucide.createIcons();
+                }
+              };
+              audio.play();
+              playBtn.innerHTML = '<i data-lucide="volume-2"></i> Playing...';
+              if(typeof lucide !== 'undefined'){
+                lucide.createIcons();
+              }
+            }else{
+              playBtn.disabled = false;
+              playBtn.innerHTML = '<i data-lucide="play"></i> Play Audio';
+              if(typeof lucide !== 'undefined'){
+                lucide.createIcons();
+              }
+            }
+          }catch(err){
+            console.error('Error playing audio:', err);
+            playBtn.disabled = false;
+            playBtn.innerHTML = '<i data-lucide="play"></i> Play Audio';
+            if(typeof lucide !== 'undefined'){
+              lucide.createIcons();
+            }
+          }
+        };
+        
+        var optionsContainer = document.getElementById('kcAudioOptions');
+        shuffledOptions.forEach(function(option){
+          var btn = document.createElement('button');
+          btn.className = 'kc-audio-option';
+          btn.textContent = option;
+          btn.onclick = function(){
+            if(option === correctWord){
+              completeVerification();
+            }else{
+              var status = document.getElementById('kcStatus');
+              status.textContent = 'Try again';
+              status.className = 'kc-challenge-status is-error';
+              setTimeout(function(){
+                status.textContent = '';
+                status.className = 'kc-challenge-status';
+              }, 1500);
+            }
+          };
+          optionsContainer.appendChild(btn);
+        });
+        
+        // Override audio toggle to switch back to visual challenge
+        var audioToggle = document.getElementById('kcAudioToggle');
+        if(audioToggle){
+          audioToggle.onclick = function(){
+            loadChallenge(getRandomChallengeType());
+          };
+        }
+      }
+
       function loadWordChallenge(){
         var words = [
           { scrambled: 'TIGER', correct: 'TIGER', options: ['TIGER', 'TIGRE', 'TIGER', 'TIGRE'] },
@@ -5398,6 +5636,9 @@
         var shuffledOptions = [...word.options].sort(() => Math.random() - 0.5);
         
         challengeInner.innerHTML = `
+          <button class="kc-audio-toggle" id="kcAudioToggle" title="Switch to audio challenge">
+            <i data-lucide="volume-2"></i>
+          </button>
           <div class="kc-challenge-title">Unscramble the word</div>
           <div class="kc-challenge-sub">What is the correct spelling?</div>
           <div class="kc-word-display" id="kcWordDisplay">${word.scrambled}</div>
@@ -5454,6 +5695,7 @@
         
         setTimeout(function(){
           challenge.classList.add('is-open');
+          document.getElementById('modalHcaptchaWidget').classList.add('is-open');
           loadChallenge(getRandomChallengeType());
         }, 550);
       };
