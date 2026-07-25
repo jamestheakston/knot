@@ -15,7 +15,7 @@
 <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
 <script src="/api/mail.js"></script>
-<script src="https://js.hcaptcha.com/1/api.js" onload="onHcaptchaLoad()" async defer></script>
+<script src="https://js.hcaptcha.com/1/api.js" async defer></script>
 <style>
   :root{
     --bg: #F7F8FB;
@@ -2225,14 +2225,8 @@
 </div>
 
 <script>
-  // Global hCaptcha loading state
-  var hCaptchaLoaded = false;
-  
-  // Called when hCaptcha script loads
-  function onHcaptchaLoad(){
-    console.log('hCaptcha loaded successfully');
-    hCaptchaLoaded = true;
-  }
+  // Global hCaptcha widget tracking
+  var modalHcaptchaWidgetId = null;
   
   document.addEventListener('DOMContentLoaded', function(){
     var SupabaseClient = null;
@@ -4451,6 +4445,7 @@
     }
 
     function showEmailInviteModal(){
+      console.log('showEmailInviteModal called');
       document.getElementById('emailInviteModal').classList.add('is-open');
       document.getElementById('modalInviteEmail').value = '';
       
@@ -4461,6 +4456,18 @@
         return;
       }
       
+      // Remove existing widget by ID if it exists
+      if(modalHcaptchaWidgetId !== null && typeof hcaptcha !== 'undefined' && hcaptcha.reset){
+        console.log('Resetting existing hCaptcha widget with ID:', modalHcaptchaWidgetId);
+        try{
+          hcaptcha.reset(modalHcaptchaWidgetId);
+          modalHcaptchaWidgetId = null;
+        }catch(err){
+          console.error('Error resetting hCaptcha widget:', err);
+        }
+      }
+      
+      // Clear container innerHTML
       widgetContainer.innerHTML = '<div class="hcaptcha-loading"><i data-lucide="loader-2" class="loading-icon"></i></div>';
       
       if(typeof lucide !== 'undefined'){
@@ -4469,15 +4476,16 @@
       
       // Wait for hCaptcha to be available and render widget
       var renderCaptcha = function(attempts){
-        if(typeof hcaptcha !== 'undefined' && hcaptcha.render && hCaptchaLoaded){
+        console.log('renderCaptcha attempt:', attempts, 'hcaptcha defined:', typeof hcaptcha !== 'undefined', 'hcaptcha.render function:', typeof hcaptcha !== 'undefined' && typeof hcaptcha.render === 'function');
+        
+        if(typeof hcaptcha !== 'undefined' && typeof hcaptcha.render === 'function'){
           try{
-            // Reset any existing widget
-            hcaptcha.reset();
-            
-            hcaptcha.render('modalHcaptchaWidget', {
+            console.log('Attempting to render hCaptcha widget');
+            modalHcaptchaWidgetId = hcaptcha.render('modalHcaptchaWidget', {
               sitekey: '6756a528-fd90-49fc-b01e-80e2b896d9b8',
               theme: 'light',
               callback: function(){
+                console.log('hCaptcha widget loaded successfully, ID:', modalHcaptchaWidgetId);
                 // Hide loading spinner when captcha loads
                 var loadingSpinner = widgetContainer.querySelector('.hcaptcha-loading');
                 if(loadingSpinner){
@@ -4485,6 +4493,7 @@
                 }
               },
               'expired-callback': function(){
+                console.log('hCaptcha widget expired');
                 // Show loading spinner again if expired
                 var loadingSpinner = widgetContainer.querySelector('.hcaptcha-loading');
                 if(loadingSpinner){
@@ -4492,6 +4501,7 @@
                 }
               },
               'error-callback': function(){
+                console.error('hCaptcha widget error');
                 // Hide loading spinner on error and show error message
                 var loadingSpinner = widgetContainer.querySelector('.hcaptcha-loading');
                 if(loadingSpinner){
@@ -4500,12 +4510,14 @@
                 widgetContainer.innerHTML = '<div style="color: #C4432A; font-size: 13px; padding: 12px; text-align: center;">CAPTCHA failed to load. Please refresh and try again.</div>';
               }
             });
+            console.log('hCaptcha render returned widget ID:', modalHcaptchaWidgetId);
           }catch(err){
             console.error('Error rendering hCaptcha:', err);
             widgetContainer.innerHTML = '<div style="color: #C4432A; font-size: 13px; padding: 12px; text-align: center;">CAPTCHA failed to load. Please refresh and try again.</div>';
           }
         }else if(attempts < 50){
           // hCaptcha not loaded yet, try again after a delay (max 5 seconds)
+          console.log('hCaptcha not ready, retrying in 100ms...');
           setTimeout(function(){
             renderCaptcha(attempts + 1);
           }, 100);
@@ -4521,7 +4533,19 @@
     }
 
     function hideEmailInviteModal(){
+      console.log('hideEmailInviteModal called');
       document.getElementById('emailInviteModal').classList.remove('is-open');
+      
+      // Reset and remove widget by ID when modal closes
+      if(modalHcaptchaWidgetId !== null && typeof hcaptcha !== 'undefined' && hcaptcha.reset){
+        console.log('Removing hCaptcha widget with ID:', modalHcaptchaWidgetId);
+        try{
+          hcaptcha.reset(modalHcaptchaWidgetId);
+          modalHcaptchaWidgetId = null;
+        }catch(err){
+          console.error('Error removing hCaptcha widget:', err);
+        }
+      }
     }
 
     function showJoinPodModal(){
@@ -4621,6 +4645,7 @@
     }
 
     async function sendModalInviteEmail(){
+      console.log('sendModalInviteEmail called');
       var email = document.getElementById('modalInviteEmail').value;
       var btn = document.getElementById('sendModalInviteBtn');
       
@@ -4632,7 +4657,8 @@
       // Verify hCaptcha
       var captchaValid = true;
       if(typeof hcaptcha !== 'undefined' && hcaptcha.getResponse){
-        var captchaResponse = hcaptcha.getResponse();
+        var captchaResponse = hcaptcha.getResponse(modalHcaptchaWidgetId);
+        console.log('hCaptcha response:', captchaResponse ? 'valid' : 'missing');
         if(!captchaResponse){
           alert('Please complete the captcha verification');
           return;
@@ -4657,14 +4683,22 @@
         var result = await sendInviteEmail(email, currentPod.name, currentPod.inviteCode, inviterName);
 
         if(result.success){
+          console.log('Invite sent successfully');
           alert('Invite sent successfully to ' + email);
           hideEmailInviteModal();
           
-          // Reset hCaptcha if it exists
-          if(typeof hcaptcha !== 'undefined' && hcaptcha.reset){
-            hcaptcha.reset();
+          // Reset hCaptcha widget by ID if it exists
+          if(modalHcaptchaWidgetId !== null && typeof hcaptcha !== 'undefined' && hcaptcha.reset){
+            console.log('Resetting hCaptcha widget after successful send, ID:', modalHcaptchaWidgetId);
+            try{
+              hcaptcha.reset(modalHcaptchaWidgetId);
+              modalHcaptchaWidgetId = null;
+            }catch(err){
+              console.error('Error resetting hCaptcha widget:', err);
+            }
           }
         }else{
+          console.error('Error sending invite:', result.error);
           alert('Error sending invite: ' + result.error);
         }
       }catch(err){
