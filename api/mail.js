@@ -88,7 +88,7 @@ async function sendInviteEmail(toEmail, podName, inviteCode, inviterName){
     var emailContent = generateInviteEmailHTML(podName, inviteCode, inviterName);
     
     var templateParams = {
-      to_email: toEmail,
+      toemail: toEmail,
       from_name: 'Knot Invitations',
       subject: "You're invited to join a Knot pod",
       email_content: emailContent
@@ -111,7 +111,7 @@ async function sendLoginNotification(email){
     var emailContent = generateLoginEmailHTML(email, loginTime);
     
     var templateParams = {
-      to_email: email,
+      toemail: email,
       from_name: 'Knot Security',
       subject: 'New login to your Knot account',
       email_content: emailContent
