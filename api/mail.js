@@ -89,7 +89,7 @@ async function sendInviteEmail(toEmail, podName, inviteCode, inviterName){
     
     var templateParams = {
       toemail: toEmail,
-      from_name: 'Knot Invitations',
+      fromname: 'Knot Invitations',
       subject: "You're invited to join a Knot pod",
       email_content: emailContent
     };
@@ -112,7 +112,7 @@ async function sendLoginNotification(email){
     
     var templateParams = {
       toemail: email,
-      from_name: 'Knot Security',
+      fromname: 'Knot Security',
       subject: 'New login to your Knot account',
       email_content: emailContent
     };
