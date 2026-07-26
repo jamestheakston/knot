@@ -121,7 +121,7 @@
       this.showToast(
         'New Version Available',
         'A new version of this page is available with updates and improvements. <a href="#" onclick="location.reload(); return false;" style="color: var(--blue); text-decoration: underline;">Click here to reload</a>',
-        'newupdate',
+        'info',
         {
           reload: {
             label: 'Reload',
