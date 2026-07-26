@@ -41,6 +41,26 @@
     -webkit-font-smoothing: antialiased;
     line-height: 1.5;
   }
+  body.dark-mode{
+    --bg: #0F111A;
+    --bg-2: #1A1D29;
+    --bg-3: #242838;
+    --ink: #F7F8FB;
+    --muted: #A0A8B8;
+    --muted-2: #6B7280;
+    --line: rgba(255,255,255,0.10);
+    --line-strong: rgba(255,255,255,0.18);
+  }
+  body.light-mode{
+    --bg: #F7F8FB;
+    --bg-2: #FFFFFF;
+    --bg-3: #EEF1F6;
+    --ink: #151922;
+    --muted: #5B6472;
+    --muted-2: #8890A0;
+    --line: rgba(21,25,34,0.10);
+    --line-strong: rgba(21,25,34,0.18);
+  }
   h1,h2,h3{
     font-family: 'Instrument Serif', serif;
     font-weight: 400;
@@ -2594,7 +2614,6 @@
             Log Out
           </div>
         </div>
-        <div class="gtranslate_wrapper"></div>
       </div>
     </div>
   </aside>
@@ -4045,7 +4064,7 @@
           }
           
           var role = member.role || 'member';
-          var joinedDate = new Date(member.joined_at).toLocaleDateString();
+          var joinedDate = formatDate(member.joined_at);
           var canRemove = isAdmin && member.user_id !== currentUser.id;
           
           return `
@@ -4216,8 +4235,8 @@
           var date = new Date(ci.created_at);
           return `
             <div class="check-in-item">
-              <div class="check-in-date">${date.toLocaleDateString()}</div>
-              <div class="check-in-time">${date.toLocaleTimeString()}</div>
+              <div class="check-in-date">${formatDate(ci.created_at)}</div>
+              <div class="check-in-time">${formatTime(ci.created_at)}</div>
             </div>
           `;
         }).join('');
@@ -4516,6 +4535,11 @@
               </select>
               <small class="form-help">Choose how dates are displayed</small>
             </div>
+            <div class="form-group">
+              <label class="form-label">Translation</label>
+              <div class="gtranslate_wrapper"></div>
+              <small class="form-help">Translate the dashboard to your preferred language</small>
+            </div>
             <div class="form-actions">
               <button class="btn btn-primary" id="savePodSettings">Save Changes</button>
             </div>
@@ -4542,6 +4566,9 @@
 
       document.getElementById('savePodSettings').addEventListener('click', handleSavePodSettings);
       document.getElementById('deletePodBtn').addEventListener('click', handleDeletePod);
+      
+      // Load saved pod settings
+      loadPodSettingsFromStorage();
     }
 
     async function handleDeletePod(){
@@ -4884,6 +4911,9 @@
     async function handleSavePodSettings(){
       var client = getSupabaseClient();
       var podName = document.getElementById('podNameInput').value;
+      var podTheme = document.getElementById('podThemeInput').value;
+      var podTimezone = document.getElementById('podTimezoneInput').value;
+      var podDateFormat = document.getElementById('podDateFormatInput').value;
       
       try{
         var { error } = await client
@@ -4895,10 +4925,129 @@
 
         currentPod.name = podName;
         document.getElementById('currentPodName').textContent = podName;
+        
+        // Save pod settings to localStorage
+        var podSettings = {
+          theme: podTheme,
+          timezone: podTimezone,
+          dateFormat: podDateFormat
+        };
+        localStorage.setItem('podSettings_' + currentPod.id, JSON.stringify(podSettings));
+        
+        // Apply theme
+        applyTheme(podTheme);
+        
+        // Apply timezone and date format
+        applyTimezoneAndDateFormat(podTimezone, podDateFormat);
+        
         alert('Pod settings saved successfully');
       }catch(err){
         console.error('Error saving pod settings:', err);
         alert('Error saving pod settings: ' + err.message);
+      }
+    }
+
+    function applyTheme(theme){
+      if(theme === 'light'){
+        document.body.classList.remove('dark-mode');
+        document.body.classList.add('light-mode');
+      }else if(theme === 'dark'){
+        document.body.classList.remove('light-mode');
+        document.body.classList.add('dark-mode');
+      }else{
+        // Auto - detect system preference
+        if(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches){
+          document.body.classList.remove('light-mode');
+          document.body.classList.add('dark-mode');
+        }else{
+          document.body.classList.remove('dark-mode');
+          document.body.classList.add('light-mode');
+        }
+      }
+    }
+
+    function applyTimezoneAndDateFormat(timezone, dateFormat){
+      // Store for use in date formatting functions
+      window.podTimezone = timezone;
+      window.podDateFormat = dateFormat;
+      
+      // Re-render any dates on the page with new format
+      renderCheckIns();
+      renderMembers();
+    }
+
+    function formatDate(date){
+      if(!date) return '';
+      
+      var dateObj = new Date(date);
+      var timezone = window.podTimezone || 'UTC';
+      var dateFormat = window.podDateFormat || 'MM/DD/YYYY';
+      
+      // Format date based on selected format
+      var options = { 
+        timeZone: timezone,
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit'
+      };
+      
+      var formattedDate = dateObj.toLocaleDateString('en-US', options);
+      
+      // Reformat based on selected format
+      var parts = formattedDate.split('/');
+      if(parts.length === 3){
+        var month = parts[0];
+        var day = parts[1];
+        var year = parts[2];
+        
+        if(dateFormat === 'DD/MM/YYYY'){
+          return day + '/' + month + '/' + year;
+        }else if(dateFormat === 'YYYY-MM-DD'){
+          return year + '-' + month + '-' + day;
+        }else{
+          // MM/DD/YYYY (default)
+          return month + '/' + day + '/' + year;
+        }
+      }
+      
+      return formattedDate;
+    }
+
+    function formatTime(date){
+      if(!date) return '';
+      
+      var dateObj = new Date(date);
+      var timezone = window.podTimezone || 'UTC';
+      
+      var options = { 
+        timeZone: timezone,
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: true
+      };
+      
+      return dateObj.toLocaleTimeString('en-US', options);
+    }
+
+    function loadPodSettingsFromStorage(){
+      if(!currentPod) return;
+      
+      var savedSettings = localStorage.getItem('podSettings_' + currentPod.id);
+      if(savedSettings){
+        var settings = JSON.parse(savedSettings);
+        
+        // Set form values
+        var themeInput = document.getElementById('podThemeInput');
+        var timezoneInput = document.getElementById('podTimezoneInput');
+        var dateFormatInput = document.getElementById('podDateFormatInput');
+        
+        if(themeInput) themeInput.value = settings.theme || 'auto';
+        if(timezoneInput) timezoneInput.value = settings.timezone || 'UTC';
+        if(dateFormatInput) dateFormatInput.value = settings.dateFormat || 'MM/DD/YYYY';
+        
+        // Apply settings
+        applyTheme(settings.theme || 'auto');
+        applyTimezoneAndDateFormat(settings.timezone || 'UTC', settings.dateFormat || 'MM/DD/YYYY');
       }
     }
 
@@ -5013,6 +5162,11 @@
       document.getElementById('emailInviteModal').classList.add('is-open');
       document.getElementById('modalInviteEmail').value = '';
       
+      // Explicitly reset captcha state before initializing
+      knotCaptchaVerified = false;
+      knotCaptchaToken = null;
+      currentChallengeType = null;
+      
       // Initialize custom Knot captcha widget
       initKnotCaptcha();
     }
@@ -5035,7 +5189,9 @@
       var challenge = document.getElementById('kcChallenge');
       var challengeInner = document.getElementById('kcChallengeInner');
 
+      // Reset closure variables to ensure clean state
       var verified = false;
+      var dragging = false;
 
       function generateToken(){
         return 'knot_' + Math.random().toString(36).slice(2) + Date.now().toString(36);
@@ -5084,7 +5240,6 @@
         var label = document.getElementById('kcSliderLabel');
         var status = document.getElementById('kcStatus');
 
-        var dragging = false;
         var startX = 0;
         var handleStartLeft = 0;
         var maxDrag = 0;
@@ -5098,6 +5253,8 @@
           handle.style.top = '50%';
           handle.style.marginTop = '-18px';
           label.classList.remove('is-hidden');
+          status.textContent = '';
+          status.className = 'kc-challenge-status';
         }
 
         function getMaxDrag(){
@@ -5203,14 +5360,39 @@
       var checkbox = document.getElementById('kcCheckbox');
       var challenge = document.getElementById('kcChallenge');
       var challengeInner = document.getElementById('kcChallengeInner');
+      var status = document.getElementById('kcStatus');
 
+      // Reset global state
       knotCaptchaVerified = false;
       knotCaptchaToken = null;
       currentChallengeType = null;
       
+      // Reset UI state
       checkbox.classList.remove('is-checked', 'is-loading');
       challenge.classList.remove('is-open');
       challengeInner.innerHTML = '<!-- Dynamic challenge content will be inserted here -->';
+      
+      // Reset status text
+      if(status){
+        status.textContent = '';
+        status.className = 'kc-challenge-status';
+      }
+      
+      // Reset slider state if it exists
+      var fill = document.getElementById('kcSliderFill');
+      var handle = document.getElementById('kcSliderHandle');
+      var label = document.getElementById('kcSliderLabel');
+      
+      if(fill && handle && label){
+        fill.style.width = '0%';
+        fill.classList.remove('is-snapping');
+        handle.style.transform = 'translateX(0px)';
+        handle.style.left = '4px';
+        handle.style.position = 'absolute';
+        handle.style.top = '50%';
+        handle.style.marginTop = '-18px';
+        label.classList.remove('is-hidden');
+      }
     }
 
     function showJoinPodModal(){
@@ -5313,14 +5495,15 @@
       console.log('sendModalInviteEmail called');
       var email = document.getElementById('modalInviteEmail').value;
       var btn = document.getElementById('sendModalInviteBtn');
+      var checkbox = document.getElementById('kcCheckbox');
       
       if(!email || !email.includes('@')){
         alert('Please enter a valid email address');
         return;
       }
 
-      // Verify custom Knot captcha
-      if(!knotCaptchaVerified){
+      // Verify custom Knot captcha - check both flag and DOM state
+      if(!knotCaptchaVerified || !checkbox || !checkbox.classList.contains('is-checked')){
         alert('Please complete the captcha verification');
         return;
       }
@@ -5468,7 +5651,7 @@
             </div>
             <div class="settings-item">
               <div class="settings-item-label">Account Created</div>
-              <div class="settings-item-value">${new Date(currentUser.created_at).toLocaleDateString()}</div>
+              <div class="settings-item-value">${formatDate(currentUser.created_at)}</div>
             </div>
           </div>
 
