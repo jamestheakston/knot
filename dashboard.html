@@ -2553,10 +2553,10 @@
           <i data-lucide="list-checks"></i>
           Habits
         </div>
-        <div class="nav-item" data-nav="invite">
-  <i data-lucide="user-plus"></i>
-  Invite Members
-</div>
+        <div class="nav-item admin-only" data-nav="invite">
+          <i data-lucide="user-plus"></i>
+          Invite Members
+        </div>
         <div class="nav-item" data-nav="profile">
           <i data-lucide="user"></i>
           Profile
@@ -4903,8 +4903,27 @@
     }
 
     function loadInvite(){
-  console.log('Loading invite');
-  var contentArea = document.getElementById('contentArea');
+      console.log('Loading invite');
+      var contentArea = document.getElementById('contentArea');
+      
+      if(!isAdmin){
+        contentArea.innerHTML = `
+          <div class="invite-section">
+            <div class="invite-card">
+              <h3>Invite Members</h3>
+              <p>You need to contact your pod admin to invite new members. Only admins can send invitations to join the pod.</p>
+              <div class="admin-contact-info">
+                <i data-lucide="info" style="width: 20px; height: 20px; color: var(--blue);"></i>
+                <span>Ask your admin for the invite code or have them send you an invitation.</span>
+              </div>
+            </div>
+          </div>
+        `;
+        if(typeof lucide !== 'undefined'){
+          lucide.createIcons();
+        }
+        return;
+      }
 
       contentArea.innerHTML = `
         <div class="invite-section">
@@ -4931,7 +4950,6 @@
                   <li>Once they join, they'll appear in the Members section</li>
                 </ol>
               </div>
-              ${isAdmin ? `
               <div class="reset-invite-section">
                 <button class="btn btn-ghost" id="resetInviteBtn" style="color: var(--red); border-color: var(--red);">
                   <i data-lucide="refresh-cw" style="width: 16px; height: 16px; margin-right: 8px;"></i>
@@ -4939,7 +4957,6 @@
                 </button>
                 <p class="reset-invite-warning">This will invalidate your current invite code. Current members will not be affected, but anyone with the old code will no longer be able to join.</p>
               </div>
-              ` : ''}
             </div>
           </div>
         </div>
@@ -4960,14 +4977,11 @@
         }, 2000);
       });
 
-      var resetInviteBtn = document.getElementById('resetInviteBtn');
-      if(resetInviteBtn){
-        resetInviteBtn.addEventListener('click', function(){
-          if(confirm('Are you sure you want to reset your invite code? This will invalidate your current invite code. Current members will not be affected, but anyone with the old code will no longer be able to join.')){
-            handleResetInviteCode();
-          }
-        });
-      }
+      document.getElementById('resetInviteBtn').addEventListener('click', function(){
+        if(confirm('Are you sure you want to reset your invite code? This will invalidate your current invite code. Current members will not be affected, but anyone with the old code will no longer be able to join.')){
+          handleResetInviteCode();
+        }
+      });
 
       if(typeof lucide !== 'undefined'){
         lucide.createIcons();
