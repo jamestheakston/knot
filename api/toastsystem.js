@@ -211,20 +211,9 @@
         var latestCommit = branchData.meta.sha;
         
         if(latestCommit !== this.CURRENT_COMMIT_SHA && !this.hasShownUpdateToast){
-          // Check if this file was modified in the latest commit using GitHub API
-          var commitRes = await fetch('https://api.github.com/repos/' + this.GITHUB_REPO + '/commits/' + latestCommit);
-          var commitData = await commitRes.json();
-          
-          if(commitData && commitData.files){
-            var fileChanged = commitData.files.some(function(file){
-              return file.filename === this.CURRENT_FILE;
-            }.bind(this));
-            
-            if(fileChanged){
-              this.hasShownUpdateToast = true;
-              this.showNewUpdateToast();
-            }
-          }
+          // New commit detected, show update toast
+          this.hasShownUpdateToast = true;
+          this.showNewUpdateToast();
         }
       }catch(err){
         console.error('Error checking for updates:', err);
