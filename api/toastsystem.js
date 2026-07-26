@@ -120,7 +120,7 @@
     showNewUpdateToast: function(){
       this.showToast(
         'New Version Available',
-        'A new version of this page is available with updates and improvements. <a href="#" onclick="location.reload(); return false;" style="color: var(--blue); text-decoration: underline;">Click here to reload</a>',
+        'A new version of this page is available with updates and improvements.',
         'newupdate',
         {
           reload: {
@@ -134,8 +134,7 @@
             label: 'Later',
             primary: false,
             handler: function(){
-              // Reset flag so toast can show again if needed
-              ToastSystem.hasShownUpdateToast = false;
+              // Don't reset flag - toast won't show again until a new commit
             }
           }
         }
