@@ -212,7 +212,7 @@
         
         if(latestCommit !== this.CURRENT_COMMIT_SHA && !this.hasShownUpdateToast){
           // Check if this file was modified in the latest commit using UNGH
-          var commitRes = await fetch('https://ungh.cc/repos/' + this.GITHUB_REPO + '/git/commits/' + latestCommit);
+          var commitRes = await fetch('https://ungh.cc/repos/' + this.GITHUB_REPO + '/commits/' + latestCommit);
           var commitData = await commitRes.json();
           
           if(commitData && commitData.commit && commitData.commit.files){
