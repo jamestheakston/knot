@@ -5357,7 +5357,7 @@
 
     // GitHub Version Check
     var GITHUB_REPO = 'jamestheakston/knot';
-    var VERSION_CHECK_INTERVAL = 5 * 60 * 1000; // Check every 5 minutes
+    var VERSION_CHECK_INTERVAL = 5 * 1000; // Check every 5 seconds
     var hasShownUpdateToast = false; // Prevent showing toast multiple times
     var CURRENT_COMMIT_SHA = null; // Will be fetched on page load
 
@@ -5416,7 +5416,8 @@
                 label: 'Later',
                 primary: false,
                 handler: function(){
-                  // Do nothing, just dismiss
+                  // Reset flag so toast can show again if needed
+                  hasShownUpdateToast = false;
                 }
               }
             }
