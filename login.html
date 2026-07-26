@@ -44,6 +44,10 @@
     display: flex;
     flex-direction: column;
   }
+  .gtranslate_wrapper{
+    transform: scale(0.7);
+    transform-origin: left center;
+  }
   h1,h2,h3{
     font-family: 'Instrument Serif', serif;
     font-weight: 400;
@@ -575,6 +579,11 @@
     checkAuthErrors();
   });
 </script>
+
+<div class="gtranslate_wrapper"></div>
+
+<script>window.gtranslateSettings = {"default_language":"en","languages":["en","fr","it","es"],"globe_color":"#66aaff","wrapper_selector":".gtranslate_wrapper"}</script>
+<script src="https://cdn.gtranslate.net/widgets/latest/globe.js" defer></script>
 
 </body>
 </html>
