@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Access denied. You must be logged in to access this page.">
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%232A4BD7' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71'/><path d='M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71'/></svg>">
+<link rel="icon" type="image/svg+xml" media="(prefers-color-scheme: dark)" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23FFFFFF' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71'/><path d='M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71'/></svg>">
+<title>403 — Access Denied | Knot</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@latest"></script>
+<style>
+  :root{
+    --bg: #F7F8FB;
+    --bg-2: #FFFFFF;
+    --bg-3: #EEF1F6;
+    --ink: #151922;
+    --muted: #5B6472;
+    --muted-2: #8890A0;
+    --blue: #2A4BD7;
+    --blue-bright: #1B37AE;
+    --blue-soft: #EAEFFF;
+    --line: rgba(21,25,34,0.10);
+    --line-strong: rgba(21,25,34,0.18);
+  }
+
+  *{ box-sizing: border-box; }
+  html{ scroll-behavior: smooth; }
+  body{
+    margin:0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'Work Sans', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    line-height: 1.5;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+  h1,h2{
+    font-family: 'Instrument Serif', serif;
+    font-weight: 400;
+    margin: 0;
+    letter-spacing: -0.01em;
+  }
+  a{ color: inherit; text-decoration: none; }
+
+  ::selection{ background: var(--blue); color: #fff; }
+
+  :focus-visible{
+    outline: 2px solid var(--blue);
+    outline-offset: 3px;
+    border-radius: 4px;
+  }
+
+  /* ---------- 403 PAGE ---------- */
+  .access-denied-page{
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 120px 24px 40px;
+  }
+  .access-denied-container{
+    text-align: center;
+    max-width: 500px;
+  }
+  .access-denied-code{
+    font-size: 120px;
+    font-weight: 700;
+    color: #DC2626;
+    font-family: 'Instrument Serif', serif;
+    line-height: 1;
+    margin-bottom: 24px;
+  }
+  .access-denied-title{
+    font-size: 32px;
+    margin-bottom: 16px;
+  }
+  .access-denied-description{
+    font-size: 16px;
+    color: var(--muted);
+    margin-bottom: 32px;
+    line-height: 1.6;
+  }
+  .access-denied-actions{
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  /* ---------- ERROR CODE ---------- */
+  .error-code-section{
+    margin-top: 32px;
+    padding-top: 24px;
+    border-top: 1px solid var(--line);
+  }
+  .error-code-wrapper{
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    color: var(--muted-2);
+    font-family: 'Work Sans', sans-serif;
+    position: relative;
+  }
+  .error-code-text{
+    font-weight: 500;
+  }
+  .error-code-value{
+    font-family: monospace;
+    background: var(--bg-3);
+    padding: 2px 6px;
+    border-radius: 4px;
+  }
+  .code-tooltip-icon{
+    cursor: help;
+    color: var(--muted-2);
+    transition: color 0.2s ease;
+  }
+  .code-tooltip-icon:hover{
+    color: var(--blue);
+  }
+  .code-tooltip{
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--ink);
+    color: var(--bg-2);
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    white-space: nowrap;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.2s ease;
+    margin-bottom: 8px;
+    z-index: 100;
+  }
+  .code-tooltip::after{
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 6px solid transparent;
+    border-top-color: var(--ink);
+  }
+  .error-code-wrapper:hover .code-tooltip{
+    opacity: 1;
+    visibility: visible;
+  }
+
+  /* ---------- BUTTONS ---------- */
+  .btn{
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px 20px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 500;
+    font-family: 'Work Sans', sans-serif;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s ease;
+  }
+  .btn-primary{
+    background: var(--blue);
+    color: #fff;
+  }
+  .btn-primary:hover{
+    background: var(--blue-bright);
+  }
+  .btn-ghost{
+    background: transparent;
+    color: var(--ink);
+    border: 1px solid var(--line-strong);
+  }
+  .btn-ghost:hover{
+    background: var(--bg-3);
+  }
+
+  /* Toast Notifications */
+  .toast-container{
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    z-index: 10000;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .toast{
+    background: var(--bg-2);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 16px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    min-width: 320px;
+    max-width: 400px;
+    animation: toastSlideIn 0.3s ease;
+  }
+  @keyframes toastSlideIn{
+    from{
+      transform: translateX(100%);
+      opacity: 0;
+    }
+    to{
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+  @keyframes toastSlideOut{
+    from{
+      transform: translateX(0);
+      opacity: 1;
+    }
+    to{
+      transform: translateX(100%);
+      opacity: 0;
+    }
+  }
+  .toast.is-info{
+    border-left: 4px solid var(--blue);
+  }
+  .toast.is-success{
+    border-left: 4px solid #10B981;
+  }
+  .toast.is-warning{
+    border-left: 4px solid #F59E0B;
+  }
+  .toast.is-error{
+    border-left: 4px solid #DC2626;
+  }
+  .toast-header{
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+  .toast-title{
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--ink);
+  }
+  .toast-message{
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.4;
+  }
+  .toast-actions{
+    margin-top: 12px;
+    display: flex;
+    gap: 8px;
+  }
+  .toast-btn{
+    padding: 6px 12px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s ease;
+  }
+  .toast-btn-primary{
+    background: var(--blue);
+    color: #fff;
+  }
+  .toast-btn-primary:hover{
+    background: var(--blue-bright);
+  }
+  .toast-btn-secondary{
+    background: var(--bg-3);
+    color: var(--ink);
+  }
+  .toast-btn-secondary:hover{
+    background: var(--line);
+  }
+  .toast-close{
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: none;
+    border: none;
+    color: var(--muted);
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 4px;
+    transition: color 0.2s ease;
+  }
+  .toast-close:hover{
+    color: var(--ink);
+  }
+  .toast-close i{
+    width: 16px;
+    height: 16px;
+  }
+
+  /* ---------- RESPONSIVE ---------- */
+  @media (max-width: 640px){
+    .access-denied-page{
+      padding: 100px 20px 40px;
+    }
+    .access-denied-code{
+      font-size: 80px;
+    }
+    .access-denied-title{
+      font-size: 24px;
+    }
+  }
+</style>
+</head>
+<body>
+
+<div class="access-denied-page">
+  <div class="access-denied-container">
+    <div class="access-denied-code">403</div>
+    <h1 class="access-denied-title">Access Denied</h1>
+    <p class="access-denied-description">You must be logged in to access this page. Please sign in to continue.</p>
+    <div class="access-denied-actions">
+      <a href="login.html" class="btn btn-primary">Log In</a>
+      <a href="index.html" class="btn btn-ghost">Go to Home</a>
+    </div>
+    
+    <div class="error-code-section" id="errorCodeSection" style="display: none;">
+      <div class="error-code-wrapper">
+        <span class="error-code-text">C0DE:</span>
+        <span class="error-code-value" id="errorCodeValue"></span>
+        <i data-lucide="help-circle" class="code-tooltip-icon" width="16" height="16"></i>
+        <div class="code-tooltip">This code can be used with support teams to help identify an issue.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Handle URL code parameter
+  function handleCodeParameter(){
+    var urlParams = new URLSearchParams(window.location.search);
+    var code = urlParams.get('code');
+    
+    if(code){
+      // Display the code
+      document.getElementById('errorCodeSection').style.display = 'block';
+      document.getElementById('errorCodeValue').textContent = code;
+      
+      // Clear the parameter from URL
+      var cleanUrl = window.location.pathname;
+      window.history.replaceState({}, document.title, cleanUrl);
+    }
+  }
+
+  // Toast Notification System
+  function showToast(title, message, type, actions, duration){
+    var container = document.getElementById('toastContainer');
+    if(!container){
+      container = document.createElement('div');
+      container.id = 'toastContainer';
+      container.className = 'toast-container';
+      document.body.appendChild(container);
+    }
+
+    var toast = document.createElement('div');
+    toast.className = 'toast is-' + (type || 'info');
+    
+    var actionsHTML = '';
+    if(actions && actions.length > 0){
+      actionsHTML = '<div class="toast-actions">';
+      actions.forEach(function(action){
+        actionsHTML += '<button class="toast-btn ' + (action.primary ? 'toast-btn-primary' : 'toast-btn-secondary') + '" data-action="' + action.action + '">' + action.label + '</button>';
+      });
+      actionsHTML += '</div>';
+    }
+
+    toast.innerHTML = `
+      <button class="toast-close"><i data-lucide="x"></i></button>
+      <div class="toast-header">
+        <i data-lucide="info" style="width: 18px; height: 18px; color: var(--blue);"></i>
+        <div class="toast-title">${title}</div>
+      </div>
+      <div class="toast-message">${message}</div>
+      ${actionsHTML}
+    `;
+
+    container.appendChild(toast);
+    
+    if(typeof lucide !== 'undefined'){
+      lucide.createIcons();
+    }
+
+    // Close button handler
+    toast.querySelector('.toast-close').onclick = function(){
+      toast.style.animation = 'toastSlideOut 0.3s ease forwards';
+      setTimeout(function(){
+        if(toast.parentElement){
+          toast.remove();
+        }
+      }, 300);
+    };
+
+    // Action button handlers
+    if(actions && actions.length > 0){
+      toast.querySelectorAll('.toast-btn').forEach(function(btn){
+        btn.onclick = function(){
+          var action = btn.getAttribute('data-action');
+          if(actions[action] && actions[action].handler){
+            actions[action].handler();
+          }
+          toast.style.animation = 'toastSlideOut 0.3s ease forwards';
+          setTimeout(function(){
+            if(toast.parentElement){
+              toast.remove();
+            }
+          }, 300);
+        };
+      });
+    }
+
+    // Optional auto-dismiss (if duration is provided)
+    if(duration && duration > 0){
+      setTimeout(function(){
+        if(toast.parentElement){
+          toast.style.animation = 'toastSlideOut 0.3s ease forwards';
+          setTimeout(function(){
+            if(toast.parentElement){
+              toast.remove();
+            }
+          }, 300);
+        }
+      }, duration);
+    }
+  }
+
+  // Initialize Lucide icons
+  if(typeof lucide !== 'undefined'){
+    lucide.createIcons();
+  }
+
+  // Handle code parameter on page load
+  handleCodeParameter();
+
+  // GitHub Version Check
+  var GITHUB_REPO = 'jamestheakston/knot';
+  var VERSION_CHECK_INTERVAL = 5 * 1000; // Check every 5 seconds
+  var hasShownUpdateToast = false; // Prevent showing toast multiple times
+  var CURRENT_COMMIT_SHA = null; // Will be fetched on page load
+  var CURRENT_FILE = '403.html'; // Current file to check for changes
+
+  // Fetch current commit on page load
+  async function fetchCurrentCommit(){
+    try{
+      var response = await fetch('https://api.github.com/repos/' + GITHUB_REPO + '/commits/main');
+      if(!response.ok) return;
+      
+      var data = await response.json();
+      var currentCommit = data.sha;
+      
+      // Store in localStorage
+      localStorage.setItem('knot_current_commit', currentCommit);
+      CURRENT_COMMIT_SHA = currentCommit;
+    }catch(err){
+      console.error('Error fetching current commit:', err);
+      // Fallback to stored commit if available
+      CURRENT_COMMIT_SHA = localStorage.getItem('knot_current_commit');
+    }
+  }
+
+  async function checkForUpdates(){
+    if(!CURRENT_COMMIT_SHA){
+      await fetchCurrentCommit();
+      if(!CURRENT_COMMIT_SHA) return;
+    }
+    
+    try{
+      var response = await fetch('https://api.github.com/repos/' + GITHUB_REPO + '/commits/main');
+      if(!response.ok) return;
+      
+      var data = await response.json();
+      var latestCommit = data.sha;
+      
+      if(latestCommit !== CURRENT_COMMIT_SHA && !hasShownUpdateToast){
+        // Check if this file was modified in the latest commit
+        var commitResponse = await fetch('https://api.github.com/repos/' + GITHUB_REPO + '/commits/' + latestCommit);
+        if(commitResponse.ok){
+          var commitData = await commitResponse.json();
+          var fileChanged = commitData.files && commitData.files.some(function(file){
+            return file.filename === CURRENT_FILE;
+          });
+          
+          if(fileChanged){
+            hasShownUpdateToast = true;
+            showToast(
+              'New Version Available',
+              'A new version of this page is available with updates and improvements. <a href="#" onclick="location.reload(); return false;" style="color: var(--blue); text-decoration: underline;">Click here to reload</a>',
+              'info',
+              {
+                reload: {
+                  label: 'Reload',
+                  primary: true,
+                  handler: function(){
+                    location.reload();
+                  }
+                },
+                later: {
+                  label: 'Later',
+                  primary: false,
+                  handler: function(){
+                    // Reset flag so toast can show again if needed
+                    hasShownUpdateToast = false;
+                  }
+                }
+              }
+            );
+          }
+        }
+      }
+    }catch(err){
+      console.error('Error checking for updates:', err);
+    }
+  }
+
+  // Fetch current commit on page load
+  fetchCurrentCommit();
+  
+  // Start version check after fetching current commit
+  setTimeout(checkForUpdates, 3000); // Check after 3 seconds
+  setInterval(checkForUpdates, VERSION_CHECK_INTERVAL); // Check periodically
+</script>
+
+</body>
+</html>

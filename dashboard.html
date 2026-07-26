@@ -2910,8 +2910,8 @@
       console.log('checkAuth error:', error);
       
       if(error || !session){
-        console.log('No session found, redirecting to index');
-        window.location.href = 'index.html';
+        console.log('No session found, redirecting to 403');
+        window.location.href = '403.html?code=DASH-58580';
         return;
       }
 
