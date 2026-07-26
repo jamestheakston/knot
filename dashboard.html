@@ -5310,6 +5310,7 @@
       toast.innerHTML = `
         <button class="toast-close"><i data-lucide="x"></i></button>
         <div class="toast-header">
+          <i data-lucide="info" style="width: 18px; height: 18px; color: var(--blue);"></i>
           <div class="toast-title">${title}</div>
         </div>
         <div class="toast-message">${message}</div>
@@ -5349,9 +5350,10 @@
     }
 
     // GitHub Version Check
-    var CURRENT_COMMIT_SHA = '4c089d6'; // Current commit SHA
+    var CURRENT_COMMIT_SHA = '1c9aebb'; // Current commit SHA
     var GITHUB_REPO = 'jamestheakston/knot';
     var VERSION_CHECK_INTERVAL = 5 * 60 * 1000; // Check every 5 minutes
+    var hasShownUpdateToast = false; // Prevent showing toast multiple times
 
     async function checkForUpdates(){
       try{
@@ -5361,10 +5363,14 @@
         var data = await response.json();
         var latestCommit = data.sha;
         
-        if(latestCommit !== CURRENT_COMMIT_SHA){
+        console.log('Current commit:', CURRENT_COMMIT_SHA);
+        console.log('Latest commit:', latestCommit);
+        
+        if(latestCommit !== CURRENT_COMMIT_SHA && !hasShownUpdateToast){
+          hasShownUpdateToast = true;
           showToast(
             'New Version Available',
-            'A new version of Knot is available with updates and improvements.',
+            'A new version of Knot is available with updates and improvements. <a href="#" onclick="location.reload(); return false;" style="color: var(--blue); text-decoration: underline;">Click here to reload</a>',
             'info',
             {
               reload: {
