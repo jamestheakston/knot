@@ -1,5 +1,8 @@
-// Toast Notification System with GitHub Version Checking
-// This file provides toast notifications and automatic version checking for Knot pages
+// Toast Notification System with Automatic Version Checking
+// This file provides toast notifications for Knot pages
+// Types: info, warning, error, newupdate
+// - info, warning, error: Simple toasts with title and message
+// - newupdate: Automatic version checking with update notifications
 
 (function(window){
   'use strict';
@@ -13,6 +16,9 @@
     CURRENT_FILE: null,
 
     // Show a toast notification
+    // Types: info, warning, error, newupdate
+    // For info, warning, error: Provide title and message
+    // For newupdate: Automatic version checking (no params needed)
     showToast: function(title, message, type, actions, duration){
       var container = document.getElementById('toastContainer');
       if(!container){
@@ -37,10 +43,24 @@
         actionsHTML += '</div>';
       }
 
+      // Choose icon based on type
+      var iconName = 'info';
+      var iconColor = 'var(--blue)';
+      if(type === 'warning'){
+        iconName = 'alert-triangle';
+        iconColor = '#F59E0B';
+      }else if(type === 'error'){
+        iconName = 'alert-circle';
+        iconColor = '#DC2626';
+      }else if(type === 'newupdate'){
+        iconName = 'refresh-cw';
+        iconColor = '#10B981';
+      }
+
       toast.innerHTML = `
         <button class="toast-close"><i data-lucide="x"></i></button>
         <div class="toast-header">
-          <i data-lucide="info" style="width: 18px; height: 18px; color: var(--blue);"></i>
+          <i data-lucide="${iconName}" style="width: 18px; height: 18px; color: ${iconColor};"></i>
           <div class="toast-title">${title}</div>
         </div>
         <div class="toast-message">${message}</div>
@@ -94,6 +114,32 @@
           }
         }, duration);
       }
+    },
+
+    // Show new update toast (automatic version checking)
+    showNewUpdateToast: function(){
+      this.showToast(
+        'New Version Available',
+        'A new version of this page is available with updates and improvements. <a href="#" onclick="location.reload(); return false;" style="color: var(--blue); text-decoration: underline;">Click here to reload</a>',
+        'newupdate',
+        {
+          reload: {
+            label: 'Reload',
+            primary: true,
+            handler: function(){
+              location.reload();
+            }
+          },
+          later: {
+            label: 'Later',
+            primary: false,
+            handler: function(){
+              // Reset flag so toast can show again if needed
+              ToastSystem.hasShownUpdateToast = false;
+            }
+          }
+        }
+      );
     },
 
     // Fetch current commit on page load using UNGH proxy
@@ -176,28 +222,7 @@
             
             if(fileChanged){
               this.hasShownUpdateToast = true;
-              this.showToast(
-                'New Version Available',
-                'A new version of this page is available with updates and improvements. <a href="#" onclick="location.reload(); return false;" style="color: var(--blue); text-decoration: underline;">Click here to reload</a>',
-                'info',
-                {
-                  reload: {
-                    label: 'Reload',
-                    primary: true,
-                    handler: function(){
-                      location.reload();
-                    }
-                  },
-                  later: {
-                    label: 'Later',
-                    primary: false,
-                    handler: function(){
-                      // Reset flag so toast can show again if needed
-                      ToastSystem.hasShownUpdateToast = false;
-                    }
-                  }
-                }
-              );
+              this.showNewUpdateToast();
             }
           }
         }
@@ -227,5 +252,6 @@
   // Expose to global scope
   window.ToastSystem = ToastSystem;
   window.showToast = ToastSystem.showToast.bind(ToastSystem);
+  window.showNewUpdateToast = ToastSystem.showNewUpdateToast.bind(ToastSystem);
 
 })(window);
