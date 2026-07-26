@@ -5355,6 +5355,10 @@
     // Initialize Toast System with version checking
     if(typeof ToastSystem !== 'undefined'){
       ToastSystem.init('dashboard.html');
+      // Test toast - remove after verification
+      setTimeout(function(){
+        showToast('Test', 'Toast system is working!', 'info', null, 3000);
+      }, 1000);
     }
 
     function initKnotCaptcha(){
