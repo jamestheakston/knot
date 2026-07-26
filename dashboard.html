@@ -5131,9 +5131,8 @@
       window.podTimezone = timezone;
       window.podDateFormat = dateFormat;
       
-      // Re-render any dates on the page with new format
-      loadCheckIns();
-      loadMembers();
+      // Note: The page will need to be reloaded to see the new format applied to existing content
+      // This is intentional to avoid unnecessary re-renders
     }
 
     function formatDate(date){
