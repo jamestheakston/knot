@@ -96,14 +96,30 @@
       }
     },
 
-    // Fetch current commit on page load
+    // Fetch current commit on page load using UNGH proxy
     fetchCurrentCommit: async function(){
       try{
-        var response = await fetch('https://api.github.com/repos/' + this.GITHUB_REPO + '/commits/main');
-        if(!response.ok) return;
+        // Get repository metadata to find default branch
+        var repoRes = await fetch('https://ungh.cc/repos/' + this.GITHUB_REPO);
+        var repoData = await repoRes.json();
         
-        var data = await response.json();
-        var currentCommit = data.sha;
+        if(!repoData || !repoData.repo || !repoData.repo.defaultBranch){
+          console.error('Error fetching repo data from UNGH');
+          this.CURRENT_COMMIT_SHA = localStorage.getItem('knot_current_commit');
+          return;
+        }
+        
+        // Get the file tree and root commit SHA for the default branch
+        var branchRes = await fetch('https://ungh.cc/repos/' + this.GITHUB_REPO + '/files/' + repoData.repo.defaultBranch);
+        var branchData = await branchRes.json();
+        
+        if(!branchData || !branchData.meta || !branchData.meta.sha){
+          console.error('Error fetching branch data from UNGH');
+          this.CURRENT_COMMIT_SHA = localStorage.getItem('knot_current_commit');
+          return;
+        }
+        
+        var currentCommit = branchData.meta.sha;
         
         // Store in localStorage
         localStorage.setItem('knot_current_commit', currentCommit);
@@ -115,7 +131,7 @@
       }
     },
 
-    // Check for updates
+    // Check for updates using UNGH proxy
     checkForUpdates: async function(){
       if(!this.CURRENT_COMMIT_SHA){
         await this.fetchCurrentCommit();
@@ -128,19 +144,34 @@
       }
       
       try{
-        var response = await fetch('https://api.github.com/repos/' + this.GITHUB_REPO + '/commits/main');
-        if(!response.ok) return;
+        // Get repository metadata to find default branch
+        var repoRes = await fetch('https://ungh.cc/repos/' + this.GITHUB_REPO);
+        var repoData = await repoRes.json();
         
-        var data = await response.json();
-        var latestCommit = data.sha;
+        if(!repoData || !repoData.repo || !repoData.repo.defaultBranch){
+          console.error('Error fetching repo data from UNGH');
+          return;
+        }
+        
+        // Get the file tree and root commit SHA for the default branch
+        var branchRes = await fetch('https://ungh.cc/repos/' + this.GITHUB_REPO + '/files/' + repoData.repo.defaultBranch);
+        var branchData = await branchRes.json();
+        
+        if(!branchData || !branchData.meta || !branchData.meta.sha){
+          console.error('Error fetching branch data from UNGH');
+          return;
+        }
+        
+        var latestCommit = branchData.meta.sha;
         
         if(latestCommit !== this.CURRENT_COMMIT_SHA && !this.hasShownUpdateToast){
-          // Check if this file was modified in the latest commit
-          var commitResponse = await fetch('https://api.github.com/repos/' + this.GITHUB_REPO + '/commits/' + latestCommit);
-          if(commitResponse.ok){
-            var commitData = await commitResponse.json();
-            var fileChanged = commitData.files && commitData.files.some(function(file){
-              return file.filename === this.CURRENT_FILE;
+          // Check if this file was modified in the latest commit using UNGH
+          var commitRes = await fetch('https://ungh.cc/repos/' + this.GITHUB_REPO + '/git/commits/' + latestCommit);
+          var commitData = await commitRes.json();
+          
+          if(commitData && commitData.commit && commitData.commit.files){
+            var fileChanged = commitData.commit.files.some(function(file){
+              return file.path === this.CURRENT_FILE;
             }.bind(this));
             
             if(fileChanged){
