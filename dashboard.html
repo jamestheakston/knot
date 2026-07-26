@@ -2818,7 +2818,7 @@
     
     <div class="upgrade-plan-name">
       <i data-lucide="crown" style="color: #FFD700; width: 24px; height: 24px;"></i>
-      Pod Pro
+      Basic
     </div>
     
     <ul class="upgrade-features">
@@ -5434,6 +5434,7 @@
     var VERSION_CHECK_INTERVAL = 5 * 1000; // Check every 5 seconds
     var hasShownUpdateToast = false; // Prevent showing toast multiple times
     var CURRENT_COMMIT_SHA = null; // Will be fetched on page load
+    var CURRENT_FILE = 'dashboard.html'; // Current file to check for changes
 
     // Fetch current commit on page load
     async function fetchCurrentCommit(){
@@ -5468,29 +5469,40 @@
         var latestCommit = data.sha;
         
         if(latestCommit !== CURRENT_COMMIT_SHA && !hasShownUpdateToast){
-          hasShownUpdateToast = true;
-          showToast(
-            'New Version Available',
-            'A new version of Knot is available with updates and improvements. <a href="#" onclick="location.reload(); return false;" style="color: var(--blue); text-decoration: underline;">Click here to reload</a>',
-            'info',
-            {
-              reload: {
-                label: 'Reload',
-                primary: true,
-                handler: function(){
-                  location.reload();
+          // Check if this file was modified in the latest commit
+          var commitResponse = await fetch('https://api.github.com/repos/' + GITHUB_REPO + '/commits/' + latestCommit);
+          if(commitResponse.ok){
+            var commitData = await commitResponse.json();
+            var fileChanged = commitData.files && commitData.files.some(function(file){
+              return file.filename === CURRENT_FILE;
+            });
+            
+            if(fileChanged){
+              hasShownUpdateToast = true;
+              showToast(
+                'New Version Available',
+                'A new version of this page is available with updates and improvements. <a href="#" onclick="location.reload(); return false;" style="color: var(--blue); text-decoration: underline;">Click here to reload</a>',
+                'info',
+                {
+                  reload: {
+                    label: 'Reload',
+                    primary: true,
+                    handler: function(){
+                      location.reload();
+                    }
+                  },
+                  dismiss: {
+                    label: 'Later',
+                    primary: false,
+                    handler: function(){
+                      // Reset flag so toast can show again if needed
+                      hasShownUpdateToast = false;
+                    }
+                  }
                 }
-              },
-              dismiss: {
-                label: 'Later',
-                primary: false,
-                handler: function(){
-                  // Reset flag so toast can show again if needed
-                  hasShownUpdateToast = false;
-                }
-              }
+              );
             }
-          );
+          }
         }
       }catch(err){
         console.error('Error checking for updates:', err);
