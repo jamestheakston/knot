@@ -2721,13 +2721,15 @@
           </div>
         </div>
         <div class="gtranslate_wrapper"></div>
-        <div class="headway-changelog"></div>
       </div>
     </div>
   </aside>
 
   <!-- Toast Container -->
   <div class="toast-container" id="toastContainer"></div>
+  
+  <!-- Headway Changelog Widget -->
+  <div class="headway-changelog"></div>
 
   <!-- Main Content -->
   <main class="main-content">
@@ -5287,7 +5289,7 @@
     var currentChallengeType = null;
 
     // Toast Notification System
-    function showToast(title, message, type, actions){
+    function showToast(title, message, type, actions, duration){
       var container = document.getElementById('toastContainer');
       if(!container){
         container = document.createElement('div');
@@ -5342,12 +5344,14 @@
         });
       }
 
-      // Auto-remove after 10 seconds
-      setTimeout(function(){
-        if(toast.parentElement){
-          toast.remove();
-        }
-      }, 10000);
+      // Optional auto-dismiss (if duration is provided)
+      if(duration && duration > 0){
+        setTimeout(function(){
+          if(toast.parentElement){
+            toast.remove();
+          }
+        }, duration);
+      }
     }
 
     // GitHub Version Check
@@ -5589,8 +5593,18 @@
         checkbox.classList.remove('is-loading');
         checkbox.classList.add('is-checked');
         
+        // Collapse challenge panel after short delay
         setTimeout(function(){
           challenge.classList.remove('is-open');
+          
+          // Clear challenge content after collapse animation completes
+          setTimeout(function(){
+            challengeInner.innerHTML = '<!-- Dynamic challenge content will be inserted here -->';
+            if(status){
+              status.textContent = '';
+              status.className = 'kc-challenge-status';
+            }
+          }, 300); // Match CSS transition duration
         }, 500);
       }
 
