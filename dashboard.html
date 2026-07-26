@@ -1736,6 +1736,112 @@
   .invite-code-display{
     margin-top: 32px;
   }
+
+  /* Toast Notifications */
+  .toast-container{
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    z-index: 10000;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .toast{
+    background: var(--bg-2);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 16px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    min-width: 320px;
+    max-width: 400px;
+    animation: toastSlideIn 0.3s ease;
+  }
+  @keyframes toastSlideIn{
+    from{
+      transform: translateX(100%);
+      opacity: 0;
+    }
+    to{
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+  .toast.is-info{
+    border-left: 4px solid var(--blue);
+  }
+  .toast.is-success{
+    border-left: 4px solid #10B981;
+  }
+  .toast.is-warning{
+    border-left: 4px solid #F59E0B;
+  }
+  .toast.is-error{
+    border-left: 4px solid var(--red);
+  }
+  .toast-header{
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+  .toast-title{
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--ink);
+  }
+  .toast-message{
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.4;
+  }
+  .toast-actions{
+    margin-top: 12px;
+    display: flex;
+    gap: 8px;
+  }
+  .toast-btn{
+    padding: 6px 12px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s ease;
+  }
+  .toast-btn-primary{
+    background: var(--blue);
+    color: #fff;
+  }
+  .toast-btn-primary:hover{
+    background: var(--blue-bright);
+  }
+  .toast-btn-secondary{
+    background: var(--bg-3);
+    color: var(--ink);
+  }
+  .toast-btn-secondary:hover{
+    background: var(--line);
+  }
+  .toast-close{
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: none;
+    border: none;
+    color: var(--muted);
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 4px;
+    transition: color 0.2s ease;
+  }
+  .toast-close:hover{
+    color: var(--ink);
+  }
+  .toast-close i{
+    width: 16px;
+    height: 16px;
+  }
   .invite-code-large{
     display: flex;
     gap: 16px;
@@ -2614,9 +2720,13 @@
             Log Out
           </div>
         </div>
+        <div class="gtranslate_wrapper"></div>
       </div>
     </div>
   </aside>
+
+  <!-- Toast Container -->
+  <div class="toast-container" id="toastContainer"></div>
 
   <!-- Main Content -->
   <main class="main-content">
@@ -4535,11 +4645,6 @@
               </select>
               <small class="form-help">Choose how dates are displayed</small>
             </div>
-            <div class="form-group">
-              <label class="form-label">Translation</label>
-              <div class="gtranslate_wrapper"></div>
-              <small class="form-help">Translate the dashboard to your preferred language</small>
-            </div>
             <div class="form-actions">
               <button class="btn btn-primary" id="savePodSettings">Save Changes</button>
             </div>
@@ -4918,21 +5023,22 @@
       try{
         var { error } = await client
           .from('pods')
-          .update({ name: podName })
+          .update({ 
+            name: podName,
+            theme: podTheme,
+            timezone: podTimezone,
+            date_format: podDateFormat
+          })
           .eq('id', currentPod.id);
 
         if(error) throw error;
 
         currentPod.name = podName;
-        document.getElementById('currentPodName').textContent = podName;
+        currentPod.theme = podTheme;
+        currentPod.timezone = podTimezone;
+        currentPod.date_format = podDateFormat;
         
-        // Save pod settings to localStorage
-        var podSettings = {
-          theme: podTheme,
-          timezone: podTimezone,
-          dateFormat: podDateFormat
-        };
-        localStorage.setItem('podSettings_' + currentPod.id, JSON.stringify(podSettings));
+        document.getElementById('currentPodName').textContent = podName;
         
         // Apply theme
         applyTheme(podTheme);
@@ -5032,23 +5138,18 @@
     function loadPodSettingsFromStorage(){
       if(!currentPod) return;
       
-      var savedSettings = localStorage.getItem('podSettings_' + currentPod.id);
-      if(savedSettings){
-        var settings = JSON.parse(savedSettings);
-        
-        // Set form values
-        var themeInput = document.getElementById('podThemeInput');
-        var timezoneInput = document.getElementById('podTimezoneInput');
-        var dateFormatInput = document.getElementById('podDateFormatInput');
-        
-        if(themeInput) themeInput.value = settings.theme || 'auto';
-        if(timezoneInput) timezoneInput.value = settings.timezone || 'UTC';
-        if(dateFormatInput) dateFormatInput.value = settings.dateFormat || 'MM/DD/YYYY';
-        
-        // Apply settings
-        applyTheme(settings.theme || 'auto');
-        applyTimezoneAndDateFormat(settings.timezone || 'UTC', settings.dateFormat || 'MM/DD/YYYY');
-      }
+      // Load from currentPod object (from Supabase)
+      var themeInput = document.getElementById('podThemeInput');
+      var timezoneInput = document.getElementById('podTimezoneInput');
+      var dateFormatInput = document.getElementById('podDateFormatInput');
+      
+      if(themeInput) themeInput.value = currentPod.theme || 'auto';
+      if(timezoneInput) timezoneInput.value = currentPod.timezone || 'UTC';
+      if(dateFormatInput) dateFormatInput.value = currentPod.date_format || 'MM/DD/YYYY';
+      
+      // Apply settings
+      applyTheme(currentPod.theme || 'auto');
+      applyTimezoneAndDateFormat(currentPod.timezone || 'UTC', currentPod.date_format || 'MM/DD/YYYY');
     }
 
     function loadInvite(){
@@ -5183,6 +5284,114 @@
     var knotCaptchaVerified = false;
     var knotCaptchaToken = null;
     var currentChallengeType = null;
+
+    // Toast Notification System
+    function showToast(title, message, type, actions){
+      var container = document.getElementById('toastContainer');
+      if(!container){
+        container = document.createElement('div');
+        container.id = 'toastContainer';
+        container.className = 'toast-container';
+        document.body.appendChild(container);
+      }
+
+      var toast = document.createElement('div');
+      toast.className = 'toast is-' + (type || 'info');
+      
+      var actionsHTML = '';
+      if(actions && actions.length > 0){
+        actionsHTML = '<div class="toast-actions">';
+        actions.forEach(function(action){
+          actionsHTML += '<button class="toast-btn ' + (action.primary ? 'toast-btn-primary' : 'toast-btn-secondary') + '" data-action="' + action.action + '">' + action.label + '</button>';
+        });
+        actionsHTML += '</div>';
+      }
+
+      toast.innerHTML = `
+        <button class="toast-close"><i data-lucide="x"></i></button>
+        <div class="toast-header">
+          <div class="toast-title">${title}</div>
+        </div>
+        <div class="toast-message">${message}</div>
+        ${actionsHTML}
+      `;
+
+      container.appendChild(toast);
+      
+      if(typeof lucide !== 'undefined'){
+        lucide.createIcons();
+      }
+
+      // Close button handler
+      toast.querySelector('.toast-close').onclick = function(){
+        toast.remove();
+      };
+
+      // Action button handlers
+      if(actions && actions.length > 0){
+        toast.querySelectorAll('.toast-btn').forEach(function(btn){
+          btn.onclick = function(){
+            var action = btn.getAttribute('data-action');
+            if(actions[action] && actions[action].handler){
+              actions[action].handler();
+            }
+            toast.remove();
+          };
+        });
+      }
+
+      // Auto-remove after 10 seconds
+      setTimeout(function(){
+        if(toast.parentElement){
+          toast.remove();
+        }
+      }, 10000);
+    }
+
+    // GitHub Version Check
+    var CURRENT_COMMIT_SHA = '4c089d6'; // Current commit SHA
+    var GITHUB_REPO = 'jamestheakston/knot';
+    var VERSION_CHECK_INTERVAL = 5 * 60 * 1000; // Check every 5 minutes
+
+    async function checkForUpdates(){
+      try{
+        var response = await fetch('https://api.github.com/repos/' + GITHUB_REPO + '/commits/main');
+        if(!response.ok) return;
+        
+        var data = await response.json();
+        var latestCommit = data.sha;
+        
+        if(latestCommit !== CURRENT_COMMIT_SHA){
+          showToast(
+            'New Version Available',
+            'A new version of Knot is available with updates and improvements.',
+            'info',
+            {
+              reload: {
+                label: 'Reload',
+                primary: true,
+                handler: function(){
+                  location.reload();
+                }
+              },
+              dismiss: {
+                label: 'Later',
+                primary: false,
+                handler: function(){
+                  // Do nothing, just dismiss
+                }
+              }
+            }
+          );
+        }
+      }catch(err){
+        console.error('Error checking for updates:', err);
+      }
+    }
+
+    // Start version check on page load
+    setTimeout(checkForUpdates, 2000); // Check after 2 seconds
+    setInterval(checkForUpdates, VERSION_CHECK_INTERVAL); // Check periodically
 
     function initKnotCaptcha(){
       var checkbox = document.getElementById('kcCheckbox');
