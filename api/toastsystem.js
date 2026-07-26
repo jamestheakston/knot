@@ -211,13 +211,13 @@
         var latestCommit = branchData.meta.sha;
         
         if(latestCommit !== this.CURRENT_COMMIT_SHA && !this.hasShownUpdateToast){
-          // Check if this file was modified in the latest commit using UNGH
-          var commitRes = await fetch('https://ungh.cc/repos/' + this.GITHUB_REPO + '/commits/' + latestCommit);
+          // Check if this file was modified in the latest commit using GitHub API
+          var commitRes = await fetch('https://api.github.com/repos/' + this.GITHUB_REPO + '/commits/' + latestCommit);
           var commitData = await commitRes.json();
           
-          if(commitData && commitData.commit && commitData.commit.files){
-            var fileChanged = commitData.commit.files.some(function(file){
-              return file.path === this.CURRENT_FILE;
+          if(commitData && commitData.files){
+            var fileChanged = commitData.files.some(function(file){
+              return file.filename === this.CURRENT_FILE;
             }.bind(this));
             
             if(fileChanged){
