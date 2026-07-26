@@ -2605,6 +2605,33 @@
   </div>
 </div>
 
+<!-- Password Modal -->
+<div class="modal-overlay" id="passwordModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 id="passwordModalTitle">Add Password</h2>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">Email</label>
+        <input type="email" class="form-input" id="passwordEmail" placeholder="your@email.com">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Password</label>
+        <input type="password" class="form-input" id="passwordInput" placeholder="Minimum 6 characters">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Confirm Password</label>
+        <input type="password" class="form-input" id="passwordConfirm" placeholder="Re-enter password">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" id="cancelPasswordBtn">Cancel</button>
+      <button class="btn btn-primary" id="savePasswordBtn">Save</button>
+    </div>
+  </div>
+</div>
+
 <!-- Join Pod Modal -->
 <div class="modal-overlay" id="joinPodModal">
   <div class="modal">
@@ -5913,6 +5940,7 @@
       var identities = currentUser.user_metadata?.identities || currentUser.identities || [];
       var hasGitHub = identities.some(function(id){ return id.provider === 'github'; });
       var hasGoogle = identities.some(function(id){ return id.provider === 'google'; });
+      var hasPassword = identities.some(function(id){ return id.provider === 'email'; });
 
       contentArea.innerHTML = `
         <div class="account-settings-section">
@@ -5956,6 +5984,19 @@
                   ${hasGoogle ? 'Disconnect' : 'Connect'}
                 </button>
               </div>
+
+              <div class="social-connection ${hasPassword ? 'is-connected' : ''}">
+                <div class="social-connection-icon">
+                  <i data-lucide="mail" style="width: 24px; height: 24px;"></i>
+                </div>
+                <div class="social-connection-info">
+                  <div class="social-connection-name">Email & Password</div>
+                  <div class="social-connection-status">${hasPassword ? 'Connected' : 'Not connected'}</div>
+                </div>
+                <button class="btn ${hasPassword ? 'btn-ghost' : 'btn-primary'} social-connection-btn" data-provider="email">
+                  ${hasPassword ? 'Change Password' : 'Add Password'}
+                </button>
+              </div>
             </div>
           </div>
 
@@ -5976,11 +6017,27 @@
       document.getElementById('resetSessionBtn').addEventListener('click', handleResetSession);
       document.getElementById('logoutBtn').addEventListener('click', handleLogout);
 
+      // Password modal handlers
+      document.getElementById('cancelPasswordBtn').addEventListener('click', hidePasswordModal);
+      document.getElementById('savePasswordBtn').addEventListener('click', savePassword);
+
       // Social connection buttons
       document.querySelectorAll('.social-connection-btn').forEach(function(btn){
         btn.addEventListener('click', function(){
           var provider = this.dataset.provider;
           var isConnected = this.closest('.social-connection').classList.contains('is-connected');
+          
+          if(provider === 'email'){
+            // Handle email/password
+            if(isConnected){
+              // Change password
+              showPasswordModal(true);
+            }else{
+              // Add password
+              showPasswordModal(false);
+            }
+            return;
+          }
           
           if(isConnected){
             // Disconnect
@@ -5997,8 +6054,16 @@
 
     async function connectSocialProvider(provider){
       var client = getSupabaseClient();
+      
+      // Check for active session before linking
+      var { data: { session } } = await client.auth.getSession();
+      if(!session){
+        alert('You must be logged in to link an account');
+        return;
+      }
+      
       try{
-        var { error } = await client.auth.signInWithOAuth({
+        var { error } = await client.auth.linkIdentity({
           provider: provider,
           options: {
             redirectTo: window.location.origin + '/dashboard.html?link=true'
@@ -6007,12 +6072,33 @@
         if(error) throw error;
       }catch(err){
         console.error('Error connecting social provider:', err);
-        alert('Error connecting account: ' + err.message);
+        if(err.message && err.message.includes('already been linked')){
+          alert('This ' + provider + ' account is already linked to a different Knot account');
+        }else{
+          alert('Error connecting account: ' + err.message);
+        }
       }
     }
 
     async function disconnectSocialProvider(provider){
       var client = getSupabaseClient();
+      
+      // Check if this is the last remaining login method
+      var identities = currentUser.user_metadata?.identities || currentUser.identities || [];
+      var hasPassword = identities.some(function(id){ return id.provider === 'email'; });
+      var hasGitHub = identities.some(function(id){ return id.provider === 'github'; });
+      var hasGoogle = identities.some(function(id){ return id.provider === 'google'; });
+      
+      var remainingMethods = 0;
+      if(hasPassword && provider !== 'email') remainingMethods++;
+      if(hasGitHub && provider !== 'github') remainingMethods++;
+      if(hasGoogle && provider !== 'google') remainingMethods++;
+      
+      if(remainingMethods === 0){
+        alert('You cannot disconnect your last remaining login method. Please add another login method first.');
+        return;
+      }
+      
       try{
         var { error } = await client.auth.unlinkIdentity({ provider: provider });
         if(error) throw error;
@@ -6021,6 +6107,68 @@
       }catch(err){
         console.error('Error disconnecting social provider:', err);
         alert('Error disconnecting account: ' + err.message);
+      }
+    }
+
+    function showPasswordModal(isChange){
+      var modal = document.getElementById('passwordModal');
+      var title = document.getElementById('passwordModalTitle');
+      var emailInput = document.getElementById('passwordEmail');
+      
+      title.textContent = isChange ? 'Change Password' : 'Add Password';
+      emailInput.value = currentUser.email || '';
+      emailInput.readOnly = !!currentUser.email;
+      
+      document.getElementById('passwordInput').value = '';
+      document.getElementById('passwordConfirm').value = '';
+      
+      modal.classList.add('is-open');
+    }
+
+    function hidePasswordModal(){
+      document.getElementById('passwordModal').classList.remove('is-open');
+    }
+
+    async function savePassword(){
+      var client = getSupabaseClient();
+      var email = document.getElementById('passwordEmail').value;
+      var password = document.getElementById('passwordInput').value;
+      var confirm = document.getElementById('passwordConfirm').value;
+      
+      // Validation
+      if(!email || !email.includes('@')){
+        alert('Please enter a valid email address');
+        return;
+      }
+      
+      if(!password || password.length < 6){
+        alert('Password must be at least 6 characters');
+        return;
+      }
+      
+      if(password !== confirm){
+        alert('Passwords do not match');
+        return;
+      }
+      
+      try{
+        var { error } = await client.auth.updateUser({
+          email: email,
+          password: password
+        });
+        
+        if(error) throw error;
+        
+        alert('Password updated successfully');
+        hidePasswordModal();
+        loadAccountSettings();
+      }catch(err){
+        console.error('Error updating password:', err);
+        if(err.message && err.message.includes('email confirmation')){
+          alert('Please check your email to confirm the new address');
+        }else{
+          alert('Error updating password: ' + err.message);
+        }
       }
     }
 
@@ -6054,6 +6202,13 @@
     document.getElementById('noPodsModal').addEventListener('click', function(e){
       if(e.target === this){
         hideNoPodsModal();
+      }
+    });
+
+    // Password modal close on overlay click
+    document.getElementById('passwordModal').addEventListener('click', function(e){
+      if(e.target === this){
+        hidePasswordModal();
       }
     });
 
