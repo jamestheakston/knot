@@ -53,8 +53,8 @@
         iconName = 'alert-circle';
         iconColor = '#DC2626';
       }else if(type === 'newupdate'){
-        iconName = 'refresh-cw';
-        iconColor = '#10B981';
+        iconName = 'info';
+        iconColor = 'var(--blue)';
       }
 
       toast.innerHTML = `
@@ -121,7 +121,7 @@
       this.showToast(
         'New Version Available',
         'A new version of this page is available with updates and improvements. <a href="#" onclick="location.reload(); return false;" style="color: var(--blue); text-decoration: underline;">Click here to reload</a>',
-        'info',
+        'newupdate',
         {
           reload: {
             label: 'Reload',
