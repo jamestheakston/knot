@@ -2721,6 +2721,7 @@
           </div>
         </div>
         <div class="gtranslate_wrapper"></div>
+        <div class="headway-changelog"></div>
       </div>
     </div>
   </aside>
@@ -5350,12 +5351,38 @@
     }
 
     // GitHub Version Check
-    var CURRENT_COMMIT_SHA = 'cce74a4'; // Current commit SHA
     var GITHUB_REPO = 'jamestheakston/knot';
     var VERSION_CHECK_INTERVAL = 5 * 60 * 1000; // Check every 5 minutes
     var hasShownUpdateToast = false; // Prevent showing toast multiple times
+    var CURRENT_COMMIT_SHA = null; // Will be fetched on page load
+
+    // Fetch current commit on page load
+    async function fetchCurrentCommit(){
+      try{
+        var response = await fetch('https://api.github.com/repos/' + GITHUB_REPO + '/commits/main');
+        if(!response.ok) return;
+        
+        var data = await response.json();
+        var currentCommit = data.sha;
+        
+        // Store in localStorage
+        localStorage.setItem('knot_current_commit', currentCommit);
+        CURRENT_COMMIT_SHA = currentCommit;
+        
+        console.log('Fetched current commit:', currentCommit);
+      }catch(err){
+        console.error('Error fetching current commit:', err);
+        // Fallback to stored commit if available
+        CURRENT_COMMIT_SHA = localStorage.getItem('knot_current_commit');
+      }
+    }
 
     async function checkForUpdates(){
+      if(!CURRENT_COMMIT_SHA){
+        await fetchCurrentCommit();
+        if(!CURRENT_COMMIT_SHA) return;
+      }
+      
       try{
         var response = await fetch('https://api.github.com/repos/' + GITHUB_REPO + '/commits/main');
         if(!response.ok) return;
@@ -5395,8 +5422,11 @@
       }
     }
 
-    // Start version check on page load
-    setTimeout(checkForUpdates, 2000); // Check after 2 seconds
+    // Fetch current commit on page load
+    fetchCurrentCommit();
+    
+    // Start version check after fetching current commit
+    setTimeout(checkForUpdates, 3000); // Check after 3 seconds
     setInterval(checkForUpdates, VERSION_CHECK_INTERVAL); // Check periodically
 
     function initKnotCaptcha(){
@@ -6244,6 +6274,15 @@
 
 <script>window.gtranslateSettings = {"default_language":"en","languages":["en","fr","it","es"],"globe_color":"#66aaff","wrapper_selector":".gtranslate_wrapper"}</script>
 <script src="https://cdn.gtranslate.net/widgets/latest/globe.js" defer></script>
+
+<script>
+  // @see https://docs.headwayapp.co/widget for more configuration options.
+  var HW_config = {
+    selector: ".headway-changelog", // CSS selector where to inject the badge
+    account:  "J422Zx"
+  }
+</script>
+<script async src="https://cdn.headwayapp.co/widget.js"></script>
 
 </body>
 </html>
