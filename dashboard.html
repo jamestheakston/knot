@@ -1408,12 +1408,12 @@
     border-color: var(--green);
     background: var(--green);
   }
-  .kc-checkbox i{
+  .kc-checkbox .kc-check-icon{
     display: none !important;
     visibility: hidden !important;
     opacity: 0 !important;
   }
-  .kc-checkbox.is-checked i{
+  .kc-checkbox.is-checked .kc-check-icon{
     display: block !important;
     visibility: visible !important;
     opacity: 1 !important;
@@ -1441,7 +1441,7 @@
     transform: translate(-50%, -50%);
   }
   .kc-checkbox.is-loading .kc-spinner{ display:block; }
-  .kc-checkbox.is-loading i{ display:none; }
+  .kc-checkbox.is-loading .kc-check-icon{ display:none; }
   @keyframes kc-spin{ to{ transform: translate(-50%, -50%) rotate(360deg); } }
 
   .kc-label{
@@ -2561,12 +2561,12 @@
               <div class="knot-captcha" id="knotCaptcha">
                 <div class="kc-row">
                   <div class="kc-checkbox" id="kcCheckbox">
-                    <i data-lucide="check"></i>
+                    <i data-lucide="check" class="kc-check-icon"></i>
                     <div class="kc-spinner"></div>
                   </div>
-                  <div class="kc-label">
+                  <div class="kc-label" id="kcLabel">
                     I'm human
-                    <small>Verify to continue</small>
+                    <small id="kcLabelSmall">Verify to continue</small>
                   </div>
                 </div>
 
@@ -5579,6 +5579,12 @@
           status.className = 'kc-challenge-status is-success';
         }
         
+        // Update label text to show verification complete
+        var labelSmall = document.getElementById('kcLabelSmall');
+        if(labelSmall){
+          labelSmall.textContent = 'Verification complete';
+        }
+        
         // Remove loading state and show tick
         checkbox.classList.remove('is-loading');
         checkbox.classList.add('is-checked');
@@ -5606,6 +5612,7 @@
       var challenge = document.getElementById('kcChallenge');
       var challengeInner = document.getElementById('kcChallengeInner');
       var status = document.getElementById('kcStatus');
+      var labelSmall = document.getElementById('kcLabelSmall');
 
       // Reset global state
       knotCaptchaVerified = false;
@@ -5621,6 +5628,11 @@
       if(status){
         status.textContent = '';
         status.className = 'kc-challenge-status';
+      }
+      
+      // Reset label text to original
+      if(labelSmall){
+        labelSmall.textContent = 'Verify to continue';
       }
       
       // Reset slider state if it exists
