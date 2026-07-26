@@ -5423,8 +5423,6 @@
         // Store in localStorage
         localStorage.setItem('knot_current_commit', currentCommit);
         CURRENT_COMMIT_SHA = currentCommit;
-        
-        console.log('Fetched current commit:', currentCommit);
       }catch(err){
         console.error('Error fetching current commit:', err);
         // Fallback to stored commit if available
@@ -5444,9 +5442,6 @@
         
         var data = await response.json();
         var latestCommit = data.sha;
-        
-        console.log('Current commit:', CURRENT_COMMIT_SHA);
-        console.log('Latest commit:', latestCommit);
         
         if(latestCommit !== CURRENT_COMMIT_SHA && !hasShownUpdateToast){
           hasShownUpdateToast = true;
@@ -5511,6 +5506,12 @@
         
         if(typeof lucide !== 'undefined'){
           lucide.createIcons();
+          
+          // Ensure the check icon keeps the kc-check-icon class after Lucide renders
+          var checkIcon = checkbox.querySelector('svg');
+          if(checkIcon && !checkIcon.classList.contains('kc-check-icon')){
+            checkIcon.classList.add('kc-check-icon');
+          }
         }
       }
 
@@ -5644,6 +5645,12 @@
         // Remove loading state and show tick
         checkbox.classList.remove('is-loading');
         checkbox.classList.add('is-checked');
+        
+        // Ensure the check icon has the kc-check-icon class
+        var checkIcon = checkbox.querySelector('svg');
+        if(checkIcon && !checkIcon.classList.contains('kc-check-icon')){
+          checkIcon.classList.add('kc-check-icon');
+        }
         
         // Collapse challenge panel after short delay
         setTimeout(function(){
