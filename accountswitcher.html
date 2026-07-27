@@ -1173,14 +1173,14 @@
 
   // Open account info slide-over
   function openAccountInfoSlideOver(){
-    document.getElementById('accountInfoSlideOver').style.display = 'block';
-    document.getElementById('accountInfoSlideOverPanel').style.display = 'block';
+    document.getElementById('accountInfoSlideOver').classList.add('is-open');
+    document.getElementById('accountInfoSlideOverPanel').classList.add('is-open');
   }
 
   // Close account info slide-over
   function closeAccountInfoSlideOver(){
-    document.getElementById('accountInfoSlideOver').style.display = 'none';
-    document.getElementById('accountInfoSlideOverPanel').style.display = 'none';
+    document.getElementById('accountInfoSlideOver').classList.remove('is-open');
+    document.getElementById('accountInfoSlideOverPanel').classList.remove('is-open');
   }
 
   // Logout account
@@ -1258,14 +1258,14 @@
 
   // Open logout confirmation slide-over
   function openLogoutConfirmSlideOver(){
-    document.getElementById('logoutConfirmSlideOver').style.display = 'block';
-    document.getElementById('logoutConfirmSlideOverPanel').style.display = 'block';
+    document.getElementById('logoutConfirmSlideOver').classList.add('is-open');
+    document.getElementById('logoutConfirmSlideOverPanel').classList.add('is-open');
   }
 
   // Close logout confirmation slide-over
   function closeLogoutConfirmSlideOver(){
-    document.getElementById('logoutConfirmSlideOver').style.display = 'none';
-    document.getElementById('logoutConfirmSlideOverPanel').style.display = 'none';
+    document.getElementById('logoutConfirmSlideOver').classList.remove('is-open');
+    document.getElementById('logoutConfirmSlideOverPanel').classList.remove('is-open');
   }
 
   // Close menus when clicking outside
