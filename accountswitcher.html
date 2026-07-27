@@ -848,6 +848,41 @@
     animation: spin 1s linear infinite;
   }
 
+  /* Beta Banner */
+  .beta-banner{
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 12px 20px;
+    border-radius: 8px;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+  }
+  .beta-banner-label{
+    background: rgba(255, 255, 255, 0.2);
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .beta-banner-text{
+    flex: 1;
+    font-size: 14px;
+    line-height: 1.4;
+  }
+  .beta-banner-text a{
+    color: white;
+    text-decoration: underline;
+    font-weight: 500;
+  }
+  .beta-banner-text a:hover{
+    text-decoration: none;
+  }
+
   /* ---------- RESPONSIVE ---------- */
   @media (max-width: 640px){
     .page{
@@ -883,6 +918,11 @@
       <span class="beta-label">Beta</span>
     </div>
     <p>Select an account to continue or add a new one</p>
+  </div>
+
+  <div class="beta-banner">
+    <span class="beta-banner-label">Beta</span>
+    <span class="beta-banner-text">This is a new service that is currently in testing. <a href="https://s.surveyplanet.com/4i31iovq" target="_blank">Give feedback</a></span>
   </div>
 
   <div id="accountList" class="account-list">
