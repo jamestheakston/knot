@@ -894,24 +894,10 @@
 
     if(account){
       AccountManager.setActiveAccount(accountId);
-      
-      // Sign out of current Supabase session and redirect to login
-      var client = getSupabaseClient();
-      if(client){
-        client.auth.signOut().then(function(){
-          showToast('Switching accounts', 'Please sign in as ' + (account.name || account.email), 'info', null, 4000);
-          setTimeout(function(){
-            window.location.href = 'login.html?from=accountswitcher';
-          }, 1500);
-        }).catch(function(err){
-          console.error('Sign out error:', err);
-          // Even if sign out fails, redirect to login
-          window.location.href = 'login.html?from=accountswitcher';
-        });
-      }else{
-        // If no client, just redirect
-        window.location.href = 'login.html?from=accountswitcher';
-      }
+      showToast('Account switched', 'Now logged in as ' + (account.name || account.email), 'info', null, 4000);
+      setTimeout(function(){
+        window.location.href = 'dashboard.html';
+      }, 500);
     }
   }
 
