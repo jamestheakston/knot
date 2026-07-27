@@ -843,7 +843,7 @@
       var displayName = account.name || account.email || 'Unknown';
       
       html += `
-        <div class="account-card ${isActive ? 'active' : ''}" data-account-id="${account.id}">
+        <div class="account-card ${isActive ? 'active' : ''}" data-account-id="${account.id}" onclick="selectAccount('${account.id}')">
           <div class="account-avatar">${initial}</div>
           <div class="account-info">
             <div class="account-name">${displayName}</div>
