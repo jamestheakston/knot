@@ -505,6 +505,56 @@
     padding: 24px;
     overflow-y: auto;
   }
+
+  /* Account Info Content */
+  .account-info-content{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 24px;
+  }
+  .account-info-avatar{
+    display: flex;
+    justify-content: center;
+  }
+  .account-info-avatar-circle{
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: var(--blue);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 32px;
+    font-weight: 600;
+  }
+  .account-info-details{
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .account-info-row{
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .account-info-label{
+    font-size: 13px;
+    color: var(--muted);
+    font-weight: 500;
+  }
+  .account-info-value{
+    font-size: 15px;
+    color: var(--ink);
+    word-break: break-all;
+  }
+  .account-info-id{
+    font-family: monospace;
+    font-size: 13px;
+    color: var(--muted-2);
+  }
   .login-options{
     display: flex;
     flex-direction: column;
@@ -719,6 +769,20 @@
   </div>
 </div>
 
+<!-- Account Info Slide-over Modal -->
+<div class="slide-over-overlay" id="accountInfoSlideOver"></div>
+<div class="slide-over" id="accountInfoSlideOverPanel">
+  <div class="slide-over-header">
+    <h2 id="accountInfoSlideOverTitle">Account Information</h2>
+    <button class="slide-over-close" id="closeAccountInfoSlideOver">
+      <i data-lucide="x"></i>
+    </button>
+  </div>
+  <div class="slide-over-body" id="accountInfoSlideOverBody">
+    <!-- Content will be rendered here -->
+  </div>
+</div>
+
 <script>
   if(typeof lucide !== 'undefined'){
     lucide.createIcons();
@@ -876,7 +940,7 @@
             <div class="account-name">${displayName}</div>
             <div class="account-email">${account.email || ''}</div>
           </div>
-          <div class="account-badge">${isActive ? 'Active' : ''}</div>
+          ${isActive ? '<div class="account-badge">Active</div>' : ''}
           <div class="account-menu-wrapper">
             <button class="account-menu-btn" onclick="event.stopPropagation(); toggleAccountMenu('${account.id}')">
               <i data-lucide="more-vertical"></i>
@@ -1002,14 +1066,47 @@
     });
     
     if(account){
-      var info = 'Name: ' + (account.name || 'N/A') + '\n';
-      info += 'Email: ' + (account.email || 'N/A') + '\n';
-      info += 'ID: ' + account.id;
-      alert(info);
+      var body = document.getElementById('accountInfoSlideOverBody');
+      body.innerHTML = `
+        <div class="account-info-content">
+          <div class="account-info-avatar">
+            <div class="account-info-avatar-circle">
+              ${account.email ? account.email.charAt(0).toUpperCase() : 'U'}
+            </div>
+          </div>
+          <div class="account-info-details">
+            <div class="account-info-row">
+              <span class="account-info-label">Name</span>
+              <span class="account-info-value">${account.name || 'N/A'}</span>
+            </div>
+            <div class="account-info-row">
+              <span class="account-info-label">Email</span>
+              <span class="account-info-value">${account.email || 'N/A'}</span>
+            </div>
+            <div class="account-info-row">
+              <span class="account-info-label">Account ID</span>
+              <span class="account-info-value account-info-id">${account.id}</span>
+            </div>
+          </div>
+        </div>
+      `;
+      openAccountInfoSlideOver();
     }
     
     // Close the menu
     document.getElementById('accountMenu-' + accountId).style.display = 'none';
+  }
+
+  // Open account info slide-over
+  function openAccountInfoSlideOver(){
+    document.getElementById('accountInfoSlideOver').style.display = 'block';
+    document.getElementById('accountInfoSlideOverPanel').style.display = 'block';
+  }
+
+  // Close account info slide-over
+  function closeAccountInfoSlideOver(){
+    document.getElementById('accountInfoSlideOver').style.display = 'none';
+    document.getElementById('accountInfoSlideOverPanel').style.display = 'none';
   }
 
   // Logout account
@@ -1056,6 +1153,10 @@
       });
     }
   });
+
+  // Account info slide-over close button
+  document.getElementById('closeAccountInfoSlideOver').addEventListener('click', closeAccountInfoSlideOver);
+  document.getElementById('accountInfoSlideOver').addEventListener('click', closeAccountInfoSlideOver);
 
   // Slide-over login modal
   function openLoginSlideOver(){
@@ -1225,8 +1326,12 @@
     var client = getSupabaseClient();
     if(client){
       client.auth.getSession().then(function({ data: { session } }){
-        if(!session){
-          // User is not logged in to Supabase, redirect to error page
+        // Check if user has any stored accounts
+        var accounts = AccountManager.getAccounts();
+        
+        // Allow access if user has a Supabase session OR has stored accounts
+        if(!session && accounts.length === 0){
+          // User is not logged in and has no stored accounts, redirect to error page
           var errorUrl = 'error.html?title=Not+Authenticated&c0de=ACCTSWITCHER-5676&errormsg=You+must+be+logged+in+to+access+the+account+switcher.&cta1title=Go+to+Login&cta1link=login.html';
           window.location.href = errorUrl;
           return;
@@ -1270,10 +1375,16 @@
         }
       });
     }else{
-      // If no Supabase client, redirect to error page
-      var errorUrl = 'error.html?title=Authentication+Error&c0de=ACCTSWITCHER-5677&errormsg=Unable+to+initialize+authentication.&cta1title=Go+to+Login&cta1link=login.html';
-      window.location.href = errorUrl;
-      return;
+      // If no Supabase client, check if there are stored accounts
+      var accounts = AccountManager.getAccounts();
+      if(accounts.length === 0){
+        // No Supabase client and no stored accounts, redirect to error page
+        var errorUrl = 'error.html?title=Authentication+Error&c0de=ACCTSWITCHER-5677&errormsg=Unable+to+initialize+authentication.&cta1title=Go+to+Login&cta1link=login.html';
+        window.location.href = errorUrl;
+        return;
+      }
+      // Has stored accounts, allow access
+      renderAccounts();
     }
   });
 </script>

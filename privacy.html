@@ -509,7 +509,20 @@
     </ul>
     <p>However, no method of transmission over the internet is 100% secure. While we strive to protect your information, we cannot guarantee absolute security. We encourage users to use strong, unique passwords and enable two-factor authentication when available.</p>
     
-    <h3>4.1 Data Breach Notification</h3>
+    <h3>4.1 Account Switching and Session Management</h3>
+    <p>Knot provides an account switching feature that allows you to manage multiple accounts. To enable instant switching between accounts without requiring repeated authentication, we store session tokens (access tokens and refresh tokens) in your browser's localStorage. This includes:</p>
+    <ul>
+      <li>Access tokens for immediate authentication</li>
+      <li>Refresh tokens for obtaining new access tokens</li>
+      <li>Token expiration timestamps</li>
+      <li>Account profile information (name, email, avatar)</li>
+    </ul>
+    <div class="highlight-box">
+      <p><strong>Security Notice:</strong> Storing authentication tokens in localStorage is vulnerable to cross-site scripting (XSS) attacks. If malicious code is executed on your device, these tokens could potentially be accessed. We implement this approach for user convenience, but you should be aware of this security trade-off. For enhanced security, consider using a dedicated browser profile or clearing your localStorage after each session if you share your device.</p>
+    </div>
+    <p>Session tokens are automatically refreshed by Supabase when they expire, and the updated tokens are stored in localStorage. When you remove an account from the account switcher, the associated session tokens are deleted from localStorage. When you log out of an account, the Supabase session is revoked and the tokens are removed.</p>
+    
+    <h3>4.2 Data Breach Notification</h3>
     <p>In the event of a data breach that compromises your personal information, we will notify affected users within 72 hours of becoming aware of the breach, in accordance with applicable data protection laws. Notifications will include information about what happened, what data was affected, and steps you can take to protect yourself.</p>
   </div>
 
