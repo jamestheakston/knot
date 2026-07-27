@@ -724,12 +724,10 @@
     lucide.createIcons();
   }
 
-  // Initialize Toast System with version checking (with delay to avoid network errors)
-  setTimeout(function(){
-    if(typeof ToastSystem !== 'undefined'){
-      ToastSystem.init('accountswitcher.html');
-    }
-  }, 2000);
+  // Initialize Toast System with version checking
+  if(typeof ToastSystem !== 'undefined'){
+    ToastSystem.init('accountswitcher.html');
+  }
 
   // Supabase Client
   var SupabaseClient = null;
@@ -743,7 +741,15 @@
       }
       SupabaseClient = supabase.createClient(
         'https://mfjtdrqvmuwtoarkiezi.supabase.co',
-        'sb_publishable_SPhsUI31nYbrrLjPBAaRBw_OkWQ2_Xn'
+        'sb_publishable_SPhsUI31nYbrrLjPBAaRBw_OkWQ2_Xn',
+        {
+          auth: {
+            persistSession: true,
+            storage: window.localStorage,
+            autoRefreshToken: true,
+            detectSessionInUrl: true
+          }
+        }
       );
       return SupabaseClient;
     }catch(e){
