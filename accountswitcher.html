@@ -1157,14 +1157,6 @@
           return;
         }
         
-        // User is authenticated, proceed with account checks
-        var accounts = AccountManager.getAccounts();
-        if(accounts.length === 0){
-          var errorUrl = 'error.html?title=No+Accounts+Found&c0de=ACCTSWITCHER-5675&errormsg=You+must+add+an+account+to+access+the+account+switcher.&cta1title=Go+to+Login&cta1link=login.html';
-          window.location.href = errorUrl;
-          return;
-        }
-        
         // Auto-refresh once on page load
         if(!sessionStorage.getItem('accountswitcher_refreshed')){
           sessionStorage.setItem('accountswitcher_refreshed', 'true');
