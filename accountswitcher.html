@@ -1153,6 +1153,12 @@
     }
 
     // Check if account has session tokens
+    console.log('Account tokens check:', {
+      hasAccessToken: !!account.access_token,
+      hasRefreshToken: !!account.refresh_token,
+      accountId: account.id
+    });
+    
     if(!account.access_token || !account.refresh_token){
       // Account needs re-login
       showToast('Session expired', 'Please log in again for ' + (account.name || account.email), 'warning', null, 3000);
@@ -1169,10 +1175,12 @@
     }
 
     // Set the session for the target account
+    console.log('Setting session for account:', account.id);
     client.auth.setSession({
       access_token: account.access_token,
       refresh_token: account.refresh_token
     }).then(function({ data, error }){
+      console.log('setSession result:', { data: data, error: error });
       if(error){
         console.error('Error setting session:', error);
         // Token expired or invalid, fall back to re-login
