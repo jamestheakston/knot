@@ -881,8 +881,7 @@
         'sb_publishable_SPhsUI31nYbrrLjPBAaRBw_OkWQ2_Xn',
         {
           auth: {
-            persistSession: true,
-            storage: window.localStorage,
+            persistSession: false,
             autoRefreshToken: true,
             detectSessionInUrl: true
           }
@@ -1098,7 +1097,11 @@
         return;
       }
 
-      // Session set successfully
+      // Session set successfully - update stored tokens with new session
+      if(data && data.session){
+        AccountManager.updateAccountTokens(accountId, data.session);
+      }
+      
       AccountManager.setActiveAccount(accountId);
       showToast('Account switched', 'Now logged in as ' + (account.name || account.email), 'info', null, 4000);
       
