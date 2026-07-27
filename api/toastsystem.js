@@ -210,9 +210,10 @@
         var latestCommit = branchData.meta.sha;
         
         if(latestCommit !== this.CURRENT_COMMIT_SHA && !this.hasShownUpdateToast){
-          // New commit detected, wait 20 seconds before showing toast
+          // New commit detected, mark as shown immediately to prevent duplicate toasts
+          this.hasShownUpdateToast = true;
+          // Wait 20 seconds before showing toast
           setTimeout(function(){
-            this.hasShownUpdateToast = true;
             this.showNewUpdateToast();
           }.bind(this), 20000);
         }
