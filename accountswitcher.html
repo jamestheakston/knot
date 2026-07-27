@@ -724,10 +724,12 @@
     lucide.createIcons();
   }
 
-  // Initialize Toast System with version checking
-  if(typeof ToastSystem !== 'undefined'){
-    ToastSystem.init('accountswitcher.html');
-  }
+  // Initialize Toast System with version checking (with delay to avoid network errors)
+  setTimeout(function(){
+    if(typeof ToastSystem !== 'undefined'){
+      ToastSystem.init('accountswitcher.html');
+    }
+  }, 2000);
 
   // Supabase Client
   var SupabaseClient = null;
