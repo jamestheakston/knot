@@ -561,6 +561,17 @@
       ToastSystem.init('login.html');
     }
 
+    // Check if user is already logged in, redirect to accountswitcher
+    var client = getSupabaseClient();
+    if(client){
+      client.auth.getSession().then(function({ data: { session } }){
+        if(session){
+          // User is already logged in, redirect to accountswitcher
+          window.location.href = 'accountswitcher.html';
+        }
+      });
+    }
+
     // GitHub login
     document.getElementById('githubLoginBtn').addEventListener('click', async function(){
       var client = getSupabaseClient();
