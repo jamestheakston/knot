@@ -561,6 +561,10 @@
       ToastSystem.init('login.html');
     }
 
+    // Check if user was redirected from account switcher
+    var urlParams = new URLSearchParams(window.location.search);
+    var fromAccountSwitcher = urlParams.get('from') === 'accountswitcher';
+
     // GitHub login
     document.getElementById('githubLoginBtn').addEventListener('click', async function(){
       var client = getSupabaseClient();
@@ -576,7 +580,7 @@
         var { data, error } = await client.auth.signInWithOAuth({
           provider: 'github',
           options: {
-            redirectTo: window.location.origin + '/dashboard.html?oauth_login=true'
+            redirectTo: window.location.origin + (fromAccountSwitcher ? '/accountswitcher.html?from=login' : '/dashboard.html?oauth_login=true')
           }
         });
 
@@ -603,7 +607,7 @@
         var { data, error } = await client.auth.signInWithOAuth({
           provider: 'google',
           options: {
-            redirectTo: window.location.origin + '/dashboard.html?oauth_login=true'
+            redirectTo: window.location.origin + (fromAccountSwitcher ? '/accountswitcher.html?from=login' : '/dashboard.html?oauth_login=true')
           }
         });
 
@@ -664,7 +668,7 @@
         sendLoginNotification(email);
         
         setTimeout(function(){
-          window.location.href = 'dashboard.html';
+          window.location.href = fromAccountSwitcher ? 'accountswitcher.html' : 'dashboard.html';
         }, 500);
       }catch(err){
         console.error('Login error:', err);
