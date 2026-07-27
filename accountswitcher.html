@@ -818,7 +818,7 @@
 
     if(account){
       AccountManager.setActiveAccount(accountId);
-      showToast('Account switched', 'Now logged in as ' + (account.name || account.email), 'info', null, 2000);
+      showToast('Account switched', 'Now logged in as ' + (account.name || account.email), 'info', null, 4000);
       setTimeout(function(){
         window.location.href = 'dashboard.html';
       }, 500);
@@ -963,7 +963,7 @@
       AccountManager.addAccount(account);
       
       closeLoginSlideOver();
-      showToast('Account added', 'Successfully added ' + account.name, 'success', null, 2000);
+      showToast('Account added', 'Successfully added ' + account.name, 'success', null, 4000);
       renderAccounts();
       
     }catch(err){
@@ -1020,7 +1020,7 @@
             AccountManager.addAccount(account);
             // Remove OAuth params from URL
             window.history.replaceState({}, document.title, window.location.pathname);
-            showToast('Account added', 'Successfully added ' + account.name, 'success', null, 2000);
+            showToast('Account added', 'Successfully added ' + account.name, 'success', null, 4000);
           }
           renderAccounts();
         });
