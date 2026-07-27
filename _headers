@@ -1,9 +1,0 @@
-/sitemap.xml
-  Content-Type: application/xml
-  Access-Control-Allow-Origin: *
-  Cache-Control: public, max-age=3600
-
-/robots.txt
-  Content-Type: text/plain
-  Access-Control-Allow-Origin: *
-  Cache-Control: public, max-age=3600
