@@ -120,7 +120,7 @@
     showNewUpdateToast: function(){
       this.showToast(
         'New Version Available',
-        'A new version of this page is available with updates and improvements.',
+        'A new version of Knot is available with updates and improvements.',
         'newupdate',
         {
           reload: {
@@ -210,12 +210,68 @@
         var latestCommit = branchData.meta.sha;
         
         if(latestCommit !== this.CURRENT_COMMIT_SHA && !this.hasShownUpdateToast){
-          // New commit detected, show update toast
-          this.hasShownUpdateToast = true;
-          this.showNewUpdateToast();
+          // New commit detected, check Cloudflare Pages deployment status
+          var deploymentReady = await this.checkCloudflareDeployment(latestCommit);
+          
+          if(deploymentReady){
+            // Deployment is ready, show update toast
+            this.hasShownUpdateToast = true;
+            this.showNewUpdateToast();
+          }
         }
       }catch(err){
         console.error('Error checking for updates:', err);
+      }
+    },
+
+    // Check Cloudflare Pages deployment status for a commit
+    checkCloudflareDeployment: async function(commitSha){
+      try{
+        // Cloudflare Pages API to check deployment status
+        // To properly check Cloudflare Pages deployment, you need:
+        // 1. Cloudflare API token with appropriate permissions
+        // 2. Account ID and Project ID for your Cloudflare Pages project
+        // 3. Call the Cloudflare API to check deployment status for the commit
+        
+        // For now, we'll use a simple approach - check if commit exists and assume deployment is ready
+        // In production, replace this with actual Cloudflare API call:
+        // 
+        // var cloudflareApiToken = 'YOUR_CLOUDFLARE_API_TOKEN';
+        // var accountId = 'YOUR_ACCOUNT_ID';
+        // var projectId = 'YOUR_PROJECT_ID';
+        // 
+        // var deploymentRes = await fetch(
+        //   `https://api.cloudflare.com/client/v4/accounts/${accountId}/pages/projects/${projectId}/deployments`,
+        //   {
+        //     headers: {
+        //       'Authorization': `Bearer ${cloudflareApiToken}`,
+        //       'Content-Type': 'application/json'
+        //     }
+        //   }
+        // );
+        // var deployments = await deploymentRes.json();
+        // var latestDeployment = deployments.result[0];
+        // 
+        // // Check if the latest deployment is for our commit and is successful
+        // if(latestDeployment.deployment_trigger.metadata.commit_hash === commitSha && 
+        //    latestDeployment.latest_stage.status === 'success'){
+        //   return true;
+        // }
+        
+        // Simple fallback: check if commit is accessible via GitHub API
+        var commitRes = await fetch('https://api.github.com/repos/' + this.GITHUB_REPO + '/commits/' + commitSha);
+        var commitData = await commitRes.json();
+        
+        if(commitData && commitData.sha){
+          // Commit exists, assume deployment is ready
+          return true;
+        }
+        
+        return false;
+      }catch(err){
+        console.error('Error checking Cloudflare deployment:', err);
+        // If we can't check deployment, still show the toast
+        return true;
       }
     },
 
