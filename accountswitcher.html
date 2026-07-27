@@ -644,20 +644,6 @@
 
 <div class="toast-container" id="toastContainer"></div>
 
-<!-- Login Slide-over Modal -->
-<div class="slide-over-overlay" id="loginSlideOver"></div>
-<div class="slide-over" id="loginSlideOverPanel">
-  <div class="slide-over-header">
-    <h2>Add Account</h2>
-    <button class="slide-over-close" id="closeLoginSlideOver">
-      <i data-lucide="x"></i>
-    </button>
-  </div>
-  <div class="slide-over-body" id="loginSlideOverBody">
-    <!-- Login options will be rendered here -->
-  </div>
-</div>
-
 <script>
   if(typeof lucide !== 'undefined'){
     lucide.createIcons();
@@ -739,12 +725,25 @@
 
     if(accounts.length === 0){
       accountList.innerHTML = `
-        <div class="add-account-card" onclick="openLoginSlideOver()">
-          <div class="add-account-icon">
-            <i data-lucide="plus"></i>
+        <div class="login-options">
+          <button class="oauth-btn" onclick="handleOAuthLogin('google')">
+            <i data-lucide="chrome"></i>
+            Continue with Google
+          </button>
+          <button class="oauth-btn" onclick="handleOAuthLogin('github')">
+            <i data-lucide="github"></i>
+            Continue with GitHub
+          </button>
+          <div class="divider">
+            <span>or</span>
           </div>
-          <div class="add-account-text">Add Account</div>
+          <button class="email-btn" onclick="showEmailForm()">
+            <i data-lucide="mail"></i>
+            Continue with email
+          </button>
         </div>
+        <div id="emailFormContainer"></div>
+        <div id="oauthLoadingContainer"></div>
       `;
       if(typeof lucide !== 'undefined'){
         lucide.createIcons();
@@ -772,12 +771,13 @@
     });
 
     html += `
-      <div class="add-account-card" onclick="openLoginSlideOver()">
+      <div class="add-account-card" onclick="showLoginOptions()">
         <div class="add-account-icon">
           <i data-lucide="plus"></i>
         </div>
         <div class="add-account-text">Add Account</div>
       </div>
+      <div id="loginOptionsContainer" style="display: none;"></div>
     `;
 
     accountList.innerHTML = html;
@@ -802,22 +802,12 @@
     }
   }
 
-  // Slide-over login modal
-  function openLoginSlideOver(){
-    document.getElementById('loginSlideOver').classList.add('is-open');
-    document.getElementById('loginSlideOverPanel').classList.add('is-open');
-    renderLoginOptions();
-  }
-
-  function closeLoginSlideOver(){
-    document.getElementById('loginSlideOver').classList.remove('is-open');
-    document.getElementById('loginSlideOverPanel').classList.remove('is-open');
-  }
-
-  function renderLoginOptions(){
-    var body = document.getElementById('loginSlideOverBody');
-    body.innerHTML = `
-      <div class="login-options">
+  // Show login options (inline)
+  function showLoginOptions(){
+    var container = document.getElementById('loginOptionsContainer');
+    container.style.display = 'block';
+    container.innerHTML = `
+      <div class="login-options" style="margin-top: 12px;">
         <button class="oauth-btn" onclick="handleOAuthLogin('google')">
           <i data-lucide="chrome"></i>
           Continue with Google
@@ -834,17 +824,38 @@
           Continue with email
         </button>
       </div>
+      <div id="emailFormContainer"></div>
+      <div id="oauthLoadingContainer"></div>
     `;
     if(typeof lucide !== 'undefined'){
       lucide.createIcons();
     }
   }
 
+  function showEmailForm(){
+    var container = document.getElementById('emailFormContainer');
+    container.innerHTML = `
+      <form class="email-form" onsubmit="handleEmailLogin(event)" style="margin-top: 12px;">
+        <div class="form-group">
+          <label class="form-label" for="loginEmail">Email</label>
+          <input type="email" id="loginEmail" class="form-input" placeholder="you@example.com" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="loginPassword">Password</label>
+          <input type="password" id="loginPassword" class="form-input" placeholder="••••••••" required>
+        </div>
+        <button type="submit" class="form-submit-btn" id="emailLoginBtn">
+          Sign in
+        </button>
+      </form>
+    `;
+  }
+
   function showOAuthLoading(provider){
-    var body = document.getElementById('loginSlideOverBody');
+    var container = document.getElementById('oauthLoadingContainer');
     var providerName = provider === 'google' ? 'Google' : 'GitHub';
-    body.innerHTML = `
-      <div class="oauth-loading">
+    container.innerHTML = `
+      <div class="oauth-loading" style="margin-top: 12px;">
         <i data-lucide="loader-2" class="oauth-loading-spinner"></i>
         <div class="oauth-loading-text">Connecting to ${providerName}...</div>
         <button class="oauth-cancel-btn" onclick="cancelOAuthLogin()">Cancel</button>
@@ -856,7 +867,8 @@
   }
 
   function cancelOAuthLogin(){
-    closeLoginSlideOver();
+    document.getElementById('oauthLoadingContainer').innerHTML = '';
+    document.getElementById('loginOptionsContainer').style.display = 'none';
     renderAccounts();
   }
 
@@ -877,25 +889,6 @@
         options: { redirectTo: redirectUrl }
       });
     }
-  }
-
-  function showEmailForm(){
-    var body = document.getElementById('loginSlideOverBody');
-    body.innerHTML = `
-      <form class="email-form" onsubmit="handleEmailLogin(event)">
-        <div class="form-group">
-          <label class="form-label" for="loginEmail">Email</label>
-          <input type="email" id="loginEmail" class="form-input" placeholder="you@example.com" required>
-        </div>
-        <div class="form-group">
-          <label class="form-label" for="loginPassword">Password</label>
-          <input type="password" id="loginPassword" class="form-input" placeholder="••••••••" required>
-        </div>
-        <button type="submit" class="form-submit-btn" id="emailLoginBtn">
-          Sign in
-        </button>
-      </form>
-    `;
   }
 
   async function handleEmailLogin(e){
@@ -928,7 +921,6 @@
       };
       AccountManager.addAccount(account);
       
-      closeLoginSlideOver();
       showToast('Account added', 'Successfully added ' + account.name, 'success', null, 2000);
       renderAccounts();
       
@@ -939,16 +931,6 @@
       btn.textContent = 'Sign in';
     }
   }
-
-  // Close slide-over on overlay click
-  document.getElementById('loginSlideOver').addEventListener('click', function(e){
-    if(e.target === this){
-      closeLoginSlideOver();
-    }
-  });
-
-  // Close button
-  document.getElementById('closeLoginSlideOver').addEventListener('click', closeLoginSlideOver);
 
   // Initialize
   document.addEventListener('DOMContentLoaded', function(){
