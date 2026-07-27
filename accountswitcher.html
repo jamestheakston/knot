@@ -1160,11 +1160,11 @@
     });
     
     if(!account.access_token || !account.refresh_token){
-      // Account needs re-login
-      showToast('Session expired', 'Please log in again for ' + (account.name || account.email), 'warning', null, 3000);
+      // Account needs re-login - tokens not stored
+      showToast('Session not found', 'Please log in again for ' + (account.name || account.email) + ' to enable instant switching', 'warning', null, 4000);
       setTimeout(function(){
         window.location.href = 'login.html?email=' + encodeURIComponent(account.email) + '&from=accountswitcher';
-      }, 1500);
+      }, 2000);
       return;
     }
 
