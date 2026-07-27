@@ -576,7 +576,7 @@
         var { data, error } = await client.auth.signInWithOAuth({
           provider: 'github',
           options: {
-            redirectTo: window.location.origin + '/dashboard.html?oauth_login=true'
+            redirectTo: window.location.origin + '/accountswitcher.html?oauth_login=true'
           }
         });
 
@@ -603,7 +603,7 @@
         var { data, error } = await client.auth.signInWithOAuth({
           provider: 'google',
           options: {
-            redirectTo: window.location.origin + '/dashboard.html?oauth_login=true'
+            redirectTo: window.location.origin + '/accountswitcher.html?oauth_login=true'
           }
         });
 
@@ -641,11 +641,30 @@
 
         showToast('Success', 'Login successful!', 'success');
         
+        // Save account to account manager
+        var account = {
+          id: data.user.id,
+          email: data.user.email,
+          name: data.user.user_metadata?.full_name || data.user.user_metadata?.name || data.user.email,
+          avatar: data.user.user_metadata?.avatar_url || null
+        };
+        var accounts = JSON.parse(localStorage.getItem('knot_accounts') || '[]');
+        var existingIndex = accounts.findIndex(function(acc){
+          return acc.id === account.id;
+        });
+        if(existingIndex >= 0){
+          accounts[existingIndex] = account;
+        }else{
+          accounts.push(account);
+        }
+        localStorage.setItem('knot_accounts', JSON.stringify(accounts));
+        localStorage.setItem('knot_active_account', account.id);
+        
         // Send login notification email
         sendLoginNotification(email);
         
         setTimeout(function(){
-          window.location.href = 'dashboard.html';
+          window.location.href = 'accountswitcher.html';
         }, 500);
       }catch(err){
         console.error('Login error:', err);

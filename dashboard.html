@@ -2778,6 +2778,10 @@
             <i data-lucide="user"></i>
             Profile
           </div>
+          <div class="kebab-option" data-action="switch-account">
+            <i data-lucide="users"></i>
+            Switch Account
+          </div>
           <div class="kebab-option" data-action="account">
             <i data-lucide="settings"></i>
             Account Settings
@@ -6289,6 +6293,8 @@
           navigateTo('profile');
         }else if(action === 'account'){
           navigateTo('account');
+        }else if(action === 'switch-account'){
+          window.location.href = 'accountswitcher.html';
         }
         
         document.getElementById('kebabMenu').classList.remove('is-open');
