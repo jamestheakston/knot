@@ -2932,6 +2932,26 @@
       
       if(isOAuthLogin){
         sendLoginNotification(currentUser.email);
+        
+        // Save account to account manager
+        var account = {
+          id: currentUser.id,
+          email: currentUser.email,
+          name: currentUser.user_metadata?.full_name || currentUser.user_metadata?.name || currentUser.email,
+          avatar: currentUser.user_metadata?.avatar_url || null
+        };
+        var accounts = JSON.parse(localStorage.getItem('knot_accounts') || '[]');
+        var existingIndex = accounts.findIndex(function(acc){
+          return acc.id === account.id;
+        });
+        if(existingIndex >= 0){
+          accounts[existingIndex] = account;
+        }else{
+          accounts.push(account);
+        }
+        localStorage.setItem('knot_accounts', JSON.stringify(accounts));
+        localStorage.setItem('knot_active_account', account.id);
+        
         // Clean up the URL parameter
         window.history.replaceState({}, document.title, window.location.pathname);
       }

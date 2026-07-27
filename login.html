@@ -587,7 +587,7 @@
         var { data, error } = await client.auth.signInWithOAuth({
           provider: 'github',
           options: {
-            redirectTo: window.location.origin + '/accountswitcher.html?oauth_login=true'
+            redirectTo: window.location.origin + '/dashboard.html?oauth_login=true'
           }
         });
 
@@ -614,7 +614,7 @@
         var { data, error } = await client.auth.signInWithOAuth({
           provider: 'google',
           options: {
-            redirectTo: window.location.origin + '/accountswitcher.html?oauth_login=true'
+            redirectTo: window.location.origin + '/dashboard.html?oauth_login=true'
           }
         });
 
@@ -675,7 +675,7 @@
         sendLoginNotification(email);
         
         setTimeout(function(){
-          window.location.href = 'accountswitcher.html';
+          window.location.href = 'dashboard.html';
         }, 500);
       }catch(err){
         console.error('Login error:', err);
