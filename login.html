@@ -561,23 +561,28 @@
     }
 
     // Check if user has stored accounts - if so, redirect to accountswitcher
-    var storedAccounts = localStorage.getItem('knot_accounts');
-    if(storedAccounts){
-      try{
-        var accounts = JSON.parse(storedAccounts);
-        if(accounts && accounts.length > 0){
-          // User has stored accounts, redirect to accountswitcher
-          window.location.href = 'accountswitcher.html';
-          return;
+    // But allow access if ?from parameter is present
+    var urlParams = new URLSearchParams(window.location.search);
+    var fromParam = urlParams.get('from');
+    
+    if(!fromParam){
+      var storedAccounts = localStorage.getItem('knot_accounts');
+      if(storedAccounts){
+        try{
+          var accounts = JSON.parse(storedAccounts);
+          if(accounts && accounts.length > 0){
+            // User has stored accounts, redirect to accountswitcher
+            window.location.href = 'accountswitcher.html';
+            return;
+          }
+        }catch(e){
+          console.error('Error parsing stored accounts:', e);
         }
-      }catch(e){
-        console.error('Error parsing stored accounts:', e);
       }
     }
 
     // Check if user was redirected from account switcher
-    var urlParams = new URLSearchParams(window.location.search);
-    var fromAccountSwitcher = urlParams.get('from') === 'accountswitcher';
+    var fromAccountSwitcher = fromParam === 'accountswitcher';
     var prefillEmail = urlParams.get('email');
     
     // Pre-fill email if provided
