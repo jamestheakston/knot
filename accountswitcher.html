@@ -115,6 +115,22 @@
     margin-bottom: 32px;
     text-align: center;
   }
+  .page-header-top{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+  }
+  .beta-label{
+    background: var(--blue);
+    color: white;
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
   .page-header h1{
     font-size: 36px;
     margin-bottom: 8px;
@@ -236,6 +252,24 @@
   .add-account-text{
     font-size: 16px;
     font-weight: 500;
+  }
+  .security-notice{
+    text-align: center;
+    padding: 16px;
+    margin-top: 16px;
+  }
+  .security-notice p{
+    margin: 0;
+    font-size: 12px;
+    color: var(--muted-2);
+    line-height: 1.5;
+  }
+  .security-notice a{
+    color: var(--blue);
+    text-decoration: none;
+  }
+  .security-notice a:hover{
+    text-decoration: underline;
   }
 
   /* ---------- ACCOUNT MENU ---------- */
@@ -555,6 +589,44 @@
     font-size: 13px;
     color: var(--muted-2);
   }
+  .account-info-actions{
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 24px;
+  }
+  .account-info-actions .btn{
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: none;
+  }
+  .account-info-actions .btn-primary{
+    background: var(--blue);
+    color: #fff;
+  }
+  .account-info-actions .btn-primary:hover{
+    background: var(--blue-bright);
+  }
+  .account-info-actions .btn-secondary{
+    background: var(--bg-3);
+    color: var(--ink);
+    border: 1px solid var(--line);
+  }
+  .account-info-actions .btn-secondary:hover{
+    background: var(--line);
+  }
+  .account-info-actions .btn-danger{
+    background: #EF4444;
+    color: #fff;
+  }
+  .account-info-actions .btn-danger:hover{
+    background: #DC2626;
+  }
 
   /* Logout Confirmation Content */
   .logout-confirm-content{
@@ -798,7 +870,10 @@
 
 <div class="page">
   <div class="page-header">
-    <h1>Switch Account</h1>
+    <div class="page-header-top">
+      <h1>Switch Account</h1>
+      <span class="beta-label">Beta</span>
+    </div>
     <p>Select an account to continue or add a new one</p>
   </div>
 
@@ -864,7 +939,7 @@
     if(typeof ToastSystem !== 'undefined'){
       ToastSystem.init('accountswitcher.html');
     }
-  }, 2000);
+  }, 5000);
 
   // Supabase Client
   var SupabaseClient = null;
@@ -1038,6 +1113,9 @@
         </div>
         <div class="add-account-text">Add Account</div>
       </div>
+      <div class="security-notice">
+        <p>Powered by Knot Security. <a href="privacy.html" target="_blank">Review Privacy Policy</a> before using this feature.</p>
+      </div>
     `;
 
     accountList.innerHTML = html;
@@ -1062,7 +1140,7 @@
     
     // Handle edge case: switching to currently active account
     if(accountId === activeAccountId){
-      showToast('Account already active', 'You are already logged in as ' + (account.name || account.email), 'info', null, 2000);
+      window.location.href = 'dashboard.html';
       return;
     }
 
@@ -1141,6 +1219,8 @@
     
     if(account){
       var body = document.getElementById('accountInfoSlideOverBody');
+      var isActive = account.id === AccountManager.getActiveAccount();
+      
       body.innerHTML = `
         <div class="account-info-content">
           <div class="account-info-avatar">
@@ -1161,6 +1241,13 @@
               <span class="account-info-label">Account ID</span>
               <span class="account-info-value account-info-id">${account.id}</span>
             </div>
+          </div>
+          <div class="account-info-actions">
+            ${isActive 
+              ? '<button class="btn btn-primary" onclick="closeAccountInfoSlideOver()">Close</button>'
+              : '<button class="btn btn-secondary" onclick="closeAccountInfoSlideOver()">Close</button><button class="btn btn-primary" onclick="closeAccountInfoSlideOver(); selectAccount(\'' + account.id + '\')">Switch to Account</button>'
+            }
+            <button class="btn btn-danger" onclick="closeAccountInfoSlideOver(); logoutAccount('${account.id}')">Logout</button>
           </div>
         </div>
       `;
