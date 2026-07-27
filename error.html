@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Error page">
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%232A4BD7' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71'/><path d='M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71'/></svg>">
+<link rel="icon" type="image/svg+xml" media="(prefers-color-scheme: dark)" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23FFFFFF' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71'/><path d='M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71'/></svg>">
+<title>Error | Knot</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@latest"></script>
+<script src="/api/toastsystem.js"></script>
+<style>
+  :root{
+    --bg: #F7F8FB;
+    --bg-2: #FFFFFF;
+    --bg-3: #EEF1F6;
+    --ink: #151922;
+    --muted: #5B6472;
+    --muted-2: #8890A0;
+    --blue: #2A4BD7;
+    --blue-bright: #1B37AE;
+    --blue-soft: #EAEFFF;
+    --line: rgba(21,25,34,0.10);
+    --line-strong: rgba(21,25,34,0.18);
+  }
+
+  *{ box-sizing: border-box; }
+  html{ scroll-behavior: smooth; }
+  body{
+    margin:0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'Work Sans', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    line-height: 1.5;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+  h1,h2{
+    font-family: 'Instrument Serif', serif;
+    font-weight: 400;
+    margin: 0;
+    letter-spacing: -0.01em;
+  }
+  a{ color: inherit; text-decoration: none; }
+
+  ::selection{ background: var(--blue); color: #fff; }
+
+  :focus-visible{
+    outline: 2px solid var(--blue);
+    outline-offset: 3px;
+    border-radius: 4px;
+  }
+
+  /* ---------- ERROR PAGE STYLES ---------- */
+  .error-page{
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 120px 24px 40px;
+  }
+  .error-container{
+    text-align: center;
+    max-width: 500px;
+  }
+  .error-code{
+    font-size: 120px;
+    font-weight: 700;
+    color: #DC2626;
+    font-family: 'Instrument Serif', serif;
+    line-height: 1;
+    margin-bottom: 24px;
+  }
+  .error-title{
+    font-size: 32px;
+    margin-bottom: 16px;
+  }
+  .error-description{
+    font-size: 16px;
+    color: var(--muted);
+    margin-bottom: 32px;
+    line-height: 1.6;
+  }
+  .error-actions{
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  .btn{
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .btn-primary{
+    background: var(--blue);
+    color: #fff;
+  }
+  .btn-primary:hover{
+    background: var(--blue-bright);
+  }
+  .btn-ghost{
+    background: var(--bg-3);
+    color: var(--ink);
+  }
+  .btn-ghost:hover{
+    background: var(--line);
+  }
+
+  /* ---------- ERROR CODE ---------- */
+  .error-code-section{
+    margin-top: 32px;
+    padding-top: 24px;
+    border-top: 1px solid var(--line);
+  }
+  .error-code-wrapper{
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'Work Sans', sans-serif;
+    position: relative;
+  }
+  .error-code-text{
+    font-weight: 500;
+  }
+  .error-code-value{
+    font-family: monospace;
+    background: var(--bg-3);
+    padding: 2px 6px;
+    border-radius: 4px;
+  }
+  .code-tooltip-icon{
+    cursor: help;
+    color: var(--muted-2);
+    transition: color 0.2s ease;
+  }
+  .code-tooltip-icon:hover{
+    color: var(--blue);
+  }
+  .code-tooltip{
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--ink);
+    color: var(--bg-2);
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 13px;
+    white-space: nowrap;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s ease, visibility 0.2s ease;
+    margin-bottom: 8px;
+    z-index: 100;
+  }
+  .code-tooltip::after{
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 6px solid transparent;
+    border-top-color: var(--ink);
+  }
+  .error-code-wrapper:hover .code-tooltip{
+    opacity: 1;
+    visibility: visible;
+  }
+
+  /* ---------- RESPONSIVE ---------- */
+  @media (max-width: 640px){
+    .error-page{
+      padding: 100px 20px 40px;
+    }
+    .error-code{
+      font-size: 80px;
+    }
+    .error-title{
+      font-size: 24px;
+    }
+  }
+</style>
+</head>
+<body>
+
+<div class="error-page">
+  <div class="error-container">
+    <div class="error-code" id="errorCodeDisplay">Error</div>
+    <h1 class="error-title" id="errorTitle">Something went wrong</h1>
+    <p class="error-description" id="errorMessage">An unexpected error occurred. Please try again later.</p>
+    <div class="error-actions" id="errorActions">
+      <a href="index.html" class="btn btn-ghost">Go to Home</a>
+    </div>
+    
+    <div class="error-code-section" id="errorCodeSection" style="display: none;">
+      <div class="error-code-wrapper">
+        <span class="error-code-text">C0DE:</span>
+        <span class="error-code-value" id="errorCodeValue"></span>
+        <i data-lucide="help-circle" class="code-tooltip-icon" width="16" height="16"></i>
+        <div class="code-tooltip">This code can be used with support teams to help identify an issue.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Handle URL parameters
+  function handleUrlParameters(){
+    var urlParams = new URLSearchParams(window.location.search);
+    
+    var title = urlParams.get('title');
+    var code = urlParams.get('c0de');
+    var errorMsg = urlParams.get('errormsg');
+    var cta1Title = urlParams.get('cta1title');
+    var cta1Link = urlParams.get('cta1link');
+    
+    // Set title
+    if(title){
+      document.getElementById('errorTitle').textContent = title;
+      document.title = title + ' | Knot';
+    }
+    
+    // Set error code display
+    if(code){
+      document.getElementById('errorCodeDisplay').textContent = code;
+    }
+    
+    // Set error message
+    if(errorMsg){
+      document.getElementById('errorMessage').textContent = errorMsg;
+    }
+    
+    // Set CTA button
+    if(cta1Title && cta1Link){
+      document.getElementById('errorActions').innerHTML = `
+        <a href="${cta1Link}" class="btn btn-primary">${cta1Title}</a>
+        <a href="index.html" class="btn btn-ghost">Go to Home</a>
+      `;
+    }
+    
+    // Display C0DE section if provided
+    if(code){
+      document.getElementById('errorCodeSection').style.display = 'block';
+      document.getElementById('errorCodeValue').textContent = code;
+    }
+    
+    // Clear parameters from URL
+    var cleanUrl = window.location.pathname;
+    window.history.replaceState({}, document.title, cleanUrl);
+  }
+  
+  // Initialize Lucide icons
+  if(typeof lucide !== 'undefined'){
+    lucide.createIcons();
+  }
+  
+  // Handle URL parameters on page load
+  handleUrlParameters();
+  
+  // Initialize Toast System with version checking
+  if(typeof ToastSystem !== 'undefined'){
+    ToastSystem.init('error.html');
+  }
+</script>
+
+</body>
+</html>
