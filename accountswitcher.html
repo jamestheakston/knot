@@ -238,6 +238,67 @@
     font-weight: 500;
   }
 
+  /* ---------- ACCOUNT MENU ---------- */
+  .account-menu-wrapper{
+    position: relative;
+  }
+  .account-menu-btn{
+    background: none;
+    border: none;
+    padding: 8px;
+    cursor: pointer;
+    color: var(--muted);
+    border-radius: 4px;
+    transition: all 0.2s ease;
+  }
+  .account-menu-btn:hover{
+    background: var(--bg-3);
+    color: var(--ink);
+  }
+  .account-menu-btn i{
+    width: 18px;
+    height: 18px;
+  }
+  .account-menu{
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background: var(--bg-2);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    min-width: 160px;
+    z-index: 100;
+    margin-top: 4px;
+  }
+  .account-menu-item{
+    width: 100%;
+    padding: 10px 14px;
+    background: none;
+    border: none;
+    text-align: left;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 14px;
+    color: var(--ink);
+    transition: background 0.2s ease;
+  }
+  .account-menu-item:hover{
+    background: var(--bg-3);
+  }
+  .account-menu-item i{
+    width: 16px;
+    height: 16px;
+  }
+  .account-menu-item:first-child{
+    border-radius: 8px 8px 0 0;
+  }
+  .account-menu-item:last-child{
+    border-radius: 0 0 8px 8px;
+  }
+
   /* ---------- LOADING ---------- */
   .loading{
     display: flex;
@@ -782,13 +843,28 @@
       var displayName = account.name || account.email || 'Unknown';
       
       html += `
-        <div class="account-card ${isActive ? 'active' : ''}" onclick="selectAccount('${account.id}')">
+        <div class="account-card ${isActive ? 'active' : ''}" data-account-id="${account.id}">
           <div class="account-avatar">${initial}</div>
           <div class="account-info">
             <div class="account-name">${displayName}</div>
             <div class="account-email">${account.email || ''}</div>
           </div>
           <div class="account-badge">${isActive ? 'Active' : ''}</div>
+          <div class="account-menu-wrapper">
+            <button class="account-menu-btn" onclick="event.stopPropagation(); toggleAccountMenu('${account.id}')">
+              <i data-lucide="more-vertical"></i>
+            </button>
+            <div class="account-menu" id="accountMenu-${account.id}" style="display: none;">
+              <button class="account-menu-item" onclick="event.stopPropagation(); showAccountInfo('${account.id}')">
+                <i data-lucide="info"></i>
+                Information
+              </button>
+              <button class="account-menu-item" onclick="event.stopPropagation(); logoutAccount('${account.id}')">
+                <i data-lucide="log-out"></i>
+                Logout
+              </button>
+            </div>
+          </div>
           <i data-lucide="chevron-right" class="chevron"></i>
         </div>
       `;
@@ -838,6 +914,78 @@
       }
     }
   }
+
+  // Toggle account menu
+  function toggleAccountMenu(accountId){
+    // Close all other menus first
+    document.querySelectorAll('.account-menu').forEach(function(menu){
+      if(menu.id !== 'accountMenu-' + accountId){
+        menu.style.display = 'none';
+      }
+    });
+    
+    var menu = document.getElementById('accountMenu-' + accountId);
+    if(menu.style.display === 'none' || menu.style.display === ''){
+      menu.style.display = 'block';
+    }else{
+      menu.style.display = 'none';
+    }
+  }
+
+  // Show account information
+  function showAccountInfo(accountId){
+    var accounts = AccountManager.getAccounts();
+    var account = accounts.find(function(acc){
+      return acc.id === accountId;
+    });
+    
+    if(account){
+      var info = 'Name: ' + (account.name || 'N/A') + '\n';
+      info += 'Email: ' + (account.email || 'N/A') + '\n';
+      info += 'ID: ' + account.id;
+      alert(info);
+    }
+    
+    // Close the menu
+    document.getElementById('accountMenu-' + accountId).style.display = 'none';
+  }
+
+  // Logout account
+  function logoutAccount(accountId){
+    var accounts = AccountManager.getAccounts();
+    var accountIndex = accounts.findIndex(function(acc){
+      return acc.id === accountId;
+    });
+    
+    if(accountIndex >= 0){
+      var account = accounts[accountIndex];
+      var isActive = account.id === AccountManager.getActiveAccount();
+      
+      // Remove account from list
+      accounts.splice(accountIndex, 1);
+      AccountManager.saveAccounts(accounts);
+      
+      // If it was the active account, clear active account
+      if(isActive){
+        localStorage.removeItem('knot_active_account');
+      }
+      
+      showToast('Account removed', 'Successfully removed ' + (account.name || account.email), 'info', null, 4000);
+      renderAccounts();
+    }
+    
+    // Close the menu
+    document.getElementById('accountMenu-' + accountId).style.display = 'none';
+  }
+
+  // Close menus when clicking outside
+  document.addEventListener('click', function(e){
+    if(!e.target.closest('.account-menu-wrapper')){
+      document.querySelectorAll('.account-menu').forEach(function(menu){
+        menu.style.display = 'none';
+      });
+    }
+  });
 
   // Slide-over login modal
   function openLoginSlideOver(){
@@ -1000,30 +1148,38 @@
 
   // Initialize
   document.addEventListener('DOMContentLoaded', function(){
-    // Check if user has any accounts, if not redirect to error page
-    var accounts = AccountManager.getAccounts();
-    if(accounts.length === 0){
-      var errorUrl = 'error.html?title=No+Accounts+Found&c0de=ACCTSWITCHER-5675&errormsg=You+must+add+an+account+to+access+the+account+switcher.&cta1title=Go+to+Login&cta1link=login.html';
-      window.location.href = errorUrl;
-      return;
-    }
-    
-    // Auto-refresh once on page load
-    if(!sessionStorage.getItem('accountswitcher_refreshed')){
-      sessionStorage.setItem('accountswitcher_refreshed', 'true');
-      window.location.reload();
-      return;
-    }
-    
-    // Check for OAuth login callback
-    var urlParams = new URLSearchParams(window.location.search);
-    var oauthLogin = urlParams.get('oauth_login');
-    
-    if(oauthLogin === 'true'){
-      // Get current user from Supabase session
-      var client = getSupabaseClient();
-      if(client){
-        client.auth.getSession().then(function({ data: { session } }){
+    // Check if user is authenticated with Supabase
+    var client = getSupabaseClient();
+    if(client){
+      client.auth.getSession().then(function({ data: { session } }){
+        if(!session){
+          // User is not logged in to Supabase, redirect to error page
+          var errorUrl = 'error.html?title=Not+Authenticated&c0de=ACCTSWITCHER-5676&errormsg=You+must+be+logged+in+to+access+the+account+switcher.&cta1title=Go+to+Login&cta1link=login.html';
+          window.location.href = errorUrl;
+          return;
+        }
+        
+        // User is authenticated, proceed with account checks
+        var accounts = AccountManager.getAccounts();
+        if(accounts.length === 0){
+          var errorUrl = 'error.html?title=No+Accounts+Found&c0de=ACCTSWITCHER-5675&errormsg=You+must+add+an+account+to+access+the+account+switcher.&cta1title=Go+to+Login&cta1link=login.html';
+          window.location.href = errorUrl;
+          return;
+        }
+        
+        // Auto-refresh once on page load
+        if(!sessionStorage.getItem('accountswitcher_refreshed')){
+          sessionStorage.setItem('accountswitcher_refreshed', 'true');
+          window.location.reload();
+          return;
+        }
+        
+        // Check for OAuth login callback
+        var urlParams = new URLSearchParams(window.location.search);
+        var oauthLogin = urlParams.get('oauth_login');
+        
+        if(oauthLogin === 'true'){
+          // Get current user from Supabase session
           if(session && session.user){
             var account = {
               id: session.user.id,
@@ -1037,12 +1193,15 @@
             showToast('Account added', 'Successfully added ' + account.name, 'success', null, 4000);
           }
           renderAccounts();
-        });
-      }else{
-        renderAccounts();
-      }
+        }else{
+          renderAccounts();
+        }
+      });
     }else{
-      renderAccounts();
+      // If no Supabase client, redirect to error page
+      var errorUrl = 'error.html?title=Authentication+Error&c0de=ACCTSWITCHER-5677&errormsg=Unable+to+initialize+authentication.&cta1title=Go+to+Login&cta1link=login.html';
+      window.location.href = errorUrl;
+      return;
     }
   });
 </script>
