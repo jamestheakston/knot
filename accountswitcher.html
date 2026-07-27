@@ -757,6 +757,12 @@
     STORAGE_KEY: 'knot_accounts',
     ACTIVE_ACCOUNT_KEY: 'knot_active_account',
 
+    // SECURITY NOTE: Storing raw tokens in localStorage is vulnerable to XSS token theft.
+    // This implementation accepts this risk for convenience. For production, consider:
+    // (a) Encrypting tokens at rest with a key derived from a user PIN
+    // (b) Moving session storage server-side with httpOnly cookies per account slot
+    // (c) Using Supabase's built-in session persistence with proper security headers
+
     getAccounts: function(){
       try{
         var accounts = localStorage.getItem(this.STORAGE_KEY);
@@ -804,6 +810,19 @@
       }
       this.saveAccounts(accounts);
       this.setActiveAccount(account.id);
+    },
+
+    updateAccountTokens: function(accountId, session){
+      var accounts = this.getAccounts();
+      var accountIndex = accounts.findIndex(function(acc){
+        return acc.id === accountId;
+      });
+      if(accountIndex >= 0){
+        accounts[accountIndex].access_token = session.access_token;
+        accounts[accountIndex].refresh_token = session.refresh_token;
+        accounts[accountIndex].expires_at = session.expires_at;
+        this.saveAccounts(accounts);
+      }
     },
 
     removeAccount: function(accountId){
@@ -892,25 +911,62 @@
       return acc.id === accountId;
     });
 
-    if(account){
-      AccountManager.setActiveAccount(accountId);
-      
-      // Sign out of current Supabase session and redirect to login with target account
-      var client = getSupabaseClient();
-      if(client){
-        client.auth.signOut().then(function(){
-          // Redirect to login with target account email pre-filled
-          window.location.href = 'login.html?email=' + encodeURIComponent(account.email) + '&from=accountswitcher';
-        }).catch(function(err){
-          console.error('Sign out error:', err);
-          // Even if sign out fails, redirect to login
-          window.location.href = 'login.html?email=' + encodeURIComponent(account.email) + '&from=accountswitcher';
-        });
-      }else{
-        // If no client, just redirect
-        window.location.href = 'login.html?email=' + encodeURIComponent(account.email) + '&from=accountswitcher';
-      }
+    if(!account){
+      console.error('Account not found:', accountId);
+      return;
     }
+
+    var activeAccountId = AccountManager.getActiveAccount();
+    
+    // Handle edge case: switching to currently active account
+    if(accountId === activeAccountId){
+      showToast('Account already active', 'You are already logged in as ' + (account.name || account.email), 'info', null, 2000);
+      return;
+    }
+
+    // Check if account has session tokens
+    if(!account.access_token || !account.refresh_token){
+      // Account needs re-login
+      showToast('Session expired', 'Please log in again for ' + (account.name || account.email), 'warning', null, 3000);
+      setTimeout(function(){
+        window.location.href = 'login.html?email=' + encodeURIComponent(account.email) + '&from=accountswitcher';
+      }, 1500);
+      return;
+    }
+
+    var client = getSupabaseClient();
+    if(!client){
+      showToast('Error', 'Authentication service unavailable. Please try again later.', 'error');
+      return;
+    }
+
+    // Set the session for the target account
+    client.auth.setSession({
+      access_token: account.access_token,
+      refresh_token: account.refresh_token
+    }).then(function({ data, error }){
+      if(error){
+        console.error('Error setting session:', error);
+        // Token expired or invalid, fall back to re-login
+        showToast('Session expired', 'Please log in again for ' + (account.name || account.email), 'warning', null, 3000);
+        setTimeout(function(){
+          window.location.href = 'login.html?email=' + encodeURIComponent(account.email) + '&from=accountswitcher';
+        }, 1500);
+        return;
+      }
+
+      // Session set successfully
+      AccountManager.setActiveAccount(accountId);
+      showToast('Account switched', 'Now logged in as ' + (account.name || account.email), 'info', null, 4000);
+      
+      // Redirect to dashboard
+      setTimeout(function(){
+        window.location.href = 'dashboard.html';
+      }, 500);
+    }).catch(function(err){
+      console.error('Session set error:', err);
+      showToast('Error switching accounts', 'Please try again', 'error');
+    });
   }
 
   // Toggle account menu
@@ -959,14 +1015,22 @@
       var account = accounts[accountIndex];
       var isActive = account.id === AccountManager.getActiveAccount();
       
+      // If it's the currently active account, sign out from Supabase
+      if(isActive){
+        var client = getSupabaseClient();
+        if(client){
+          client.auth.signOut().then(function(){
+            console.log('Signed out from Supabase');
+          }).catch(function(err){
+            console.error('Sign out error:', err);
+          });
+        }
+        localStorage.removeItem('knot_active_account');
+      }
+      
       // Remove account from list
       accounts.splice(accountIndex, 1);
       AccountManager.saveAccounts(accounts);
-      
-      // If it was the active account, clear active account
-      if(isActive){
-        localStorage.removeItem('knot_active_account');
-      }
       
       showToast('Account removed', 'Successfully removed ' + (account.name || account.email), 'info', null, 4000);
       renderAccounts();
@@ -1113,12 +1177,15 @@
       
       if(error) throw error;
       
-      // Save account
+      // Save account with full session data
       var account = {
         id: data.user.id,
         email: data.user.email,
         name: data.user.user_metadata?.full_name || data.user.user_metadata?.name || data.user.email,
-        avatar: data.user.user_metadata?.avatar_url || null
+        avatar: data.user.user_metadata?.avatar_url || null,
+        access_token: data.session.access_token,
+        refresh_token: data.session.refresh_token,
+        expires_at: data.session.expires_at
       };
       AccountManager.addAccount(account);
       
@@ -1157,12 +1224,16 @@
           return;
         }
         
-        // Auto-refresh once on page load
-        if(!sessionStorage.getItem('accountswitcher_refreshed')){
-          sessionStorage.setItem('accountswitcher_refreshed', 'true');
-          window.location.reload();
-          return;
-        }
+        // Set up auth state change listener to track token rotation
+        client.auth.onAuthStateChange(function(event, session){
+          if(event === 'TOKEN_REFRESHED' && session){
+            // Update stored tokens for the current account
+            var activeAccountId = AccountManager.getActiveAccount();
+            if(activeAccountId){
+              AccountManager.updateAccountTokens(activeAccountId, session);
+            }
+          }
+        });
         
         // Check for OAuth login callback
         var urlParams = new URLSearchParams(window.location.search);
@@ -1175,7 +1246,10 @@
               id: session.user.id,
               email: session.user.email,
               name: session.user.user_metadata?.full_name || session.user.user_metadata?.name || session.user.email,
-              avatar: session.user.user_metadata?.avatar_url || null
+              avatar: session.user.user_metadata?.avatar_url || null,
+              access_token: session.access_token,
+              refresh_token: session.refresh_token,
+              expires_at: session.expires_at
             };
             AccountManager.addAccount(account);
             // Remove OAuth params from URL
