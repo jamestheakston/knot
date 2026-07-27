@@ -219,6 +219,8 @@
         }
       }catch(err){
         console.error('Error checking for updates:', err);
+        // Retry after 5 seconds on network error
+        setTimeout(this.checkForUpdates.bind(this), 5000);
       }
     },
 
