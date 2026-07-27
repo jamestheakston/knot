@@ -304,6 +304,15 @@
     min-width: 160px;
     z-index: 100;
     margin-top: 4px;
+    opacity: 0;
+    transform: translateY(-8px);
+    pointer-events: none;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+  }
+  .account-menu.is-open{
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
   }
   .account-menu-item{
     width: 100%;
@@ -1198,16 +1207,12 @@
     // Close all other menus first
     document.querySelectorAll('.account-menu').forEach(function(menu){
       if(menu.id !== 'accountMenu-' + accountId){
-        menu.style.display = 'none';
+        menu.classList.remove('is-open');
       }
     });
     
     var menu = document.getElementById('accountMenu-' + accountId);
-    if(menu.style.display === 'none' || menu.style.display === ''){
-      menu.style.display = 'block';
-    }else{
-      menu.style.display = 'none';
-    }
+    menu.classList.toggle('is-open');
   }
 
   // Show account information
@@ -1255,7 +1260,7 @@
     }
     
     // Close the menu
-    document.getElementById('accountMenu-' + accountId).style.display = 'none';
+    document.getElementById('accountMenu-' + accountId).classList.remove('is-open');
   }
 
   // Open account info slide-over
@@ -1282,7 +1287,7 @@
     }
     
     // Close the menu
-    document.getElementById('accountMenu-' + accountId).style.display = 'none';
+    document.getElementById('accountMenu-' + accountId).classList.remove('is-open');
   }
 
   // Show logout confirmation
@@ -1359,7 +1364,7 @@
   document.addEventListener('click', function(e){
     if(!e.target.closest('.account-menu-wrapper')){
       document.querySelectorAll('.account-menu').forEach(function(menu){
-        menu.style.display = 'none';
+        menu.classList.remove('is-open');
       });
     }
   });
