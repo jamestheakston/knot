@@ -1,14 +1,14 @@
 {
   "redirects": [
     {
-      "source": "/(.*)",
+      "source": "/:path*",
       "has": [
         {
           "type": "host",
           "value": "knotapp.pages.dev"
         }
       ],
-      "destination": "https://knothabits.vercel.app/:1",
+      "destination": "https://knothabits.vercel.app/:path*",
       "permanent": true
     }
   ]
