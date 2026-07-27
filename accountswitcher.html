@@ -377,6 +377,229 @@
     height: 16px;
   }
 
+  /* ---------- SLIDE-OVER MODAL ---------- */
+  .slide-over-overlay{
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+  }
+  .slide-over-overlay.is-open{
+    opacity: 1;
+    visibility: visible;
+  }
+  .slide-over{
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    max-width: 480px;
+    background: var(--bg-2);
+    transform: translateX(100%);
+    transition: transform 0.3s ease;
+    z-index: 1001;
+    display: flex;
+    flex-direction: column;
+  }
+  .slide-over.is-open{
+    transform: translateX(0);
+  }
+  .slide-over-header{
+    padding: 24px;
+    border-bottom: 1px solid var(--line);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .slide-over-header h2{
+    font-size: 24px;
+    font-family: 'Instrument Serif', serif;
+    font-weight: 400;
+  }
+  .slide-over-close{
+    background: none;
+    border: none;
+    color: var(--muted);
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 4px;
+    transition: color 0.2s ease;
+  }
+  .slide-over-close:hover{
+    color: var(--ink);
+  }
+  .slide-over-close i{
+    width: 20px;
+    height: 20px;
+  }
+  .slide-over-body{
+    flex: 1;
+    padding: 24px;
+    overflow-y: auto;
+  }
+  .login-options{
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .oauth-btn{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 14px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: var(--bg);
+    color: var(--ink);
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  .oauth-btn:hover{
+    border-color: var(--blue);
+    background: var(--blue-soft);
+  }
+  .oauth-btn:disabled{
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+  .oauth-btn i{
+    width: 20px;
+    height: 20px;
+  }
+  .divider{
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin: 8px 0;
+  }
+  .divider::before,
+  .divider::after{
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--line);
+  }
+  .divider span{
+    font-size: 13px;
+    color: var(--muted-2);
+    font-weight: 500;
+  }
+  .email-btn{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 14px;
+    background: var(--blue);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.2s ease;
+  }
+  .email-btn:hover{
+    background: var(--blue-bright);
+  }
+  .email-btn i{
+    width: 20px;
+    height: 20px;
+  }
+  .oauth-loading{
+    text-align: center;
+    padding: 40px 20px;
+  }
+  .oauth-loading-spinner{
+    width: 48px;
+    height: 48px;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 16px;
+  }
+  .oauth-loading-text{
+    font-size: 16px;
+    color: var(--muted);
+    margin-bottom: 24px;
+  }
+  .oauth-cancel-btn{
+    padding: 10px 20px;
+    background: var(--bg-3);
+    color: var(--ink);
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.2s ease;
+  }
+  .oauth-cancel-btn:hover{
+    background: var(--line);
+  }
+  .email-form{
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .form-group{
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .form-label{
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--ink);
+  }
+  .form-input{
+    padding: 12px 16px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    font-size: 15px;
+    background: var(--bg);
+    color: var(--ink);
+    transition: border-color 0.2s ease;
+  }
+  .form-input:focus{
+    outline: none;
+    border-color: var(--blue);
+  }
+  .form-input::placeholder{
+    color: var(--muted-2);
+  }
+  .form-submit-btn{
+    padding: 14px;
+    background: var(--blue);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.2s ease;
+  }
+  .form-submit-btn:hover{
+    background: var(--blue-bright);
+  }
+  .form-submit-btn:disabled{
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+  .form-submit-btn .spinner{
+    width: 16px;
+    height: 16px;
+    animation: spin 1s linear infinite;
+  }
+
   /* ---------- RESPONSIVE ---------- */
   @media (max-width: 640px){
     .page{
@@ -420,6 +643,20 @@
 </div>
 
 <div class="toast-container" id="toastContainer"></div>
+
+<!-- Login Slide-over Modal -->
+<div class="slide-over-overlay" id="loginSlideOver"></div>
+<div class="slide-over" id="loginSlideOverPanel">
+  <div class="slide-over-header">
+    <h2>Add Account</h2>
+    <button class="slide-over-close" id="closeLoginSlideOver">
+      <i data-lucide="x"></i>
+    </button>
+  </div>
+  <div class="slide-over-body" id="loginSlideOverBody">
+    <!-- Login options will be rendered here -->
+  </div>
+</div>
 
 <script>
   if(typeof lucide !== 'undefined'){
@@ -502,7 +739,7 @@
 
     if(accounts.length === 0){
       accountList.innerHTML = `
-        <div class="add-account-card" onclick="window.location.href='login.html'">
+        <div class="add-account-card" onclick="openLoginSlideOver()">
           <div class="add-account-icon">
             <i data-lucide="plus"></i>
           </div>
@@ -535,7 +772,7 @@
     });
 
     html += `
-      <div class="add-account-card" onclick="window.location.href='login.html'">
+      <div class="add-account-card" onclick="openLoginSlideOver()">
         <div class="add-account-icon">
           <i data-lucide="plus"></i>
         </div>
@@ -565,8 +802,163 @@
     }
   }
 
+  // Slide-over login modal
+  function openLoginSlideOver(){
+    document.getElementById('loginSlideOver').classList.add('is-open');
+    document.getElementById('loginSlideOverPanel').classList.add('is-open');
+    renderLoginOptions();
+  }
+
+  function closeLoginSlideOver(){
+    document.getElementById('loginSlideOver').classList.remove('is-open');
+    document.getElementById('loginSlideOverPanel').classList.remove('is-open');
+  }
+
+  function renderLoginOptions(){
+    var body = document.getElementById('loginSlideOverBody');
+    body.innerHTML = `
+      <div class="login-options">
+        <button class="oauth-btn" onclick="handleOAuthLogin('google')">
+          <i data-lucide="chrome"></i>
+          Continue with Google
+        </button>
+        <button class="oauth-btn" onclick="handleOAuthLogin('github')">
+          <i data-lucide="github"></i>
+          Continue with GitHub
+        </button>
+        <div class="divider">
+          <span>or</span>
+        </div>
+        <button class="email-btn" onclick="showEmailForm()">
+          <i data-lucide="mail"></i>
+          Continue with email
+        </button>
+      </div>
+    `;
+    if(typeof lucide !== 'undefined'){
+      lucide.createIcons();
+    }
+  }
+
+  function showOAuthLoading(provider){
+    var body = document.getElementById('loginSlideOverBody');
+    var providerName = provider === 'google' ? 'Google' : 'GitHub';
+    body.innerHTML = `
+      <div class="oauth-loading">
+        <i data-lucide="loader-2" class="oauth-loading-spinner"></i>
+        <div class="oauth-loading-text">Connecting to ${providerName}...</div>
+        <button class="oauth-cancel-btn" onclick="cancelOAuthLogin()">Cancel</button>
+      </div>
+    `;
+    if(typeof lucide !== 'undefined'){
+      lucide.createIcons();
+    }
+  }
+
+  function cancelOAuthLogin(){
+    closeLoginSlideOver();
+    renderAccounts();
+  }
+
+  function handleOAuthLogin(provider){
+    showOAuthLoading(provider);
+    
+    var client = supabase;
+    var redirectUrl = window.location.origin + '/accountswitcher.html?oauth_login=true';
+    
+    if(provider === 'google'){
+      client.auth.signInWithOAuth({
+        provider: 'google',
+        options: { redirectTo: redirectUrl }
+      });
+    }else if(provider === 'github'){
+      client.auth.signInWithOAuth({
+        provider: 'github',
+        options: { redirectTo: redirectUrl }
+      });
+    }
+  }
+
+  function showEmailForm(){
+    var body = document.getElementById('loginSlideOverBody');
+    body.innerHTML = `
+      <form class="email-form" onsubmit="handleEmailLogin(event)">
+        <div class="form-group">
+          <label class="form-label" for="loginEmail">Email</label>
+          <input type="email" id="loginEmail" class="form-input" placeholder="you@example.com" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="loginPassword">Password</label>
+          <input type="password" id="loginPassword" class="form-input" placeholder="••••••••" required>
+        </div>
+        <button type="submit" class="form-submit-btn" id="emailLoginBtn">
+          Sign in
+        </button>
+      </form>
+    `;
+  }
+
+  async function handleEmailLogin(e){
+    e.preventDefault();
+    
+    var email = document.getElementById('loginEmail').value;
+    var password = document.getElementById('loginPassword').value;
+    var btn = document.getElementById('emailLoginBtn');
+    
+    btn.disabled = true;
+    btn.innerHTML = '<i data-lucide="loader-2" class="spinner"></i> Signing in...';
+    if(typeof lucide !== 'undefined'){
+      lucide.createIcons();
+    }
+    
+    try{
+      var { data, error } = await supabase.auth.signInWithPassword({
+        email: email,
+        password: password
+      });
+      
+      if(error) throw error;
+      
+      // Save account
+      var account = {
+        id: data.user.id,
+        email: data.user.email,
+        name: data.user.user_metadata?.full_name || data.user.user_metadata?.name || data.user.email,
+        avatar: data.user.user_metadata?.avatar_url || null
+      };
+      AccountManager.addAccount(account);
+      
+      closeLoginSlideOver();
+      showToast('Account added', 'Successfully added ' + account.name, 'success', null, 2000);
+      renderAccounts();
+      
+    }catch(err){
+      console.error('Email login error:', err);
+      showToast('Error', err.message, 'error');
+      btn.disabled = false;
+      btn.textContent = 'Sign in';
+    }
+  }
+
+  // Close slide-over on overlay click
+  document.getElementById('loginSlideOver').addEventListener('click', function(e){
+    if(e.target === this){
+      closeLoginSlideOver();
+    }
+  });
+
+  // Close button
+  document.getElementById('closeLoginSlideOver').addEventListener('click', closeLoginSlideOver);
+
   // Initialize
   document.addEventListener('DOMContentLoaded', function(){
+    // Auto-refresh once on page load
+    if(!sessionStorage.getItem('accountswitcher_refreshed')){
+      sessionStorage.setItem('accountswitcher_refreshed', 'true');
+      window.location.reload();
+      return;
+    }
+    
     // Check for OAuth login callback
     var urlParams = new URLSearchParams(window.location.search);
     var oauthLogin = urlParams.get('oauth_login');
