@@ -564,6 +564,12 @@
     // Check if user was redirected from account switcher
     var urlParams = new URLSearchParams(window.location.search);
     var fromAccountSwitcher = urlParams.get('from') === 'accountswitcher';
+    var prefillEmail = urlParams.get('email');
+    
+    // Pre-fill email if provided
+    if(prefillEmail){
+      document.getElementById('email').value = prefillEmail;
+    }
 
     // GitHub login
     document.getElementById('githubLoginBtn').addEventListener('click', async function(){
@@ -580,7 +586,7 @@
         var { data, error } = await client.auth.signInWithOAuth({
           provider: 'github',
           options: {
-            redirectTo: window.location.origin + (fromAccountSwitcher ? '/accountswitcher.html?from=login' : '/dashboard.html?oauth_login=true')
+            redirectTo: window.location.origin + '/dashboard.html?oauth_login=true'
           }
         });
 
@@ -607,7 +613,7 @@
         var { data, error } = await client.auth.signInWithOAuth({
           provider: 'google',
           options: {
-            redirectTo: window.location.origin + (fromAccountSwitcher ? '/accountswitcher.html?from=login' : '/dashboard.html?oauth_login=true')
+            redirectTo: window.location.origin + '/dashboard.html?oauth_login=true'
           }
         });
 
@@ -668,7 +674,9 @@
         sendLoginNotification(email);
         
         setTimeout(function(){
-          window.location.href = fromAccountSwitcher ? 'accountswitcher.html' : 'dashboard.html';
+          // If coming from account switcher, go to dashboard (not accountswitcher)
+          // This ensures the user actually gets logged in as the new account
+          window.location.href = 'dashboard.html';
         }, 500);
       }catch(err){
         console.error('Login error:', err);

@@ -76,6 +76,13 @@
     font-family: 'Instrument Serif', serif;
     line-height: 1;
     margin-bottom: 24px;
+    display: none;
+  }
+  .error-icon{
+    width: 80px;
+    height: 80px;
+    color: #DC2626;
+    margin-bottom: 24px;
   }
   .error-title{
     font-size: 32px;
@@ -199,6 +206,7 @@
 
 <div class="error-page">
   <div class="error-container">
+    <i data-lucide="alert-circle" class="error-icon"></i>
     <div class="error-code" id="errorCodeDisplay">Error</div>
     <h1 class="error-title" id="errorTitle">Something went wrong</h1>
     <p class="error-description" id="errorMessage">An unexpected error occurred. Please try again later.</p>
