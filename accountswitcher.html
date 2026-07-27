@@ -555,6 +555,63 @@
     font-size: 13px;
     color: var(--muted-2);
   }
+
+  /* Logout Confirmation Content */
+  .logout-confirm-content{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 24px;
+    text-align: center;
+  }
+  .logout-confirm-icon{
+    width: 64px;
+    height: 64px;
+    color: #F59E0B;
+  }
+  .logout-confirm-text{
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .logout-confirm-text p{
+    margin: 0;
+    color: var(--ink);
+  }
+  .logout-confirm-subtext{
+    color: var(--muted);
+    font-size: 14px;
+  }
+  .logout-confirm-actions{
+    display: flex;
+    gap: 12px;
+    width: 100%;
+  }
+  .logout-confirm-actions .btn{
+    flex: 1;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: none;
+  }
+  .logout-confirm-actions .btn-primary{
+    background: var(--blue);
+    color: #fff;
+  }
+  .logout-confirm-actions .btn-primary:hover{
+    background: var(--blue-bright);
+  }
+  .logout-confirm-actions .btn-secondary{
+    background: var(--bg-3);
+    color: var(--ink);
+    border: 1px solid var(--line);
+  }
+  .logout-confirm-actions .btn-secondary:hover{
+    background: var(--line);
+  }
   .login-options{
     display: flex;
     flex-direction: column;
@@ -779,6 +836,20 @@
     </button>
   </div>
   <div class="slide-over-body" id="accountInfoSlideOverBody">
+    <!-- Content will be rendered here -->
+  </div>
+</div>
+
+<!-- Logout Confirmation Slide-over Modal -->
+<div class="slide-over-overlay" id="logoutConfirmSlideOver"></div>
+<div class="slide-over" id="logoutConfirmSlideOverPanel">
+  <div class="slide-over-header">
+    <h2 id="logoutConfirmSlideOverTitle">Confirm Logout</h2>
+    <button class="slide-over-close" id="closeLogoutConfirmSlideOver">
+      <i data-lucide="x"></i>
+    </button>
+  </div>
+  <div class="slide-over-body" id="logoutConfirmSlideOverBody">
     <!-- Content will be rendered here -->
   </div>
 </div>
@@ -1112,6 +1183,45 @@
   // Logout account
   function logoutAccount(accountId){
     var accounts = AccountManager.getAccounts();
+    var account = accounts.find(function(acc){
+      return acc.id === accountId;
+    });
+    
+    if(account){
+      showLogoutConfirmation(accountId, account);
+    }
+    
+    // Close the menu
+    document.getElementById('accountMenu-' + accountId).style.display = 'none';
+  }
+
+  // Show logout confirmation
+  function showLogoutConfirmation(accountId, account){
+    var body = document.getElementById('logoutConfirmSlideOverBody');
+    body.innerHTML = `
+      <div class="logout-confirm-content">
+        <div class="logout-confirm-icon">
+          <i data-lucide="alert-triangle"></i>
+        </div>
+        <div class="logout-confirm-text">
+          <p>Are you sure you want to log out of <strong>${account.name || account.email}</strong>?</p>
+          <p class="logout-confirm-subtext">This will remove the account from your account switcher. You can add it again later.</p>
+        </div>
+        <div class="logout-confirm-actions">
+          <button class="btn btn-secondary" onclick="closeLogoutConfirmSlideOver()">Cancel</button>
+          <button class="btn btn-primary" onclick="confirmLogout('${accountId}')">Log Out</button>
+        </div>
+      </div>
+    `;
+    openLogoutConfirmSlideOver();
+    if(typeof lucide !== 'undefined'){
+      lucide.createIcons();
+    }
+  }
+
+  // Confirm logout
+  function confirmLogout(accountId){
+    var accounts = AccountManager.getAccounts();
     var accountIndex = accounts.findIndex(function(acc){
       return acc.id === accountId;
     });
@@ -1137,12 +1247,22 @@
       accounts.splice(accountIndex, 1);
       AccountManager.saveAccounts(accounts);
       
+      closeLogoutConfirmSlideOver();
       showToast('Account removed', 'Successfully removed ' + (account.name || account.email), 'info', null, 4000);
       renderAccounts();
     }
-    
-    // Close the menu
-    document.getElementById('accountMenu-' + accountId).style.display = 'none';
+  }
+
+  // Open logout confirmation slide-over
+  function openLogoutConfirmSlideOver(){
+    document.getElementById('logoutConfirmSlideOver').style.display = 'block';
+    document.getElementById('logoutConfirmSlideOverPanel').style.display = 'block';
+  }
+
+  // Close logout confirmation slide-over
+  function closeLogoutConfirmSlideOver(){
+    document.getElementById('logoutConfirmSlideOver').style.display = 'none';
+    document.getElementById('logoutConfirmSlideOverPanel').style.display = 'none';
   }
 
   // Close menus when clicking outside
@@ -1157,6 +1277,10 @@
   // Account info slide-over close button
   document.getElementById('closeAccountInfoSlideOver').addEventListener('click', closeAccountInfoSlideOver);
   document.getElementById('accountInfoSlideOver').addEventListener('click', closeAccountInfoSlideOver);
+
+  // Logout confirmation slide-over close button
+  document.getElementById('closeLogoutConfirmSlideOver').addEventListener('click', closeLogoutConfirmSlideOver);
+  document.getElementById('logoutConfirmSlideOver').addEventListener('click', closeLogoutConfirmSlideOver);
 
   // Slide-over login modal
   function openLoginSlideOver(){
