@@ -3513,11 +3513,6 @@
       // Load user profile BEFORE updatePodSelector so userProfile is available
       await loadUserProfile();
 
-      // Clear URL parameters after all processing is done
-      if(shouldJoinPod || joinCode || shouldCreatePod || isLinking || action || removedFromPod){
-        window.history.replaceState({}, document.title, window.location.pathname);
-      }
-
       if(userPods.length > 0){
         // Try to load saved pod ID from localStorage
         var savedPodId = localStorage.getItem('currentPodId');
@@ -3559,29 +3554,44 @@
           navigateTo('overview');
         }
 
-        // Handle identity verification modal from URL parameters
-        if(urlParams.get('openidentitymodal') === 'true'){
-          var method = urlParams.get('method');
-          // Navigate to account section first
-          navigateTo('account');
-          // After account section loads, show identity confirmed modal
-          setTimeout(function(){
-            showIdentityConfirmedModal(function(){
-              // Continue with the original action (tight security toggle)
-              var isEnabled = localStorage.getItem('knot_tight_security') === 'true';
-              var message = isEnabled
-                ? 'Are you sure you want to enable Tight Security?<br><br>This will:<br>• Disable account switching<br>• Remove all stored session data from localStorage<br>• Require you to sign in each time<br><br>This is not recommended for most users.'
-                : 'Are you sure you want to disable Tight Security?<br><br>This will:<br>• Re-enable account switching<br>• Allow session data to be stored in localStorage<br><br>You can always re-enable this later.';
+        // Handle identity verification modal from localStorage
+        var pendingVerification = localStorage.getItem('pendingIdentityVerification');
+        if(pendingVerification){
+          try{
+            var verificationData = JSON.parse(pendingVerification);
+            // Check if verification is stale (older than 10 minutes)
+            var tenMinutesAgo = Date.now() - (10 * 60 * 1000);
+            if(verificationData.timestamp && verificationData.timestamp < tenMinutesAgo){
+              localStorage.removeItem('pendingIdentityVerification');
+            }else{
+              // Navigate to account section first
+              navigateTo('account');
+              // After account section loads, show identity confirmed modal
+              setTimeout(function(){
+                showIdentityConfirmedModal(function(){
+                  // Continue with the original action (tight security toggle)
+                  var isEnabled = localStorage.getItem('knot_tight_security') === 'true';
+                  var message = isEnabled
+                    ? 'Are you sure you want to enable Tight Security?<br><br>This will:<br>• Disable account switching<br>• Remove all stored session data from localStorage<br>• Require you to sign in each time<br><br>This is not recommended for most users.'
+                    : 'Are you sure you want to disable Tight Security?<br><br>This will:<br>• Re-enable account switching<br>• Allow session data to be stored in localStorage<br><br>You can always re-enable this later.';
 
-              showConfirmModal('Tight Security', message, function(){
-                toggleTightSecurity(!isEnabled);
-              }, function(){
-                // Revert checkbox if cancelled
-                var toggle = document.getElementById('tightSecurityToggle');
-                if(toggle) toggle.checked = isEnabled;
-              });
-            });
-          }, 500);
+                  showConfirmModal('Tight Security', message, function(){
+                    toggleTightSecurity(!isEnabled);
+                  }, function(){
+                    // Revert checkbox if cancelled
+                    var toggle = document.getElementById('tightSecurityToggle');
+                    if(toggle) toggle.checked = isEnabled;
+                  });
+                  
+                  // Clear the pending verification
+                  localStorage.removeItem('pendingIdentityVerification');
+                });
+              }, 500);
+            }
+          }catch(err){
+            console.error('Error parsing pending verification:', err);
+            localStorage.removeItem('pendingIdentityVerification');
+          }
         }
         
         // If linking account, show success message
@@ -6977,11 +6987,17 @@
           var client = getSupabaseClient();
 
           if(method === 'github'){
+            // Store verification state in localStorage before OAuth redirect
+            localStorage.setItem('pendingIdentityVerification', JSON.stringify({
+              method: 'github',
+              timestamp: Date.now()
+            }));
+            
             // Trigger GitHub OAuth re-authentication
             client.auth.signInWithOAuth({
               provider: 'github',
               options: {
-                redirectTo: 'https://knotapp.pages.dev/dashboard#account?openidentitymodal=true&method=github'
+                redirectTo: window.location.origin + window.location.pathname
               }
             }).then(function(result){
               if(result.data.user){
@@ -6999,11 +7015,17 @@
               showCustomModal('Error', 'GitHub verification failed: ' + err.message);
             });
           }else if(method === 'google'){
+            // Store verification state in localStorage before OAuth redirect
+            localStorage.setItem('pendingIdentityVerification', JSON.stringify({
+              method: 'google',
+              timestamp: Date.now()
+            }));
+            
             // Trigger Google OAuth re-authentication
             client.auth.signInWithOAuth({
               provider: 'google',
               options: {
-                redirectTo: 'https://knotapp.pages.dev/dashboard#account?openidentitymodal=true&method=google'
+                redirectTo: window.location.origin + window.location.pathname
               }
             }).then(function(result){
               if(result.data.user){
