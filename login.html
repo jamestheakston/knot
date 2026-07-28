@@ -439,28 +439,130 @@
     text-decoration: underline;
   }
 
-  /* ---------- TOAST ---------- */
-  .toast{
+  /* Toast Notifications */
+  .toast-container{
     position: fixed;
-    bottom: 32px;
-    left: 50%;
-    transform: translateX(-50%) translateY(100px);
-    background: var(--red);
-    color: #fff;
-    padding: 14px 24px;
-    border-radius: 12px;
-    font-size: 14px;
-    font-weight: 500;
-    box-shadow: 0 8px 24px rgba(196, 67, 42, 0.3);
-    opacity: 0;
-    transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.4s ease;
-    z-index: 1000;
-    max-width: 400px;
-    text-align: center;
+    bottom: 24px;
+    right: 24px;
+    z-index: 10000;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
   }
-  .toast.is-visible{
-    transform: translateX(-50%) translateY(0);
-    opacity: 1;
+  .toast{
+    background: var(--bg-2);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 16px;
+    position: relative;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    min-width: 320px;
+    max-width: 400px;
+    animation: toastSlideIn 0.3s ease;
+  }
+  @keyframes toastSlideIn{
+    from{
+      transform: translateX(100%);
+      opacity: 0;
+    }
+    to{
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+  @keyframes toastSlideOut{
+    from{
+      transform: translateX(0);
+      opacity: 1;
+    }
+    to{
+      transform: translateX(100%);
+      opacity: 0;
+    }
+  }
+  .toast.is-info{
+    border-left: 4px solid var(--blue);
+  }
+  .toast.is-success{
+    border-left: 4px solid #10B981;
+  }
+  .toast.is-warning{
+    border-left: 4px solid #F59E0B;
+  }
+  .toast.is-error{
+    border-left: 4px solid var(--red);
+  }
+  .toast.is-newupdate{
+    border-left: 4px solid #10B981;
+  }
+  .toast-header{
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+  .toast-title{
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--ink);
+  }
+  .toast-message{
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.4;
+  }
+  .toast-actions{
+    margin-top: 12px;
+    display: flex;
+    gap: 8px;
+  }
+  .toast-btn{
+    padding: 6px 12px;
+    border-radius: 4px;
+    font-size: 12px;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s ease;
+  }
+  .toast-btn-primary{
+    background: var(--blue);
+    color: #fff;
+  }
+  .toast-btn-primary:hover{
+    background: var(--blue-bright);
+  }
+  .toast-btn-secondary{
+    background: var(--bg-3);
+    color: var(--ink);
+  }
+  .toast-btn-secondary:hover{
+    background: var(--line);
+  }
+  .toast-close{
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: none;
+    border: none;
+    color: var(--muted);
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 4px;
+    transition: color 0.2s ease;
+  }
+  .toast-close:hover{
+    color: var(--ink);
+  }
+  .toast-close i{
+    width: 16px;
+    height: 16px;
+  }
+  .spinner{
+    animation: spin 1s linear infinite;
+  }
+  @keyframes spin{
+    from{ transform: rotate(0deg); }
+    to{ transform: rotate(360deg); }
   }
 
   /* ---------- RESPONSIVE ---------- */
@@ -511,7 +613,7 @@
 
     <div class="social-buttons-group">
       <button class="social-btn passkey-btn" id="passkeyLoginBtn">
-        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+        <i data-lucide="key"></i>
         Sign in with Passkey
       </button>
 

@@ -6454,6 +6454,16 @@
 
     async function handleAddPasskey(){
       var client = getSupabaseClient();
+      var btn = document.getElementById('addPasskeyBtn');
+      
+      // Show loading state
+      btn.disabled = true;
+      btn.innerHTML = '<i data-lucide="loader-2" class="spinner"></i> Registering Passkey...';
+      if(typeof lucide !== 'undefined'){
+        lucide.createIcons();
+      }
+      
+      showToast('Registering Passkey', 'Registering your passkey...', 'info');
 
       try{
         var { data, error } = await client.auth.registerPasskey();
@@ -6471,6 +6481,13 @@
           showToast('Cancelled', 'Passkey registration was cancelled.', 'info');
         }else{
           showToast('Error', 'Failed to register passkey. ' + (err.message || 'Please try again.'), 'error');
+        }
+      }finally{
+        // Restore button state
+        btn.disabled = false;
+        btn.innerHTML = 'Add Passkey';
+        if(typeof lucide !== 'undefined'){
+          lucide.createIcons();
         }
       }
     }
@@ -6546,12 +6563,6 @@
     }
 
     function toggleTightSecurity(isEnabled){
-      if(isEnabled){
-        showToast('Enabling Tight Security', 'Disabling account switching and clearing session data...', 'info');
-      }else{
-        showToast('Disabling Tight Security', 'Re-enabling account switching...', 'info');
-      }
-
       if(isEnabled){
         // Enable tight security
         localStorage.setItem('knot_tight_security', 'true');

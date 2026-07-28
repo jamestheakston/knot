@@ -55,6 +55,9 @@
       }else if(type === 'newupdate'){
         iconName = 'info';
         iconColor = 'var(--blue)';
+      }else if(type === 'success'){
+        iconName = 'check-circle';
+        iconColor = '#10B981';
       }
 
       toast.innerHTML = `
@@ -101,8 +104,21 @@
         });
       }
 
-      // Optional auto-dismiss (if duration is provided)
-      if(duration && duration > 0){
+      // Auto-dismiss with default duration if not provided
+      // Default: 4000ms for info/success, 6000ms for warning/error, no auto-dismiss for toasts with actions
+      var autoDismissDuration = duration;
+      if(autoDismissDuration === undefined){
+        if(actions && typeof actions === 'object'){
+          // Don't auto-dismiss toasts with action buttons
+          autoDismissDuration = 0;
+        }else if(type === 'error' || type === 'warning'){
+          autoDismissDuration = 6000;
+        }else{
+          autoDismissDuration = 4000;
+        }
+      }
+      
+      if(autoDismissDuration && autoDismissDuration > 0){
         setTimeout(function(){
           if(toast.parentElement){
             toast.style.animation = 'toastSlideOut 0.3s ease forwards';
@@ -112,7 +128,7 @@
               }
             }, 300);
           }
-        }, duration);
+        }, autoDismissDuration);
       }
     },
 
