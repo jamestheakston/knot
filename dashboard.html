@@ -2046,10 +2046,62 @@
     text-transform: uppercase;
     letter-spacing: 0.05em;
   }
+  .settings-item-description{
+    font-size: 13px;
+    color: var(--muted-2);
+    margin-top: 4px;
+    text-transform: none;
+    letter-spacing: normal;
+    font-weight: 400;
+  }
   .settings-item-value{
     font-size: 16px;
     color: var(--ink);
     font-weight: 600;
+  }
+  
+  /* Toggle Switch */
+  .toggle-switch{
+    position: relative;
+    display: inline-block;
+    width: 48px;
+    height: 28px;
+  }
+  .toggle-switch input{
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+  .toggle-slider{
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: var(--line);
+    transition: 0.3s;
+    border-radius: 28px;
+  }
+  .toggle-slider:before{
+    position: absolute;
+    content: "";
+    height: 20px;
+    width: 20px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    transition: 0.3s;
+    border-radius: 50%;
+  }
+  .toggle-switch input:checked + .toggle-slider{
+    background-color: var(--blue);
+  }
+  .toggle-switch input:checked + .toggle-slider:before{
+    transform: translateX(20px);
+  }
+  .toggle-switch input:focus + .toggle-slider{
+    box-shadow: 0 0 0 3px var(--blue-soft);
   }
   .settings-actions{
     margin-top: 40px;
@@ -2111,6 +2163,52 @@
   .social-connection-btn{
     padding: 8px 16px;
     font-size: 13px;
+  }
+
+  /* ---------- PASSKEYS LIST ---------- */
+  .passkeys-list{
+    margin-top: 24px;
+  }
+  .passkey-item{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px;
+    background: var(--bg-3);
+    border-radius: 12px;
+    margin-bottom: 12px;
+  }
+  .passkey-item:last-child{
+    margin-bottom: 0;
+  }
+  .passkey-item-info{
+    flex: 1;
+  }
+  .passkey-item-name{
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: 4px;
+  }
+  .passkey-item-meta{
+    font-size: 13px;
+    color: var(--muted);
+  }
+  .passkey-item-actions{
+    display: flex;
+    gap: 8px;
+  }
+  .empty-state{
+    padding: 32px;
+    text-align: center;
+    color: var(--muted);
+    font-size: 14px;
+  }
+  .loading{
+    padding: 32px;
+    text-align: center;
+    color: var(--muted);
+    font-size: 14px;
   }
 
   /* ---------- ERROR STATE ---------- */
@@ -2869,7 +2967,7 @@
     <div class="no-pods-modal-actions">
       <a href="index.html?openmodal=true" class="btn btn-primary">Start a pod</a>
       <a href="index.html?openmodal=true" class="btn btn-ghost">Join with invite code</a>
-      <a href="accountswitcher.html" class="btn btn-ghost">Switch account</a>
+      <a href="accountswitcher.html" class="btn btn-ghost" id="switchAccountBtn" style="display: none;">Switch account</a>
     </div>
   </div>
 </div>
@@ -2895,7 +2993,14 @@
         }
         SupabaseClient = supabase.createClient(
           'https://mfjtdrqvmuwtoarkiezi.supabase.co',
-          'sb_publishable_SPhsUI31nYbrrLjPBAaRBw_OkWQ2_Xn'
+          'sb_publishable_SPhsUI31nYbrrLjPBAaRBw_OkWQ2_Xn',
+          {
+            auth: {
+              experimental: {
+                passkey: true
+              }
+            }
+          }
         );
         return SupabaseClient;
       }catch(err){
@@ -2910,6 +3015,14 @@
         console.error('No Supabase client in checkAuth');
         window.location.href = 'index.html';
         return;
+      }
+
+      // Check if tight security is enabled and hide switch account button
+      if(localStorage.getItem('knot_tight_security') === 'true'){
+        var switchAccountBtn = document.getElementById('switchAccountBtn');
+        if(switchAccountBtn){
+          switchAccountBtn.style.display = 'none';
+        }
       }
 
       var { data: { session }, error } = await client.auth.getSession();
@@ -5888,6 +6001,24 @@
           </div>
 
           <div class="settings-card">
+            <h3>Security Settings</h3>
+            <div class="settings-item">
+              <div class="settings-item-label">
+                <div>
+                  <div>Enable Tight Security</div>
+                  <div class="settings-item-description">Disables account switching and doesn't store session data in localStorage. Not recommended for most users.</div>
+                </div>
+              </div>
+              <div class="settings-item-value">
+                <label class="toggle-switch">
+                  <input type="checkbox" id="tightSecurityToggle" ${localStorage.getItem('knot_tight_security') === 'true' ? 'checked' : ''}>
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <div class="settings-card">
             <h3>Connected Accounts</h3>
             <div class="social-connections">
               <div class="social-connection ${hasGitHub ? 'is-connected' : ''}">
@@ -5928,6 +6059,26 @@
                   ${hasPassword ? 'Change Password' : 'Add Password'}
                 </button>
               </div>
+
+              <div class="social-connection">
+                <div class="social-connection-icon">
+                  <i data-lucide="key" style="width: 24px; height: 24px;"></i>
+                </div>
+                <div class="social-connection-info">
+                  <div class="social-connection-name">Passkeys</div>
+                  <div class="social-connection-status" id="passkeyStatus">Loading...</div>
+                </div>
+                <button class="btn btn-primary social-connection-btn" id="addPasskeyBtn">
+                  Add Passkey
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="settings-card" id="passkeysCard" style="display: none;">
+            <h3>Your Passkeys</h3>
+            <div id="passkeysList" class="passkeys-list">
+              <div class="loading">Loading passkeys...</div>
             </div>
           </div>
 
@@ -5947,6 +6098,15 @@
 
       document.getElementById('resetSessionBtn').addEventListener('click', handleResetSession);
       document.getElementById('logoutBtn').addEventListener('click', handleLogout);
+
+      // Passkey handlers
+      document.getElementById('addPasskeyBtn').addEventListener('click', handleAddPasskey);
+
+      // Load passkeys
+      loadPasskeys();
+
+      // Tight security toggle handler
+      document.getElementById('tightSecurityToggle').addEventListener('change', handleTightSecurityToggle);
 
       // Password modal handlers
       document.getElementById('cancelPasswordBtn').addEventListener('click', hidePasswordModal);
@@ -6065,41 +6225,190 @@
       var email = document.getElementById('passwordEmail').value;
       var password = document.getElementById('passwordInput').value;
       var confirm = document.getElementById('passwordConfirm').value;
-      
-      // Validation
-      if(!email || !email.includes('@')){
-        alert('Please enter a valid email address');
+
+      if(!email || !password || !confirm){
+        alert('Please fill in all fields');
         return;
       }
-      
-      if(!password || password.length < 6){
-        alert('Password must be at least 6 characters');
-        return;
-      }
-      
+
       if(password !== confirm){
         alert('Passwords do not match');
         return;
       }
-      
+
+      if(password.length < 6){
+        alert('Password must be at least 6 characters');
+        return;
+      }
+
       try{
         var { error } = await client.auth.updateUser({
           email: email,
           password: password
         });
-        
+
         if(error) throw error;
-        
-        alert('Password updated successfully');
+
+        alert('Password saved successfully');
         hidePasswordModal();
         loadAccountSettings();
       }catch(err){
-        console.error('Error updating password:', err);
-        if(err.message && err.message.includes('email confirmation')){
-          alert('Please check your email to confirm the new address');
+        console.error('Error saving password:', err);
+        alert('Error saving password: ' + err.message);
+      }
+    }
+
+    async function loadPasskeys(){
+      var client = getSupabaseClient();
+      var statusEl = document.getElementById('passkeyStatus');
+      var listEl = document.getElementById('passkeysList');
+      var cardEl = document.getElementById('passkeysCard');
+
+      try{
+        var { data, error } = await client.auth.passkey.list();
+
+        if(error) throw error;
+
+        var passkeys = data || [];
+        
+        // Update status
+        if(passkeys.length > 0){
+          statusEl.textContent = passkeys.length + ' passkey(s) registered';
+          cardEl.style.display = 'block';
         }else{
-          alert('Error updating password: ' + err.message);
+          statusEl.textContent = 'No passkeys registered';
+          cardEl.style.display = 'none';
         }
+
+        // Render passkeys list
+        if(passkeys.length === 0){
+          listEl.innerHTML = '<div class="empty-state">No passkeys registered yet</div>';
+        }else{
+          listEl.innerHTML = passkeys.map(function(passkey){
+            return `
+              <div class="passkey-item">
+                <div class="passkey-item-info">
+                  <div class="passkey-item-name">${passkey.friendly_name || 'Unnamed Passkey'}</div>
+                  <div class="passkey-item-meta">
+                    Added: ${formatDate(passkey.created_at)}
+                    ${passkey.last_used_at ? '• Last used: ' + formatDate(passkey.last_used_at) : ''}
+                  </div>
+                </div>
+                <div class="passkey-item-actions">
+                  <button class="btn btn-ghost btn-sm" onclick="renamePasskey('${passkey.id}')">Rename</button>
+                  <button class="btn btn-ghost btn-sm" onclick="deletePasskey('${passkey.id}')">Delete</button>
+                </div>
+              </div>
+            `;
+          }).join('');
+        }
+      }catch(err){
+        console.error('Error loading passkeys:', err);
+        statusEl.textContent = 'Error loading passkeys';
+        listEl.innerHTML = '<div class="error">Failed to load passkeys</div>';
+      }
+    }
+
+    async function handleAddPasskey(){
+      var client = getSupabaseClient();
+
+      try{
+        var { data, error } = await client.auth.registerPasskey();
+
+        if(error) throw error;
+
+        showToast('Success', 'Passkey registered successfully!', 'success');
+        loadPasskeys();
+      }catch(err){
+        console.error('Error registering passkey:', err);
+        
+        if(err.message && err.message.includes('not supported')){
+          showToast('Not supported', 'Passkeys are not supported on this device or browser.', 'error');
+        }else if(err.message && err.message.includes('cancelled')){
+          showToast('Cancelled', 'Passkey registration was cancelled.', 'info');
+        }else{
+          showToast('Error', 'Failed to register passkey. ' + (err.message || 'Please try again.'), 'error');
+        }
+      }
+    }
+
+    async function renamePasskey(passkeyId){
+      var newName = prompt('Enter a name for this passkey:');
+      
+      if(!newName || newName.trim() === ''){
+        return;
+      }
+
+      if(newName.length > 120){
+        alert('Name must be 120 characters or less');
+        return;
+      }
+
+      var client = getSupabaseClient();
+
+      try{
+        var { error } = await client.auth.passkey.update({
+          passkeyId: passkeyId,
+          friendlyName: newName.trim()
+        });
+
+        if(error) throw error;
+
+        showToast('Success', 'Passkey renamed successfully!', 'success');
+        loadPasskeys();
+      }catch(err){
+        console.error('Error renaming passkey:', err);
+        showToast('Error', 'Failed to rename passkey: ' + err.message, 'error');
+      }
+    }
+
+    async function deletePasskey(passkeyId){
+      if(!confirm('Are you sure you want to delete this passkey? You will not be able to use it for sign-in anymore.')){
+        return;
+      }
+
+      var client = getSupabaseClient();
+
+      try{
+        var { error } = await client.auth.passkey.delete({
+          passkeyId: passkeyId
+        });
+
+        if(error) throw error;
+
+        showToast('Success', 'Passkey deleted successfully!', 'success');
+        loadPasskeys();
+      }catch(err){
+        console.error('Error deleting passkey:', err);
+        showToast('Error', 'Failed to delete passkey: ' + err.message, 'error');
+      }
+    }
+
+    function handleTightSecurityToggle(e){
+      var isEnabled = e.target.checked;
+      var message = isEnabled 
+        ? 'Are you sure you want to enable Tight Security?\n\nThis will:\n• Disable account switching\n• Remove all stored session data from localStorage\n• Require you to sign in each time\n\nThis is not recommended for most users.'
+        : 'Are you sure you want to disable Tight Security?\n\nThis will:\n• Re-enable account switching\n• Allow session data to be stored in localStorage\n\nYou can always re-enable this later.';
+
+      if(!confirm(message)){
+        e.target.checked = !isEnabled;
+        return;
+      }
+
+      if(isEnabled){
+        // Enable tight security
+        localStorage.setItem('knot_tight_security', 'true');
+        
+        // Clear all account-related data from localStorage
+        localStorage.removeItem('knot_accounts');
+        localStorage.removeItem('knot_active_account');
+        localStorage.removeItem('knot_tokens_' + currentUser.id);
+        
+        showToast('Tight Security Enabled', 'Account switching disabled and session data cleared.', 'success');
+      }else{
+        // Disable tight security
+        localStorage.removeItem('knot_tight_security');
+        showToast('Tight Security Disabled', 'Account switching re-enabled.', 'success');
       }
     }
 
@@ -6314,6 +6623,11 @@
         }else if(action === 'account'){
           navigateTo('account');
         }else if(action === 'switch-account'){
+          // Check if tight security is enabled
+          if(localStorage.getItem('knot_tight_security') === 'true'){
+            showToast('Tight Security Enabled', 'Account switching is disabled when Tight Security is enabled.', 'info');
+            return;
+          }
           window.location.href = 'accountswitcher.html';
         }
         

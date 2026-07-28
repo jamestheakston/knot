@@ -1004,6 +1004,9 @@
         'sb_publishable_SPhsUI31nYbrrLjPBAaRBw_OkWQ2_Xn',
         {
           auth: {
+            experimental: {
+              passkey: true
+            },
             persistSession: false,
             autoRefreshToken: true,
             detectSessionInUrl: true
@@ -1588,6 +1591,14 @@
 
   // Initialize
   document.addEventListener('DOMContentLoaded', function(){
+    // Check if tight security is enabled
+    if(localStorage.getItem('knot_tight_security') === 'true'){
+      // Tight security is enabled, redirect to dashboard with message
+      var errorUrl = 'error.html?title=Tight+Security+Enabled&c0de=SECURITY-1234&errormsg=Account+switching+is+disabled+when+Tight+Security+is+enabled.+You+can+disable+this+in+Account+Settings.&cta1title=Go+to+Dashboard&cta1link=dashboard.html';
+      window.location.href = errorUrl;
+      return;
+    }
+
     // Check if user is authenticated with Supabase
     var client = getSupabaseClient();
     if(client){
