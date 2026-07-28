@@ -3098,10 +3098,10 @@
     <div class="custom-modal-body" style="text-align: center;">
       <div style="display: flex; justify-content: center; margin-bottom: 20px;">
         <div style="position: relative;">
-          <div style="width: 80px; height: 80px; background: #e2e8f0; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
-            <i data-lucide="shield-check" style="width: 40px; height: 40px; color: #475569;"></i>
+          <div style="width: 96px; height: 96px; background: #e2e8f0; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+            <i data-lucide="shield-check" style="width: 48px; height: 48px; color: #475569;"></i>
           </div>
-          <div style="position: absolute; bottom: 0; right: 0; background: #2563eb; color: white; border-radius: 50%; padding: 4px; border: 2px solid white;">
+          <div style="position: absolute; bottom: -4px; right: -4px; width: 32px; height: 32px; background: #2563eb; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 3px solid white;">
             <i data-lucide="check-circle-2" style="width: 20px; height: 20px;"></i>
           </div>
         </div>
@@ -3109,7 +3109,7 @@
       <h4 style="margin: 0 0 10px 0; font-size: 20px; font-weight: 600;">Verify Your Identity</h4>
       <p style="color: #64748b; margin-bottom: 20px;">Please verify your identity to continue with this security-sensitive action.</p>
       
-      <div id="verificationOptions" style="display: flex; flex-direction: column; gap: 12px; text-align: left;">
+      <div id="verificationOptions" style="display: flex; flex-direction: column; gap: 16px; text-align: left;">
         <!-- Verification options will be dynamically inserted here -->
       </div>
     </div>
@@ -4974,6 +4974,7 @@
               <div class="invite-code-display">
                 <span id="inviteCodeDisplay">${currentPod.inviteCode}</span>
                 <button class="btn btn-ghost" id="copyInviteCode">Copy</button>
+                <button class="btn btn-ghost" id="resetInviteCode">Reset</button>
               </div>
             </div>
             <div class="info-box">
@@ -5039,6 +5040,12 @@
         setTimeout(function(){
           document.getElementById('copyInviteCode').textContent = 'Copy';
         }, 2000);
+      });
+
+      document.getElementById('resetInviteCode').addEventListener('click', function(){
+        showConfirmModal('Reset Invite Code', 'Are you sure you want to reset your invite code? This will invalidate your current invite code. Current members will not be affected, but anyone with the old code will no longer be able to join.', function(){
+          handleResetInviteCode();
+        }, function(){});
       });
 
       document.getElementById('savePodSettings').addEventListener('click', handleSavePodSettings);
