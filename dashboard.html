@@ -16,6 +16,8 @@
 <script src="/api/mail.js"></script>
 <script src="/api/toastsystem.js"></script>
 <script type="module" src="https://cdn.jsdelivr.net/npm/@videojs/html/cdn/video.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/videojs-contrib-ads/7.4.0/videojs.ads.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/videojs-contrib-ads/7.4.0/videojs.ads.min.js"></script>
 <style>
   :root{
     --bg: #F7F8FB;
@@ -6149,9 +6151,52 @@
             </div>
             <video-player>
               <video-skin>
-                <video src="/assets/tightsecurity.mp4" playsinline></video>
+                <video id="tightSecurityVideo" src="/assets/tightsecurity.mp4" playsinline></video>
               </video-skin>
             </video-player>
+            <script>
+              // Initialize videojs-contrib-ads for preroll ad
+              document.addEventListener('DOMContentLoaded', function() {
+                var videoElement = document.getElementById('tightSecurityVideo');
+                if(videoElement && typeof videojs !== 'undefined') {
+                  var player = videojs('tightSecurityVideo');
+                  
+                  // Initialize videojs-contrib-ads
+                  player.ads();
+                  
+                  // Store original content video source
+                  var contentSrc = '/assets/tightsecurity.mp4';
+                  
+                  // Request ads whenever there's new video content
+                  player.on('contentchanged', function() {
+                    player.trigger('adsready');
+                  });
+                  
+                  // Play preroll ad when ready
+                  player.on('readyforpreroll', function() {
+                    player.ads.startLinearAdMode();
+                    
+                    // Play the ad video
+                    player.src('/assets/cookeryad.mp4');
+                    
+                    // Send event when ad is playing to remove loading spinner
+                    player.one('adplaying', function() {
+                      player.trigger('ads-ad-started');
+                    });
+                    
+                    // Resume content when ad has finished
+                    player.one('adended', function() {
+                      player.ads.endLinearAdMode();
+                      player.src(contentSrc);
+                      player.play();
+                    });
+                  });
+                  
+                  // Trigger adsready to start the ad flow
+                  player.trigger('adsready');
+                }
+              });
+            </script>
           </div>
 
           <div class="settings-card">
