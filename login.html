@@ -646,22 +646,31 @@
         // Successfully signed in with passkey
         showToast('Success', 'Signed in successfully!', 'success');
         
-        // Save session to account manager
+        // Save session to account manager with tokens
         if(data.session && data.user){
           var accountData = {
             id: data.user.id,
             email: data.user.email,
             name: data.user.user_metadata?.name || data.user.email,
+            avatar: data.user.user_metadata?.avatar_url || null,
             access_token: data.session.access_token,
             refresh_token: data.session.refresh_token,
+            expires_at: data.session.expires_at,
             provider: 'passkey'
           };
           
           // Add to account manager
-          if(typeof AccountManager !== 'undefined'){
-            AccountManager.addAccount(accountData);
-            AccountManager.setActiveAccount(data.user.id);
+          var accounts = JSON.parse(localStorage.getItem('knot_accounts') || '[]');
+          var existingIndex = accounts.findIndex(function(acc){
+            return acc.id === accountData.id;
+          });
+          if(existingIndex >= 0){
+            accounts[existingIndex] = accountData;
+          }else{
+            accounts.push(accountData);
           }
+          localStorage.setItem('knot_accounts', JSON.stringify(accounts));
+          localStorage.setItem('knot_active_account', accountData.id);
         }
 
         // Redirect to dashboard
@@ -763,12 +772,15 @@
 
         showToast('Success', 'Login successful!', 'success');
         
-        // Save account to account manager
+        // Save account to account manager with tokens
         var account = {
           id: data.user.id,
           email: data.user.email,
           name: data.user.user_metadata?.full_name || data.user.user_metadata?.name || data.user.email,
-          avatar: data.user.user_metadata?.avatar_url || null
+          avatar: data.user.user_metadata?.avatar_url || null,
+          access_token: data.session.access_token,
+          refresh_token: data.session.refresh_token,
+          expires_at: data.session.expires_at
         };
         var accounts = JSON.parse(localStorage.getItem('knot_accounts') || '[]');
         var existingIndex = accounts.findIndex(function(acc){

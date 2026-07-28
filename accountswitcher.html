@@ -1007,7 +1007,7 @@
             experimental: {
               passkey: true
             },
-            persistSession: false,
+            persistSession: true,
             autoRefreshToken: true,
             detectSessionInUrl: true
           }
@@ -1219,36 +1219,105 @@
 
     // Set the session for the target account
     console.log('Setting session for account:', account.id);
-    client.auth.setSession({
-      access_token: account.access_token,
+    
+    // First try to refresh the token to ensure it's valid
+    client.auth.refreshSession({
       refresh_token: account.refresh_token
-    }).then(function({ data, error }){
-      console.log('setSession result:', { data: data, error: error });
-      if(error){
-        console.error('Error setting session:', error);
-        // Token expired or invalid, fall back to re-login
-        showToast('Session expired', 'Please log in again for ' + (account.name || account.email), 'warning', null, 3000);
-        setTimeout(function(){
-          window.location.href = 'login.html?email=' + encodeURIComponent(account.email) + '&from=accountswitcher';
-        }, 1500);
-        return;
-      }
+    }).then(function({ data: refreshData, error: refreshError }){
+      if(refreshError){
+        console.log('Token refresh failed, trying with existing tokens:', refreshError);
+        // If refresh fails, try with existing tokens anyway
+        client.auth.setSession({
+          access_token: account.access_token,
+          refresh_token: account.refresh_token
+        }).then(function({ data, error }){
+          if(error){
+            console.error('Error setting session:', error);
+            showToast('Session expired', 'Please log in again for ' + (account.name || account.email), 'warning', null, 3000);
+            setTimeout(function(){
+              window.location.href = 'login.html?email=' + encodeURIComponent(account.email) + '&from=accountswitcher';
+            }, 1500);
+            return;
+          }
 
-      // Session set successfully - update stored tokens with new session
-      if(data && data.session){
-        AccountManager.updateAccountTokens(accountId, data.session);
+          // Session set successfully - update stored tokens with new session
+          if(data && data.session){
+            AccountManager.updateAccountTokens(accountId, data.session);
+          }
+          
+          AccountManager.setActiveAccount(accountId);
+          showToast('Account switched', 'Now logged in as ' + (account.name || account.email), 'info', null, 4000);
+          
+          // Redirect to dashboard
+          setTimeout(function(){
+            window.location.href = 'dashboard.html';
+          }, 500);
+        }).catch(function(err){
+          console.error('Session set error:', err);
+          showToast('Error switching accounts', 'Please try again', 'error');
+        });
+      }else{
+        // Refresh successful, use the new tokens
+        console.log('Token refresh successful');
+        if(refreshData && refreshData.session){
+          AccountManager.updateAccountTokens(accountId, refreshData.session);
+          
+          // Now set the session with refreshed tokens
+          client.auth.setSession({
+            access_token: refreshData.session.access_token,
+            refresh_token: refreshData.session.refresh_token
+          }).then(function({ data, error }){
+            if(error){
+              console.error('Error setting session after refresh:', error);
+              showToast('Error switching accounts', 'Please try again', 'error');
+              return;
+            }
+
+            AccountManager.setActiveAccount(accountId);
+            showToast('Account switched', 'Now logged in as ' + (account.name || account.email), 'info', null, 4000);
+            
+            // Redirect to dashboard
+            setTimeout(function(){
+              window.location.href = 'dashboard.html';
+            }, 500);
+          }).catch(function(err){
+            console.error('Session set error after refresh:', err);
+            showToast('Error switching accounts', 'Please try again', 'error');
+          });
+        }
       }
-      
-      AccountManager.setActiveAccount(accountId);
-      showToast('Account switched', 'Now logged in as ' + (account.name || account.email), 'info', null, 4000);
-      
-      // Redirect to dashboard
-      setTimeout(function(){
-        window.location.href = 'dashboard.html';
-      }, 500);
     }).catch(function(err){
-      console.error('Session set error:', err);
-      showToast('Error switching accounts', 'Please try again', 'error');
+      console.error('Token refresh error:', err);
+      // Fallback to using existing tokens
+      client.auth.setSession({
+        access_token: account.access_token,
+        refresh_token: account.refresh_token
+      }).then(function({ data, error }){
+        if(error){
+          console.error('Error setting session:', error);
+          showToast('Session expired', 'Please log in again for ' + (account.name || account.email), 'warning', null, 3000);
+          setTimeout(function(){
+            window.location.href = 'login.html?email=' + encodeURIComponent(account.email) + '&from=accountswitcher';
+          }, 1500);
+          return;
+        }
+
+        // Session set successfully - update stored tokens with new session
+        if(data && data.session){
+          AccountManager.updateAccountTokens(accountId, data.session);
+        }
+        
+        AccountManager.setActiveAccount(accountId);
+        showToast('Account switched', 'Now logged in as ' + (account.name || account.email), 'info', null, 4000);
+        
+        // Redirect to dashboard
+        setTimeout(function(){
+          window.location.href = 'dashboard.html';
+        }, 500);
+      }).catch(function(err){
+        console.error('Session set error:', err);
+        showToast('Error switching accounts', 'Please try again', 'error');
+      });
     });
   }
 

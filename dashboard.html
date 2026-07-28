@@ -2261,6 +2261,82 @@
     flex: 1;
   }
 
+  /* ---------- CUSTOM MODAL ---------- */
+  .custom-modal-overlay{
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+  }
+  .custom-modal-overlay.is-open{
+    opacity: 1;
+    visibility: visible;
+  }
+  .custom-modal{
+    background: var(--bg-2);
+    border-radius: 16px;
+    max-width: 400px;
+    width: 90%;
+    padding: 32px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    transform: scale(0.9);
+    transition: transform 0.3s ease;
+  }
+  .custom-modal-overlay.is-open .custom-modal{
+    transform: scale(1);
+  }
+  .custom-modal-header{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+  }
+  .custom-modal-header h3{
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--ink);
+    margin: 0;
+  }
+  .custom-modal-close{
+    background: none;
+    border: none;
+    color: var(--muted);
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 4px;
+    transition: color 0.2s ease, background 0.2s ease;
+  }
+  .custom-modal-close:hover{
+    color: var(--ink);
+    background: var(--bg-3);
+  }
+  .custom-modal-close i{
+    width: 20px;
+    height: 20px;
+  }
+  .custom-modal-body{
+    margin-bottom: 24px;
+  }
+  .custom-modal-body p{
+    font-size: 15px;
+    color: var(--muted);
+    line-height: 1.6;
+    margin: 0;
+  }
+  .custom-modal-footer{
+    display: flex;
+    justify-content: flex-end;
+  }
+
   /* ---------- RESPONSIVE ---------- */
   @media (max-width: 768px){
     .mobile-menu-toggle{
@@ -2972,6 +3048,24 @@
   </div>
 </div>
 
+<!-- Custom Alert Modal -->
+<div class="custom-modal-overlay" id="customModal">
+  <div class="custom-modal">
+    <div class="custom-modal-header">
+      <h3 id="customModalTitle">Title</h3>
+      <button class="custom-modal-close" id="customModalClose">
+        <i data-lucide="x"></i>
+      </button>
+    </div>
+    <div class="custom-modal-body">
+      <p id="customModalMessage">Message</p>
+    </div>
+    <div class="custom-modal-footer">
+      <button class="btn btn-primary" id="customModalOk">OK</button>
+    </div>
+  </div>
+</div>
+
 <script>
   // Global hCaptcha widget tracking
   var modalHcaptchaWidgetId = null;
@@ -3025,6 +3119,9 @@
         }
       }
 
+      // Initialize custom modal
+      initCustomModal();
+
       var { data: { session }, error } = await client.auth.getSession();
       
       console.log('checkAuth session:', session);
@@ -3046,12 +3143,18 @@
       if(isOAuthLogin){
         sendLoginNotification(currentUser.email);
         
-        // Save account to account manager
+        // Get current session to retrieve tokens
+        var { data: { session } } = await client.auth.getSession();
+        
+        // Save account to account manager with tokens
         var account = {
           id: currentUser.id,
           email: currentUser.email,
           name: currentUser.user_metadata?.full_name || currentUser.user_metadata?.name || currentUser.email,
-          avatar: currentUser.user_metadata?.avatar_url || null
+          avatar: currentUser.user_metadata?.avatar_url || null,
+          access_token: session?.access_token,
+          refresh_token: session?.refresh_token,
+          expires_at: session?.expires_at
         };
         var accounts = JSON.parse(localStorage.getItem('knot_accounts') || '[]');
         var existingIndex = accounts.findIndex(function(acc){
@@ -3384,7 +3487,7 @@
         
         // If linking account, show success message
         if(isLinking){
-          alert('Account linked successfully!');
+          showCustomModal('Success', 'Account linked successfully!');
         }
       }else{
         // User has no pods - check if they were removed from a pod
@@ -3592,7 +3695,7 @@
             localStorage.removeItem('authFlow');
             if(!joinSuccess){
               console.error('Failed to join pod from auth flow');
-              alert('Failed to join pod. Please try joining manually with your invite code.');
+              showCustomModal('Error', 'Failed to join pod. Please try joining manually with your invite code.');
             }else{
               console.log('Successfully joined pod via auth flow');
             }
@@ -3609,7 +3712,7 @@
             if(!flowData.podName || !flowData.habitName){
               console.error('Auth flow start missing required pod data:', flowData);
               localStorage.removeItem('authFlow');
-              alert('Your pod creation data is incomplete. Please create a pod manually.');
+              showCustomModal('Error', 'Your pod creation data is incomplete. Please create a pod manually.');
               console.log('=== checkAuthFlow END (missing data) ===');
               return;
             }
@@ -3743,7 +3846,7 @@
         // Ensure user is authenticated
         if(!currentUser || !currentUser.id){
           console.error('User not authenticated, cannot create pod');
-          alert('You must be logged in to create a pod. Please refresh the page.');
+          showCustomModal('Error', 'You must be logged in to create a pod. Please refresh the page.');
           console.log('=== createPodFromSignup END (not authenticated) ===');
           return;
         }
@@ -3861,7 +3964,7 @@
         console.log('=== createPodFromSignup END (success) ===');
       }catch(err){
         console.error('Error creating pod:', err);
-        alert('Error creating pod: ' + err.message);
+        showCustomModal('Error', 'Error creating pod: ' + err.message);
         console.log('=== createPodFromSignup END (error) ===');
       }
     }
@@ -4426,9 +4529,7 @@
     }
 
     async function handleRemoveMember(userId, displayName){
-      if(!confirm('Are you sure you want to remove ' + displayName + ' from this pod? This action cannot be undone.')){
-        return;
-      }
+      showToast('Removing member', 'Removing ' + displayName + ' from the pod...', 'info');
 
       var client = getSupabaseClient();
       try{
@@ -4446,16 +4547,16 @@
 
         if(!data || data.length === 0){
           console.error('No rows deleted - member may not exist or RLS blocked deletion');
-          alert('Failed to remove member. You may not have permission to remove this member, or they may not be in this pod.');
+          showCustomModal('Error', 'Failed to remove member. You may not have permission to remove this member, or they may not be in this pod.');
           return;
         }
 
         console.log('Member removed successfully');
-        alert(displayName + ' has been removed from the pod. They will be redirected when they next visit the dashboard.');
+        showToast('Success', displayName + ' has been removed from the pod.', 'success');
         loadMembers(); // Reload the members list
       }catch(err){
         console.error('Error removing member:', err);
-        alert('Error removing member: ' + err.message);
+        showCustomModal('Error', 'Error removing member: ' + err.message);
       }
     }
 
@@ -4643,7 +4744,7 @@
         loadCheckIns();
       }catch(err){
         console.error('Error checking in:', err);
-        alert('Error checking in: ' + err.message);
+        showCustomModal('Error', 'Error checking in: ' + err.message);
       }
     }
 
@@ -4882,9 +4983,7 @@
     }
 
     async function handleDeletePod(){
-      if(!confirm('Are you sure you want to delete this pod? This action cannot be undone and will permanently delete:\n\n• The pod\n• All habits\n• All check-ins\n• All member access\n\nAll members will lose access to this pod immediately.')){
-        return;
-      }
+      showToast('Deleting pod', 'Deleting pod and all associated data...', 'info');
 
       var client = getSupabaseClient();
       try{
@@ -4939,7 +5038,7 @@
         if(error) throw error;
 
         console.log('Pod deleted successfully');
-        alert('Pod deleted successfully');
+        showToast('Success', 'Pod deleted successfully', 'success');
 
         // Reload user pods
         await loadUserPods();
@@ -4967,7 +5066,7 @@
         }
       }catch(err){
         console.error('Error deleting pod:', err);
-        alert('Error deleting pod: ' + err.message);
+        showCustomModal('Error', 'Error deleting pod: ' + err.message);
       }
     }
 
@@ -5053,9 +5152,8 @@
         document.querySelectorAll('.delete-habit-btn').forEach(function(btn){
           btn.addEventListener('click', function(){
             var habitId = this.dataset.id;
-            if(confirm('Are you sure you want to delete this habit? This will also permanently delete all check-in history for this habit. This action cannot be undone.')){
-              deleteHabit(habitId);
-            }
+            showToast('Deleting habit', 'Deleting habit and all check-in history...', 'info');
+            deleteHabit(habitId);
           });
         });
       }catch(err){
@@ -5157,7 +5255,7 @@
       var description = document.getElementById('habitDescription').value;
 
       if(!name){
-        alert('Please enter a habit name');
+        showCustomModal('Error', 'Please enter a habit name');
         return;
       }
 
@@ -5172,7 +5270,7 @@
             .eq('pod_id', currentPod.id);
           
           if(!checkError && existingHabits && existingHabits.length > 0){
-            alert('Your pod can only have one habit. Please edit or delete the existing habit first.');
+            showCustomModal('Error', 'Your pod can only have one habit. Please edit or delete the existing habit first.');
             return;
           }
         }
@@ -5199,7 +5297,7 @@
         loadHabits();
       }catch(err){
         console.error('Error saving habit:', err);
-        alert('Error saving habit: ' + err.message);
+        showCustomModal('Error', 'Error saving habit: ' + err.message);
       }
     }
 
@@ -5214,7 +5312,7 @@
         loadHabits();
       }catch(err){
         console.error('Error deleting habit:', err);
-        alert('Error deleting habit: ' + err.message);
+        showCustomModal('Error', 'Error deleting habit: ' + err.message);
       }
     }
 
@@ -5251,10 +5349,10 @@
         // Apply timezone and date format
         applyTimezoneAndDateFormat(podTimezone, podDateFormat);
         
-        alert('Pod settings saved successfully');
+        showCustomModal('Success', 'Pod settings saved successfully');
       }catch(err){
         console.error('Error saving pod settings:', err);
-        alert('Error saving pod settings: ' + err.message);
+        showCustomModal('Error', 'Error saving pod settings: ' + err.message);
       }
     }
 
@@ -5432,9 +5530,8 @@
       });
 
       document.getElementById('resetInviteBtn').addEventListener('click', function(){
-        if(confirm('Are you sure you want to reset your invite code? This will invalidate your current invite code. Current members will not be affected, but anyone with the old code will no longer be able to join.')){
-          handleResetInviteCode();
-        }
+        showToast('Resetting invite code', 'Generating new invite code...', 'info');
+        handleResetInviteCode();
       });
 
       if(typeof lucide !== 'undefined'){
@@ -5454,11 +5551,11 @@
         if(error) throw error;
 
         currentPod.inviteCode = newCode;
-        alert('Invite code reset successfully! Your new code is: ' + newCode);
+        showCustomModal('Success', 'Invite code reset successfully! Your new code is: ' + newCode);
         loadInvite(); // Reload the invite section to show the new code
       }catch(err){
         console.error('Error resetting invite code:', err);
-        alert('Error resetting invite code: ' + err.message);
+        showCustomModal('Error', 'Error resetting invite code: ' + err.message);
       }
     }
 
@@ -5753,7 +5850,7 @@
       var btn = document.getElementById('joinPodBtn');
       
       if(!code || code.length !== 6){
-        alert('Please enter a valid 6-digit invite code');
+        showCustomModal('Error', 'Please enter a valid 6-digit invite code');
         return;
       }
 
@@ -5768,7 +5865,7 @@
           .rpc('check_invite_code_exists', { invite_code_param: code });
 
         if(checkError || !exists){
-          alert('Invalid invite code. Please check and try again.');
+          showCustomModal('Error', 'Invalid invite code. Please check and try again.');
           return;
         }
         
@@ -5780,7 +5877,7 @@
           .maybeSingle();
 
         if(podError || !pod){
-          alert('Invalid invite code. Please check and try again.');
+          showCustomModal('Error', 'Invalid invite code. Please check and try again.');
           return;
         }
 
@@ -5793,7 +5890,7 @@
           .maybeSingle();
 
         if(existingMember){
-          alert('You are already a member of this pod.');
+          showCustomModal('Error', 'You are already a member of this pod.');
           return;
         }
 
@@ -5825,10 +5922,10 @@
         }
 
         hideJoinPodModal();
-        alert('Successfully joined ' + pod.name + '!');
+        showCustomModal('Success', 'Successfully joined ' + pod.name + '!');
       }catch(err){
         console.error('Error joining pod:', err);
-        alert('Error joining pod: ' + err.message);
+        showCustomModal('Error', 'Error joining pod: ' + err.message);
       }finally{
         btn.disabled = false;
         btn.textContent = 'Join Pod';
@@ -5842,13 +5939,13 @@
       var checkbox = document.getElementById('kcCheckbox');
       
       if(!email || !email.includes('@')){
-        alert('Please enter a valid email address');
+        showCustomModal('Error', 'Please enter a valid email address');
         return;
       }
 
       // Verify custom Knot captcha - check both flag and DOM state
       if(!knotCaptchaVerified || !checkbox || !checkbox.classList.contains('is-checked')){
-        alert('Please complete the captcha verification');
+        showCustomModal('Error', 'Please complete the captcha verification');
         return;
       }
 
@@ -5867,18 +5964,18 @@
 
         if(result.success){
           console.log('Invite sent successfully');
-          alert('Invite sent successfully to ' + email);
+          showCustomModal('Success', 'Invite sent successfully to ' + email);
           hideEmailInviteModal();
           
           // Reset custom Knot captcha widget
           resetKnotCaptcha();
         }else{
           console.error('Error sending invite:', result.error);
-          alert('Error sending invite: ' + result.error);
+          showCustomModal('Error', 'Error sending invite: ' + result.error);
         }
       }catch(err){
         console.error('Error sending email:', err);
-        alert('Error sending invite: ' + err.message);
+        showCustomModal('Error', 'Error sending invite: ' + err.message);
       }finally{
         btn.disabled = false;
         btn.textContent = 'Send Invite';
@@ -5931,7 +6028,7 @@
       var btn = document.getElementById('saveProfileBtn');
       
       if(!displayName || displayName.trim() === ''){
-        alert('Please enter a display name');
+        showCustomModal('Error', 'Please enter a display name');
         return;
       }
 
@@ -5964,11 +6061,11 @@
         document.getElementById('userName').textContent = displayName;
         document.getElementById('userAvatar').textContent = displayName.charAt(0).toUpperCase();
 
-        alert('Profile updated successfully');
+        showCustomModal('Success', 'Profile updated successfully');
         loadProfile();
       }catch(err){
         console.error('Error saving profile:', err);
-        alert('Error saving profile: ' + err.message);
+        showCustomModal('Error', 'Error saving profile: ' + err.message);
       }finally{
         btn.disabled = false;
         btn.textContent = 'Save Changes';
@@ -6132,9 +6229,8 @@
           
           if(isConnected){
             // Disconnect
-            if(confirm('Are you sure you want to disconnect your ' + provider + ' account? You may lose access if this is your only login method.')){
-              disconnectSocialProvider(provider);
-            }
+            showToast('Disconnecting', 'Disconnecting ' + provider + ' account...', 'info');
+            disconnectSocialProvider(provider);
           }else{
             // Connect
             connectSocialProvider(provider);
@@ -6149,7 +6245,7 @@
       // Check for active session before linking
       var { data: { session } } = await client.auth.getSession();
       if(!session){
-        alert('You must be logged in to link an account');
+        showCustomModal('Error', 'You must be logged in to link an account');
         return;
       }
       
@@ -6164,9 +6260,9 @@
       }catch(err){
         console.error('Error connecting social provider:', err);
         if(err.message && err.message.includes('already been linked')){
-          alert('This ' + provider + ' account is already linked to a different Knot account');
+          showCustomModal('Error', 'This ' + provider + ' account is already linked to a different Knot account');
         }else{
-          alert('Error connecting account: ' + err.message);
+          showCustomModal('Error', 'Error connecting account: ' + err.message);
         }
       }
     }
@@ -6180,24 +6276,34 @@
       var hasGitHub = identities.some(function(id){ return id.provider === 'github'; });
       var hasGoogle = identities.some(function(id){ return id.provider === 'google'; });
       
+      // Also check for passkeys
+      var hasPasskeys = false;
+      try{
+        var { data: passkeys } = await client.auth.passkey.list();
+        hasPasskeys = passkeys && passkeys.length > 0;
+      }catch(e){
+        console.error('Error checking passkeys:', e);
+      }
+      
       var remainingMethods = 0;
       if(hasPassword && provider !== 'email') remainingMethods++;
       if(hasGitHub && provider !== 'github') remainingMethods++;
       if(hasGoogle && provider !== 'google') remainingMethods++;
+      if(hasPasskeys) remainingMethods++;
       
       if(remainingMethods === 0){
-        alert('You cannot disconnect your last remaining login method. Please add another login method first.');
+        showCustomModal('Cannot Disconnect', 'You cannot disconnect your last remaining login method. Please add another login method first.');
         return;
       }
       
       try{
         var { error } = await client.auth.unlinkIdentity({ provider: provider });
         if(error) throw error;
-        alert('Successfully disconnected ' + provider);
+        showCustomModal('Success', 'Successfully disconnected ' + provider);
         loadAccountSettings();
       }catch(err){
         console.error('Error disconnecting social provider:', err);
-        alert('Error disconnecting account: ' + err.message);
+        showCustomModal('Error', 'Error disconnecting account: ' + err.message);
       }
     }
 
@@ -6227,17 +6333,17 @@
       var confirm = document.getElementById('passwordConfirm').value;
 
       if(!email || !password || !confirm){
-        alert('Please fill in all fields');
+        showCustomModal('Error', 'Please fill in all fields');
         return;
       }
 
       if(password !== confirm){
-        alert('Passwords do not match');
+        showCustomModal('Error', 'Passwords do not match');
         return;
       }
 
       if(password.length < 6){
-        alert('Password must be at least 6 characters');
+        showCustomModal('Error', 'Password must be at least 6 characters');
         return;
       }
 
@@ -6249,12 +6355,12 @@
 
         if(error) throw error;
 
-        alert('Password saved successfully');
+        showCustomModal('Success', 'Password saved successfully');
         hidePasswordModal();
         loadAccountSettings();
       }catch(err){
         console.error('Error saving password:', err);
-        alert('Error saving password: ' + err.message);
+        showCustomModal('Error', 'Error saving password: ' + err.message);
       }
     }
 
@@ -6340,7 +6446,7 @@
       }
 
       if(newName.length > 120){
-        alert('Name must be 120 characters or less');
+        showCustomModal('Error', 'Name must be 120 characters or less');
         return;
       }
 
@@ -6363,9 +6469,7 @@
     }
 
     async function deletePasskey(passkeyId){
-      if(!confirm('Are you sure you want to delete this passkey? You will not be able to use it for sign-in anymore.')){
-        return;
-      }
+      showToast('Deleting passkey', 'Deleting passkey...', 'info');
 
       var client = getSupabaseClient();
 
@@ -6386,13 +6490,10 @@
 
     function handleTightSecurityToggle(e){
       var isEnabled = e.target.checked;
-      var message = isEnabled 
-        ? 'Are you sure you want to enable Tight Security?\n\nThis will:\n• Disable account switching\n• Remove all stored session data from localStorage\n• Require you to sign in each time\n\nThis is not recommended for most users.'
-        : 'Are you sure you want to disable Tight Security?\n\nThis will:\n• Re-enable account switching\n• Allow session data to be stored in localStorage\n\nYou can always re-enable this later.';
-
-      if(!confirm(message)){
-        e.target.checked = !isEnabled;
-        return;
+      if(isEnabled){
+        showToast('Enabling Tight Security', 'Disabling account switching and clearing session data...', 'info');
+      }else{
+        showToast('Disabling Tight Security', 'Re-enabling account switching...', 'info');
       }
 
       if(isEnabled){
@@ -6421,6 +6522,36 @@
     function showUpgradeModal(){
       var modal = document.getElementById('upgradeModal');
       modal.classList.add('is-open');
+    }
+
+    function initCustomModal(){
+      var modal = document.getElementById('customModal');
+      var closeBtn = document.getElementById('customModalClose');
+      var okBtn = document.getElementById('customModalOk');
+
+      closeBtn.addEventListener('click', hideCustomModal);
+      okBtn.addEventListener('click', hideCustomModal);
+      
+      modal.addEventListener('click', function(e){
+        if(e.target === modal){
+          hideCustomModal();
+        }
+      });
+    }
+
+    function showCustomModal(title, message){
+      var modal = document.getElementById('customModal');
+      var titleEl = document.getElementById('customModalTitle');
+      var messageEl = document.getElementById('customModalMessage');
+
+      titleEl.textContent = title;
+      messageEl.textContent = message;
+      modal.classList.add('is-open');
+    }
+
+    function hideCustomModal(){
+      var modal = document.getElementById('customModal');
+      modal.classList.remove('is-open');
     }
 
     function hideUpgradeModal(){
@@ -6642,9 +6773,7 @@
     }
 
     async function handleResetSession(){
-      if(!confirm('Are you sure you want to reset your session? This will clear all local data and sign you out.')){
-        return;
-      }
+      showToast('Resetting session', 'Clearing local data and signing out...', 'info');
       
       localStorage.clear();
       var client = getSupabaseClient();
