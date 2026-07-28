@@ -3086,6 +3086,64 @@
   </div>
 </div>
 
+<!-- Identity Verification Modal -->
+<div class="custom-modal-overlay" id="identityVerificationModal">
+  <div class="custom-modal" style="max-width: 500px;">
+    <div class="custom-modal-header">
+      <h3>Identity Verification</h3>
+      <button class="custom-modal-close" id="identityVerificationClose">
+        <i data-lucide="x"></i>
+      </button>
+    </div>
+    <div class="custom-modal-body" style="text-align: center;">
+      <div style="display: flex; justify-content: center; margin-bottom: 20px;">
+        <div style="position: relative;">
+          <div style="width: 80px; height: 80px; background: #e2e8f0; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+            <i data-lucide="user" style="width: 40px; height: 40px; color: #475569;"></i>
+          </div>
+          <div style="position: absolute; bottom: 0; right: 0; background: #2563eb; color: white; border-radius: 50%; padding: 4px; border: 2px solid white;">
+            <i data-lucide="check-circle-2" style="width: 20px; height: 20px;"></i>
+          </div>
+        </div>
+      </div>
+      <h4 style="margin: 0 0 10px 0; font-size: 20px; font-weight: 600;">Almost there!</h4>
+      <p style="color: #64748b; margin-bottom: 15px;">We need you to confirm your identity with a photo of a government issued ID and selfie. Once completed, you won't have to repeat the verification step moving forward.</p>
+      <div style="display: flex; align-items: center; justify-content: center; gap: 6px; color: #2563eb; font-weight: 500; margin-bottom: 20px;">
+        <i data-lucide="clock" style="width: 16px; height: 16px;"></i>
+        <span>Takes less than 2 min</span>
+      </div>
+      <p style="text-align: left; font-size: 13px; color: #475569; margin-bottom: 10px;">You'll need one of the following forms of ID handy and your camera turned on:</p>
+      <div style="background: #f8fafc; border-radius: 12px; overflow: hidden; border: 1px solid #e2e8f0;">
+        <label style="display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; cursor: pointer; border-bottom: 1px solid #e2e8f0;">
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <span style="width: 8px; height: 8px; border-radius: 50%; background: #94a3b8;"></span>
+            <span style="font-weight: 500; font-size: 14px;">Passport</span>
+          </div>
+          <input type="radio" name="id_type" value="passport" style="width: 16px; height: 16px; accent-color: #2563eb;">
+        </label>
+        <label style="display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; cursor: pointer; border-bottom: 1px solid #e2e8f0;">
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <span style="width: 8px; height: 8px; border-radius: 50%; background: #94a3b8;"></span>
+            <span style="font-weight: 500; font-size: 14px;">National Identity Card</span>
+          </div>
+          <input type="radio" name="id_type" value="national_id" style="width: 16px; height: 16px; accent-color: #2563eb;">
+        </label>
+        <label style="display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; cursor: pointer;">
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <span style="width: 8px; height: 8px; border-radius: 50%; background: #94a3b8;"></span>
+            <span style="font-weight: 500; font-size: 14px;">Valid Driver's License</span>
+          </div>
+          <input type="radio" name="id_type" value="drivers_license" style="width: 16px; height: 16px; accent-color: #2563eb;">
+        </label>
+      </div>
+    </div>
+    <div class="custom-modal-footer">
+      <button class="btn btn-ghost" id="identityVerificationCancel">Cancel</button>
+      <button class="btn btn-primary" id="identityVerificationConfirm">Continue</button>
+    </div>
+  </div>
+</div>
+
 <script>
   // Global hCaptcha widget tracking
   var modalHcaptchaWidgetId = null;
@@ -6344,7 +6402,14 @@
       }
       
       try{
-        var { error } = await client.auth.unlinkIdentity({ provider: provider });
+        // Find the identity_id for the provider being disconnected
+        var identities = currentUser.user_metadata?.identities || currentUser.identities || [];
+        var identity = identities.find(function(id){ return id.provider === provider; });
+        if(!identity || !identity.id){
+          showCustomModal('Error', 'Could not find identity for ' + provider);
+          return;
+        }
+        var { error } = await client.auth.unlinkIdentity({ identity_id: identity.id });
         if(error) throw error;
         showCustomModal('Success', 'Successfully disconnected ' + provider);
         loadAccountSettings();
@@ -6560,14 +6625,22 @@
 
     function handleTightSecurityToggle(e){
       var isEnabled = e.target.checked;
-      var message = isEnabled 
-        ? 'Are you sure you want to enable Tight Security?\n\nThis will:\n• Disable account switching\n• Remove all stored session data from localStorage\n• Require you to sign in each time\n\nThis is not recommended for most users.'
-        : 'Are you sure you want to disable Tight Security?\n\nThis will:\n• Re-enable account switching\n• Allow session data to be stored in localStorage\n\nYou can always re-enable this later.';
 
-      showConfirmModal('Tight Security', message, function(){
-        toggleTightSecurity(isEnabled);
+      // Show identity verification modal first
+      showIdentityVerificationModal(function(){
+        // After identity verification, show confirmation modal
+        var message = isEnabled
+          ? 'Are you sure you want to enable Tight Security?<br><br>This will:<br>• Disable account switching<br>• Remove all stored session data from localStorage<br>• Require you to sign in each time<br><br>This is not recommended for most users.'
+          : 'Are you sure you want to disable Tight Security?<br><br>This will:<br>• Re-enable account switching<br>• Allow session data to be stored in localStorage<br><br>You can always re-enable this later.';
+
+        showConfirmModal('Tight Security', message, function(){
+          toggleTightSecurity(isEnabled);
+        }, function(){
+          // Revert checkbox if cancelled
+          e.target.checked = !isEnabled;
+        });
       }, function(){
-        // Revert checkbox if cancelled
+        // Revert checkbox if identity verification cancelled
         e.target.checked = !isEnabled;
       });
     }
@@ -6656,7 +6729,7 @@
       var cancelBtn = document.getElementById('confirmModalCancel');
 
       titleEl.textContent = title;
-      messageEl.textContent = message;
+      messageEl.innerHTML = message;
       
       // Remove old event listeners
       var newConfirmBtn = confirmBtn.cloneNode(true);
@@ -6685,6 +6758,52 @@
       var modal = document.getElementById('confirmModal');
       modal.classList.remove('is-open');
       confirmModalCallback = null;
+    }
+
+    function showIdentityVerificationModal(onConfirm, onCancel){
+      var modal = document.getElementById('identityVerificationModal');
+      var confirmBtn = document.getElementById('identityVerificationConfirm');
+      var cancelBtn = document.getElementById('identityVerificationCancel');
+      var closeBtn = document.getElementById('identityVerificationClose');
+
+      // Remove old event listeners
+      var newConfirmBtn = confirmBtn.cloneNode(true);
+      var newCancelBtn = cancelBtn.cloneNode(true);
+      var newCloseBtn = closeBtn.cloneNode(true);
+      confirmBtn.parentNode.replaceChild(newConfirmBtn, confirmBtn);
+      cancelBtn.parentNode.replaceChild(newCancelBtn, cancelBtn);
+      closeBtn.parentNode.replaceChild(newCloseBtn, closeBtn);
+
+      newConfirmBtn.addEventListener('click', function(){
+        if(onConfirm){
+          onConfirm();
+        }
+        hideIdentityVerificationModal();
+      });
+
+      newCancelBtn.addEventListener('click', function(){
+        if(onCancel){
+          onCancel();
+        }
+        hideIdentityVerificationModal();
+      });
+
+      newCloseBtn.addEventListener('click', function(){
+        if(onCancel){
+          onCancel();
+        }
+        hideIdentityVerificationModal();
+      });
+
+      modal.classList.add('is-open');
+      if(typeof lucide !== 'undefined'){
+        lucide.createIcons();
+      }
+    }
+
+    function hideIdentityVerificationModal(){
+      var modal = document.getElementById('identityVerificationModal');
+      modal.classList.remove('is-open');
     }
 
     function hideUpgradeModal(){
