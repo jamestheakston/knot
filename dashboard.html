@@ -6152,49 +6152,6 @@
             <video id="tightSecurityVideo" class="video-js vjs-default-skin" controls preload="auto" width="640" height="360" data-setup='{}'>
               <source src="/assets/tightsecurity.mp4" type="video/mp4">
             </video>
-            <script>
-              // Initialize videojs-contrib-ads for preroll ad
-              document.addEventListener('DOMContentLoaded', function() {
-                var videoElement = document.getElementById('tightSecurityVideo');
-                if(videoElement && typeof videojs !== 'undefined') {
-                  var player = videojs('tightSecurityVideo');
-                  
-                  // Initialize videojs-contrib-ads
-                  player.ads();
-                  
-                  // Store original content video source
-                  var contentSrc = '/assets/tightsecurity.mp4';
-                  
-                  // Request ads whenever there's new video content
-                  player.on('contentchanged', function() {
-                    player.trigger('adsready');
-                  });
-                  
-                  // Play preroll ad when ready
-                  player.on('readyforpreroll', function() {
-                    player.ads.startLinearAdMode();
-                    
-                    // Play the ad video
-                    player.src('/assets/cookeryad.mp4');
-                    
-                    // Send event when ad is playing to remove loading spinner
-                    player.one('adplaying', function() {
-                      player.trigger('ads-ad-started');
-                    });
-                    
-                    // Resume content when ad has finished
-                    player.one('adended', function() {
-                      player.ads.endLinearAdMode();
-                      player.src(contentSrc);
-                      player.play();
-                    });
-                  });
-                  
-                  // Trigger adsready to start the ad flow
-                  player.trigger('adsready');
-                }
-              });
-            </script>
           </div>
 
           <div class="settings-card">
@@ -6286,6 +6243,46 @@
 
       // Tight security toggle handler
       document.getElementById('tightSecurityToggle').addEventListener('change', handleTightSecurityToggle);
+
+      // Initialize videojs-contrib-ads for preroll ad
+      var tightSecurityVideo = document.getElementById('tightSecurityVideo');
+      if(tightSecurityVideo && typeof videojs !== 'undefined') {
+        var player = videojs('tightSecurityVideo');
+        
+        // Initialize videojs-contrib-ads
+        player.ads();
+        
+        // Store original content video source
+        var contentSrc = '/assets/tightsecurity.mp4';
+        
+        // Request ads whenever there's new video content
+        player.on('contentchanged', function() {
+          player.trigger('adsready');
+        });
+        
+        // Play preroll ad when ready
+        player.on('readyforpreroll', function() {
+          player.ads.startLinearAdMode();
+          
+          // Play the ad video
+          player.src('/assets/cookeryad.mp4');
+          
+          // Send event when ad is playing to remove loading spinner
+          player.one('adplaying', function() {
+            player.trigger('ads-ad-started');
+          });
+          
+          // Resume content when ad has finished
+          player.one('adended', function() {
+            player.ads.endLinearAdMode();
+            player.src(contentSrc);
+            player.play();
+          });
+        });
+        
+        // Trigger adsready to start the ad flow
+        player.trigger('adsready');
+      }
 
       // Password modal handlers
       document.getElementById('cancelPasswordBtn').addEventListener('click', hidePasswordModal);
