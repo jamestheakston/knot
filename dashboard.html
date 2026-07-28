@@ -6606,8 +6606,10 @@
     }
 
     function showUpgradeModal(){
-      var modal = document.getElementById('upgradeModal');
-      modal.classList.add('is-open');
+      setTimeout(function(){
+        var modal = document.getElementById('upgradeModal');
+        modal.classList.add('is-open');
+      }, 30000); // 30 seconds delay
     }
 
     function initCustomModal(){
