@@ -6149,11 +6149,9 @@
                 </label>
               </div>
             </div>
-            <video-player>
-              <video-skin>
-                <video id="tightSecurityVideo" src="/assets/tightsecurity.mp4" playsinline></video>
-              </video-skin>
-            </video-player>
+            <video id="tightSecurityVideo" class="video-js vjs-default-skin" controls preload="auto" width="640" height="360" data-setup='{}'>
+              <source src="/assets/tightsecurity.mp4" type="video/mp4">
+            </video>
             <script>
               // Initialize videojs-contrib-ads for preroll ad
               document.addEventListener('DOMContentLoaded', function() {
