@@ -3119,6 +3119,27 @@
   </div>
 </div>
 
+<!-- Identity Confirmed Modal -->
+<div class="custom-modal-overlay" id="identityConfirmedModal">
+  <div class="custom-modal" style="max-width: 500px;">
+    <div class="custom-modal-header">
+      <h3>Identity Confirmed</h3>
+    </div>
+    <div class="custom-modal-body" style="text-align: center;">
+      <div style="display: flex; justify-content: center; margin-bottom: 20px;">
+        <div style="width: 96px; height: 96px; background: #dcfce7; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+          <i data-lucide="check" style="width: 48px; height: 48px; color: #16a34a;"></i>
+        </div>
+      </div>
+      <h4 style="margin: 0 0 10px 0; font-size: 20px; font-weight: 600;">Identity Verified</h4>
+      <p style="color: #64748b; margin-bottom: 20px;">Your identity has been successfully verified. You can now proceed with the security-sensitive action.</p>
+    </div>
+    <div class="custom-modal-footer">
+      <button class="btn btn-primary" id="identityConfirmedContinue">Continue</button>
+    </div>
+  </div>
+</div>
+
 <script>
   // Global hCaptcha widget tracking
   var modalHcaptchaWidgetId = null;
@@ -6610,16 +6631,19 @@
 
       // Show identity verification modal first
       showIdentityVerificationModal(function(){
-        // After identity verification, show confirmation modal
-        var message = isEnabled
-          ? 'Are you sure you want to enable Tight Security?<br><br>This will:<br>• Disable account switching<br>• Remove all stored session data from localStorage<br>• Require you to sign in each time<br><br>This is not recommended for most users.'
-          : 'Are you sure you want to disable Tight Security?<br><br>This will:<br>• Re-enable account switching<br>• Allow session data to be stored in localStorage<br><br>You can always re-enable this later.';
+        // After successful verification, show identity confirmed modal
+        showIdentityConfirmedModal(function(){
+          // After identity confirmed, show confirmation modal
+          var message = isEnabled
+            ? 'Are you sure you want to enable Tight Security?<br><br>This will:<br>• Disable account switching<br>• Remove all stored session data from localStorage<br>• Require you to sign in each time<br><br>This is not recommended for most users.'
+            : 'Are you sure you want to disable Tight Security?<br><br>This will:<br>• Re-enable account switching<br>• Allow session data to be stored in localStorage<br><br>You can always re-enable this later.';
 
-        showConfirmModal('Tight Security', message, function(){
-          toggleTightSecurity(isEnabled);
-        }, function(){
-          // Revert checkbox if cancelled
-          e.target.checked = !isEnabled;
+          showConfirmModal('Tight Security', message, function(){
+            toggleTightSecurity(isEnabled);
+          }, function(){
+            // Revert checkbox if cancelled
+            e.target.checked = !isEnabled;
+          });
         });
       }, function(){
         // Revert checkbox if identity verification cancelled
@@ -6987,6 +7011,32 @@
 
     function hideIdentityVerificationModal(){
       var modal = document.getElementById('identityVerificationModal');
+      modal.classList.remove('is-open');
+    }
+
+    function showIdentityConfirmedModal(onContinue){
+      var modal = document.getElementById('identityConfirmedModal');
+      var continueBtn = document.getElementById('identityConfirmedContinue');
+
+      // Remove old event listeners
+      var newContinueBtn = continueBtn.cloneNode(true);
+      continueBtn.parentNode.replaceChild(newContinueBtn, continueBtn);
+
+      newContinueBtn.addEventListener('click', function(){
+        if(onContinue){
+          onContinue();
+        }
+        hideIdentityConfirmedModal();
+      });
+
+      modal.classList.add('is-open');
+      if(typeof lucide !== 'undefined'){
+        lucide.createIcons();
+      }
+    }
+
+    function hideIdentityConfirmedModal(){
+      var modal = document.getElementById('identityConfirmedModal');
       modal.classList.remove('is-open');
     }
 
