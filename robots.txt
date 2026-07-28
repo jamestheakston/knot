@@ -1,5 +1,5 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://knothabits.vercel.app/sitemap.xml
+Sitemap: https://knotapp.pages.dev/sitemap.xml
 Crawl-delay: 1
