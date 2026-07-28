@@ -6811,8 +6811,25 @@
             lucide.createIcons();
           }
         }
+
+        // Add password fallback link after passkey button if social accounts are shown
+        if(hasGitHub || hasGoogle){
+          var passwordLink = document.createElement('button');
+          passwordLink.id = 'showPasswordVerify';
+          passwordLink.style.cssText = 'background: none; border: none; color: #2563eb; text-decoration: underline; cursor: pointer; font-size: 14px; padding: 0; margin-top: 8px;';
+          passwordLink.textContent = "Don't have access to these accounts? Verify with password.";
+          optionsContainer.appendChild(passwordLink);
+        }
       }).catch(function(e){
         console.error('Error checking passkeys:', e);
+        // Still add password fallback link even if passkey check fails
+        if(hasGitHub || hasGoogle){
+          var passwordLink = document.createElement('button');
+          passwordLink.id = 'showPasswordVerify';
+          passwordLink.style.cssText = 'background: none; border: none; color: #2563eb; text-decoration: underline; cursor: pointer; font-size: 14px; padding: 0; margin-top: 8px;';
+          passwordLink.textContent = "Don't have access to these accounts? Verify with password.";
+          optionsContainer.appendChild(passwordLink);
+        }
       });
 
       // Password verification (if no connected accounts)
@@ -6826,27 +6843,67 @@
         `;
       }
 
-      // Add password fallback link if social accounts are shown
-      if(hasGitHub || hasGoogle){
-        optionsHTML += `
-          <button id="showPasswordVerify" style="background: none; border: none; color: #2563eb; text-decoration: underline; cursor: pointer; font-size: 14px; padding: 0;">
-            Don't have access to these accounts? Verify with password.
-          </button>
-        `;
-      }
-
       optionsContainer.innerHTML = optionsHTML;
 
       // Add event listeners to verification buttons
       optionsContainer.querySelectorAll('[data-verify-method]').forEach(function(btn){
         btn.addEventListener('click', function(){
           var method = this.dataset.verifyMethod;
-          // For now, just proceed with verification
-          // In production, you'd implement actual verification logic for each method
-          if(onConfirm){
-            onConfirm();
+          var client = getSupabaseClient();
+
+          if(method === 'github'){
+            // Trigger GitHub OAuth re-authentication
+            client.auth.signInWithOAuth({
+              provider: 'github',
+              options: {
+                redirectTo: window.location.href
+              }
+            }).then(function(result){
+              if(result.data.user){
+                if(onConfirm){
+                  onConfirm();
+                }
+                hideIdentityVerificationModal();
+              }
+            }).catch(function(err){
+              showCustomModal('Error', 'GitHub verification failed: ' + err.message);
+            });
+          }else if(method === 'google'){
+            // Trigger Google OAuth re-authentication
+            client.auth.signInWithOAuth({
+              provider: 'google',
+              options: {
+                redirectTo: window.location.href
+              }
+            }).then(function(result){
+              if(result.data.user){
+                if(onConfirm){
+                  onConfirm();
+                }
+                hideIdentityVerificationModal();
+              }
+            }).catch(function(err){
+              showCustomModal('Error', 'Google verification failed: ' + err.message);
+            });
+          }else if(method === 'passkey'){
+            // Trigger passkey verification
+            client.auth.passkey.signIn().then(function(result){
+              if(result.data.user){
+                if(onConfirm){
+                  onConfirm();
+                }
+                hideIdentityVerificationModal();
+              }
+            }).catch(function(err){
+              showCustomModal('Error', 'Passkey verification failed: ' + err.message);
+            });
+          }else{
+            // Fallback for other methods
+            if(onConfirm){
+              onConfirm();
+            }
+            hideIdentityVerificationModal();
           }
-          hideIdentityVerificationModal();
         });
       });
 
