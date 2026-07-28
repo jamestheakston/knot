@@ -5188,7 +5188,7 @@
             var habitId = this.dataset.id;
             showConfirmModal('Delete Habit', 'Are you sure you want to delete this habit? This will also permanently delete all check-in history for this habit. This action cannot be undone.', function(){
               deleteHabit(habitId);
-            });
+            }, function(){});
           });
         });
       }catch(err){
