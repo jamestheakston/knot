@@ -6843,6 +6843,44 @@
           passwordLink.style.cssText = 'background: none; border: none; color: #2563eb; text-decoration: underline; cursor: pointer; font-size: 14px; padding: 0; margin-top: 8px;';
           passwordLink.textContent = "Don't have access to these accounts? Verify with password.";
           optionsContainer.appendChild(passwordLink);
+
+          // Add click listener to password link
+          passwordLink.addEventListener('click', function(){
+            optionsContainer.innerHTML = `
+              <div style="display: flex; flex-direction: column; gap: 8px;">
+                <label style="font-size: 14px; font-weight: 500;">Enter your password</label>
+                <input type="password" id="verifyPasswordInput" placeholder="Password" style="width: 100%; padding: 10px 12px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 14px;">
+                <button class="btn btn-primary" id="verifyPasswordBtn" style="width: 100%;">Verify with Password</button>
+              </div>
+            `;
+            
+            var passwordBtn = document.getElementById('verifyPasswordBtn');
+            if(passwordBtn){
+              passwordBtn.addEventListener('click', function(){
+                var password = document.getElementById('verifyPasswordInput').value;
+                if(password){
+                  var client = getSupabaseClient();
+                  client.auth.signInWithPassword({
+                    email: currentUser.email,
+                    password: password
+                  }).then(function(result){
+                    if(result.data.user){
+                      if(onConfirm){
+                        onConfirm();
+                      }
+                      hideIdentityVerificationModal();
+                    }else{
+                      showCustomModal('Error', 'Invalid password');
+                    }
+                  }).catch(function(err){
+                    showCustomModal('Error', 'Invalid password: ' + err.message);
+                  });
+                }else{
+                  showCustomModal('Error', 'Please enter your password');
+                }
+              });
+            }
+          });
         }
       }).catch(function(e){
         console.error('Error checking passkeys:', e);
@@ -6853,6 +6891,44 @@
           passwordLink.style.cssText = 'background: none; border: none; color: #2563eb; text-decoration: underline; cursor: pointer; font-size: 14px; padding: 0; margin-top: 8px;';
           passwordLink.textContent = "Don't have access to these accounts? Verify with password.";
           optionsContainer.appendChild(passwordLink);
+
+          // Add click listener to password link
+          passwordLink.addEventListener('click', function(){
+            optionsContainer.innerHTML = `
+              <div style="display: flex; flex-direction: column; gap: 8px;">
+                <label style="font-size: 14px; font-weight: 500;">Enter your password</label>
+                <input type="password" id="verifyPasswordInput" placeholder="Password" style="width: 100%; padding: 10px 12px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 14px;">
+                <button class="btn btn-primary" id="verifyPasswordBtn" style="width: 100%;">Verify with Password</button>
+              </div>
+            `;
+            
+            var passwordBtn = document.getElementById('verifyPasswordBtn');
+            if(passwordBtn){
+              passwordBtn.addEventListener('click', function(){
+                var password = document.getElementById('verifyPasswordInput').value;
+                if(password){
+                  var client = getSupabaseClient();
+                  client.auth.signInWithPassword({
+                    email: currentUser.email,
+                    password: password
+                  }).then(function(result){
+                    if(result.data.user){
+                      if(onConfirm){
+                        onConfirm();
+                      }
+                      hideIdentityVerificationModal();
+                    }else{
+                      showCustomModal('Error', 'Invalid password');
+                    }
+                  }).catch(function(err){
+                    showCustomModal('Error', 'Invalid password: ' + err.message);
+                  });
+                }else{
+                  showCustomModal('Error', 'Please enter your password');
+                }
+              });
+            }
+          });
         }
       });
 
@@ -6884,6 +6960,11 @@
               }
             }).then(function(result){
               if(result.data.user){
+                // Check if user signed in with the same account
+                if(result.data.user.id !== currentUser.id){
+                  showCustomModal('Error', 'You signed in with a different account. Please sign in with the account that is currently logged in.');
+                  return;
+                }
                 if(onConfirm){
                   onConfirm();
                 }
@@ -6901,6 +6982,11 @@
               }
             }).then(function(result){
               if(result.data.user){
+                // Check if user signed in with the same account
+                if(result.data.user.id !== currentUser.id){
+                  showCustomModal('Error', 'You signed in with a different account. Please sign in with the account that is currently logged in.');
+                  return;
+                }
                 if(onConfirm){
                   onConfirm();
                 }
@@ -6913,6 +6999,11 @@
             // Trigger passkey verification
             client.auth.passkey.signIn().then(function(result){
               if(result.data.user){
+                // Check if user signed in with the same account
+                if(result.data.user.id !== currentUser.id){
+                  showCustomModal('Error', 'You signed in with a different account. Please sign in with the account that is currently logged in.');
+                  return;
+                }
                 if(onConfirm){
                   onConfirm();
                 }
@@ -6930,49 +7021,6 @@
           }
         });
       });
-
-      // Add password fallback link listener
-      var showPasswordBtn = document.getElementById('showPasswordVerify');
-      if(showPasswordBtn){
-        showPasswordBtn.addEventListener('click', function(){
-          // Replace social buttons with password input
-          optionsContainer.innerHTML = `
-            <div style="display: flex; flex-direction: column; gap: 8px;">
-              <label style="font-size: 14px; font-weight: 500;">Enter your password</label>
-              <input type="password" id="verifyPasswordInput" placeholder="Password" style="width: 100%; padding: 10px 12px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 14px;">
-              <button class="btn btn-primary" id="verifyPasswordBtn" style="width: 100%;">Verify with Password</button>
-            </div>
-          `;
-          
-          // Add password verification listener
-          var passwordBtn = document.getElementById('verifyPasswordBtn');
-          if(passwordBtn){
-            passwordBtn.addEventListener('click', function(){
-              var password = document.getElementById('verifyPasswordInput').value;
-              if(password){
-                var client = getSupabaseClient();
-                client.auth.signInWithPassword({
-                  email: currentUser.email,
-                  password: password
-                }).then(function(result){
-                  if(result.data.user){
-                    if(onConfirm){
-                      onConfirm();
-                    }
-                    hideIdentityVerificationModal();
-                  }else{
-                    showCustomModal('Error', 'Invalid password');
-                  }
-                }).catch(function(err){
-                  showCustomModal('Error', 'Invalid password: ' + err.message);
-                });
-              }else{
-                showCustomModal('Error', 'Please enter your password');
-              }
-            });
-          }
-        });
-      }
 
       // Add password verification listener
       var passwordBtn = document.getElementById('verifyPasswordBtn');
