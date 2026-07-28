@@ -13,6 +13,7 @@
 <script src="https://unpkg.com/lucide@latest"></script>
 <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 <script src="/api/toastsystem.js"></script>
+<script type="module" src="https://cdn.jsdelivr.net/npm/@videojs/html/cdn/video.js"></script>
 <style>
   :root{
     --bg: #F7F8FB;
@@ -935,6 +936,12 @@
     <span class="beta-banner-label">Beta</span>
     <span class="beta-banner-text">This is a new service that is currently in testing. <a href="https://s.surveyplanet.com/4i31iovq" target="_blank">Give feedback</a></span>
   </div>
+
+  <video-player>
+    <video-skin>
+      <video src="/assets/tightsecurity.mp4" playsinline></video>
+    </video-skin>
+  </video-player>
 
   <div id="accountList" class="account-list">
     <div class="loading">
