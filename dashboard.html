@@ -3558,6 +3558,31 @@
           // Load overview section by default
           navigateTo('overview');
         }
+
+        // Handle identity verification modal from URL parameters
+        if(urlParams.get('openidentitymodal') === 'true'){
+          var method = urlParams.get('method');
+          // Navigate to account section first
+          navigateTo('account');
+          // After account section loads, show identity confirmed modal
+          setTimeout(function(){
+            showIdentityConfirmedModal(function(){
+              // Continue with the original action (tight security toggle)
+              var isEnabled = localStorage.getItem('knot_tight_security') === 'true';
+              var message = isEnabled
+                ? 'Are you sure you want to enable Tight Security?<br><br>This will:<br>• Disable account switching<br>• Remove all stored session data from localStorage<br>• Require you to sign in each time<br><br>This is not recommended for most users.'
+                : 'Are you sure you want to disable Tight Security?<br><br>This will:<br>• Re-enable account switching<br>• Allow session data to be stored in localStorage<br><br>You can always re-enable this later.';
+
+              showConfirmModal('Tight Security', message, function(){
+                toggleTightSecurity(!isEnabled);
+              }, function(){
+                // Revert checkbox if cancelled
+                var toggle = document.getElementById('tightSecurityToggle');
+                if(toggle) toggle.checked = isEnabled;
+              });
+            });
+          }, 500);
+        }
         
         // If linking account, show success message
         if(isLinking){
@@ -6956,7 +6981,7 @@
             client.auth.signInWithOAuth({
               provider: 'github',
               options: {
-                redirectTo: window.location.href
+                redirectTo: 'https://knotapp.pages.dev/dashboard#account?openidentitymodal=true&method=github'
               }
             }).then(function(result){
               if(result.data.user){
@@ -6978,7 +7003,7 @@
             client.auth.signInWithOAuth({
               provider: 'google',
               options: {
-                redirectTo: window.location.href
+                redirectTo: 'https://knotapp.pages.dev/dashboard#account?openidentitymodal=true&method=google'
               }
             }).then(function(result){
               if(result.data.user){
