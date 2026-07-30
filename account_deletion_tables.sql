@@ -75,14 +75,8 @@ CREATE POLICY "Service role can delete deletion requests"
 
 -- RLS Policies for account_recovery_attempts
 -- Drop existing policies if they exist
-DROP POLICY IF EXISTS "Users can view own recovery attempts" ON account_recovery_attempts;
 DROP POLICY IF EXISTS "Service role can view all recovery attempts" ON account_recovery_attempts;
 DROP POLICY IF EXISTS "Service role can insert recovery attempts" ON account_recovery_attempts;
-
--- Users can view their own recovery attempts
-CREATE POLICY "Users can view own recovery attempts"
-  ON account_recovery_attempts FOR SELECT
-  USING (auth.uid() = user_id);
 
 -- Service role can view all recovery attempts (for audit)
 CREATE POLICY "Service role can view all recovery attempts"
