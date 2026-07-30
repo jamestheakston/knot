@@ -41,6 +41,13 @@ GRANT ALL ON TABLE account_deletion_requests TO authenticated;
 GRANT ALL ON TABLE account_recovery_attempts TO authenticated;
 
 -- RLS Policies for account_deletion_requests
+-- Drop existing policies if they exist
+DROP POLICY IF EXISTS "Users can view own deletion requests" ON account_deletion_requests;
+DROP POLICY IF EXISTS "Users can insert own deletion requests" ON account_deletion_requests;
+DROP POLICY IF EXISTS "Users can update own deletion requests" ON account_deletion_requests;
+DROP POLICY IF EXISTS "Service role can update deletion requests" ON account_deletion_requests;
+DROP POLICY IF EXISTS "Service role can delete deletion requests" ON account_deletion_requests;
+
 -- Users can only see their own deletion requests
 CREATE POLICY "Users can view own deletion requests"
   ON account_deletion_requests FOR SELECT
@@ -67,15 +74,25 @@ CREATE POLICY "Service role can delete deletion requests"
   USING (auth.role() = 'service_role');
 
 -- RLS Policies for account_recovery_attempts
+-- Drop existing policies if they exist
+DROP POLICY IF EXISTS "Users can view own recovery attempts" ON account_recovery_attempts;
+DROP POLICY IF EXISTS "Service role can view all recovery attempts" ON account_recovery_attempts;
+DROP POLICY IF EXISTS "Service role can insert recovery attempts" ON account_recovery_attempts;
+
+-- Users can view their own recovery attempts
+CREATE POLICY "Users can view own recovery attempts"
+  ON account_recovery_attempts FOR SELECT
+  USING (auth.uid() = user_id);
+
+-- Service role can view all recovery attempts (for audit)
+CREATE POLICY "Service role can view all recovery attempts"
+  ON account_recovery_attempts FOR SELECT
+  USING (auth.role() = 'service_role');
+
 -- Service role can insert recovery attempts
 CREATE POLICY "Service role can insert recovery attempts"
   ON account_recovery_attempts FOR INSERT
   WITH CHECK (auth.role() = 'service_role');
-
--- Service role can view recovery attempts
-CREATE POLICY "Service role can view recovery attempts"
-  ON account_recovery_attempts FOR SELECT
-  USING (auth.role() = 'service_role');
 
 -- Function to clean up expired deletion requests
 CREATE OR REPLACE FUNCTION cleanup_expired_deletion_requests()
