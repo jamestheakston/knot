@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>About MyID - Knot</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    :root {
+      --bg: #ffffff;
+      --bg-2: #f8fafc;
+      --bg-3: #f1f5f9;
+      --line: #e2e8f0;
+      --text: #0f172a;
+      --muted: #64748b;
+      --blue: #2563eb;
+      --blue-bright: #3b82f6;
+      --green: #10b981;
+      --red: #ef4444;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0f172a;
+        --bg-2: #1e293b;
+        --bg-3: #334155;
+        --line: #334155;
+        --text: #f8fafc;
+        --muted: #94a3b8;
+      }
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 40px 20px;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 48px;
+    }
+
+    .header h1 {
+      font-size: 48px;
+      font-weight: 700;
+      margin-bottom: 16px;
+      background: var(--blue);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .header p {
+      color: var(--muted);
+      font-size: 18px;
+    }
+
+    .section {
+      background: var(--bg-2);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 32px;
+      margin-bottom: 24px;
+    }
+
+    .section h2 {
+      font-size: 24px;
+      font-weight: 600;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .section h2 i {
+      width: 24px;
+      height: 24px;
+      color: var(--blue);
+    }
+
+    .section p {
+      color: var(--muted);
+      margin-bottom: 16px;
+    }
+
+    .section ul {
+      list-style: none;
+      padding-left: 0;
+    }
+
+    .section li {
+      padding: 12px 0;
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+    }
+
+    .section li:last-child {
+      border-bottom: none;
+    }
+
+    .section li i {
+      width: 20px;
+      height: 20px;
+      color: var(--green);
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--blue);
+      text-decoration: none;
+      font-weight: 500;
+      margin-bottom: 24px;
+    }
+
+    .back-link:hover {
+      text-decoration: underline;
+    }
+
+    .icon-large {
+      width: 64px;
+      height: 64px;
+      background: var(--blue);
+      color: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 24px;
+    }
+
+    .icon-large i {
+      width: 32px;
+      height: 32px;
+    }
+
+    @media (max-width: 640px) {
+      .header h1 {
+        font-size: 36px;
+      }
+
+      .section {
+        padding: 24px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <a href="dashboard.html" class="back-link">
+      <i data-lucide="arrow-left" style="width: 16px; height: 16px;"></i>
+      Back to Dashboard
+    </a>
+
+    <div class="header">
+      <div class="icon-large">
+        <i data-lucide="key"></i>
+      </div>
+      <h1>About MyID</h1>
+      <p>A secure, passwordless way to sign in to your account</p>
+    </div>
+
+    <div class="section">
+      <h2>
+        <i data-lucide="info"></i>
+        What is MyID?
+      </h2>
+      <p>MyID is our name for passkeys - a modern authentication method that replaces traditional passwords with your device's built-in security features. We renamed it to MyID to make it more personal and easier to understand.</p>
+      <p>When you use MyID, you sign in using biometric authentication (fingerprint, face recognition) or a PIN, making it both more secure and more convenient than passwords.</p>
+    </div>
+
+    <div class="section">
+      <h2>
+        <i data-lucide="shield-check"></i>
+        How It Works
+      </h2>
+      <p>MyID uses public-key cryptography to authenticate you without ever sending your password over the internet:</p>
+      <ul>
+        <li>
+          <i data-lucide="check"></i>
+          <span><strong>Registration:</strong> When you add a MyID, your device creates a unique cryptographic key pair. The private key never leaves your device.</span>
+        </li>
+        <li>
+          <i data-lucide="check"></i>
+          <span><strong>Authentication:</strong> When you sign in, your device proves you have the private key using biometrics or PIN.</span>
+        </li>
+        <li>
+          <i data-lucide="check"></i>
+          <span><strong>Verification:</strong> The server verifies your identity using the public key, without ever seeing your private key.</span>
+        </li>
+      </ul>
+    </div>
+
+    <div class="section">
+      <h2>
+        <i data-lucide="zap"></i>
+        Benefits
+      </h2>
+      <ul>
+        <li>
+          <i data-lucide="check"></i>
+          <span><strong>More Secure:</strong> No passwords to remember, guess, or steal. Your private key never leaves your device.</span>
+        </li>
+        <li>
+          <i data-lucide="check"></i>
+          <span><strong>Phishing Resistant:</strong> MyID can't be tricked by fake websites - it only works with the legitimate site.</span>
+        </li>
+        <li>
+          <i data-lucide="check"></i>
+          <span><strong>Convenient:</strong> Sign in instantly with Face ID, Touch ID, or Windows Hello - no typing required.</span>
+        </li>
+        <li>
+          <i data-lucide="check"></i>
+          <span><strong>Device-Based:</strong> Each device has its own MyID. You can add multiple devices to your account.</span>
+        </li>
+      </ul>
+    </div>
+
+    <div class="section">
+      <h2>
+        <i data-lucide="smartphone"></i>
+        Device Support
+      </h2>
+      <p>MyID is supported on most modern devices and browsers:</p>
+      <ul>
+        <li>
+          <i data-lucide="check"></i>
+          <span><strong>macOS:</strong> Safari, Chrome, Edge (with Touch ID or Apple Watch)</span>
+        </li>
+        <li>
+          <i data-lucide="check"></i>
+          <span><strong>iOS:</strong> Safari (with Face ID or Touch ID)</span>
+        </li>
+        <li>
+          <i data-lucide="check"></i>
+          <span><strong>Windows:</strong> Chrome, Edge (with Windows Hello)</span>
+        </li>
+        <li>
+          <i data-lucide="check"></i>
+          <span><strong>Android:</strong> Chrome, Edge (with fingerprint or face unlock)</span>
+        </li>
+      </ul>
+    </div>
+
+    <div class="section">
+      <h2>
+        <i data-lucide="help-circle"></i>
+        Frequently Asked Questions
+      </h2>
+      <p><strong>Is MyID the same as a password?</strong><br>No. MyID uses cryptographic keys instead of passwords. You don't need to remember anything - your device handles the authentication.</p>
+      <p style="margin-top: 16px;"><strong>What happens if I lose my device?</strong><br>If you lose a device with a MyID, you can delete it from your account settings and add a new MyID on another device. As long as you have another login method (password, Google, GitHub), you can still access your account.</p>
+      <p style="margin-top: 16px;"><strong>Can I use MyID on multiple devices?</strong><br>Yes! You can add a MyID on each of your devices. Each device gets its own unique MyID.</p>
+      <p style="margin-top: 16px;"><strong>Is MyID private?</strong><br>Yes. Your biometric data never leaves your device. The authentication happens locally, and only a cryptographic proof is sent to the server.</p>
+    </div>
+  </div>
+
+  <script>
+    lucide.createIcons();
+  </script>
+</body>
+</html>
