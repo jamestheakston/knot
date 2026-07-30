@@ -39,8 +39,6 @@ ALTER TABLE account_recovery_attempts ENABLE ROW LEVEL SECURITY;
 GRANT USAGE ON SCHEMA public TO authenticated;
 GRANT ALL ON TABLE account_deletion_requests TO authenticated;
 GRANT ALL ON TABLE account_recovery_attempts TO authenticated;
-GRANT USAGE, SELECT ON SEQUENCE account_deletion_requests_id_seq TO authenticated;
-GRANT USAGE, SELECT ON SEQUENCE account_recovery_attempts_id_seq TO authenticated;
 
 -- RLS Policies for account_deletion_requests
 -- Users can only see their own deletion requests
