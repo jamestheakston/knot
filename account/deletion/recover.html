@@ -320,36 +320,36 @@
     // Function to restore user data in Supabase
     async function restoreUserData(userId, deletionRequestId, recoveryId) {
       try {
-        // In a real implementation, you would have soft-deleted data that needs to be restored
-        // This would include:
-        // 1. User profile data
-        // 2. Pod memberships
-        // 3. Check-in history
-        // 4. Habit data
-        // 5. Any other user-specific data
-
-        // For now, we'll simulate the restoration process
-        // In production, you would have tables with is_deleted flags that you set to false
-        
         console.log('Restoring data for user:', userId);
         
-        // Example: Restore user profile if it was soft-deleted
-        // await supabase.from('profiles').update({ is_deleted: false }).eq('user_id', userId);
-        
-        // Example: Restore pod memberships
-        // await supabase.from('pod_members').update({ is_deleted: false }).eq('user_id', userId);
-        
-        // Example: Restore check-ins
-        // await supabase.from('check_ins').update({ is_deleted: false }).eq('user_id', userId);
+        // Call the Supabase RPC function to restore all user data
+        var { data: restoreResult, error: restoreError } = await supabase.rpc('perform_account_restoration', {
+          user_id: userId
+        });
 
-        // Log the recovery attempt for audit purposes
+        if (restoreError) {
+          console.error('Error restoring user data via RPC:', restoreError);
+          
+          // Log the failed recovery attempt
+          await supabase.from('account_recovery_attempts').insert({
+            deletion_request_id: deletionRequestId,
+            recovery_id: recoveryId,
+            success: false
+          });
+
+          return { success: false, error: restoreError.message };
+        }
+
+        console.log('Restore result:', restoreResult);
+
+        // Log the successful recovery attempt
         await supabase.from('account_recovery_attempts').insert({
           deletion_request_id: deletionRequestId,
           recovery_id: recoveryId,
           success: true
         });
 
-        return { success: true };
+        return { success: true, data: restoreResult };
       } catch (error) {
         console.error('Error restoring user data:', error);
         

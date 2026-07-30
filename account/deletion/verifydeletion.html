@@ -245,7 +245,7 @@
               return;
             }
 
-            // Update deletion request status to verified
+            // User verified - update deletion request status to verified
             supabase.from('account_deletion_requests')
               .update({ 
                 status: 'verified',
@@ -260,8 +260,17 @@
                   return;
                 }
 
-                // Redirect to account deleted page
-                window.location.href = '/account/deletion/accountdeleted.html?id=' + recoveryId;
+                // Perform soft deletion of user data
+                performSoftDeletion(currentUser.id, deletionRequest.id).then(function(deletionResult) {
+                  if (deletionResult.success) {
+                    // Redirect to account deleted page
+                    window.location.href = '/account/deletion/accountdeleted.html?id=' + recoveryId;
+                  } else {
+                    messageDiv.innerHTML = '<div class="error">Verification succeeded but deletion failed. Please contact support.</div>';
+                    btn.disabled = false;
+                    btn.textContent = 'Verify and Delete Account';
+                  }
+                });
               });
           });
       }).catch(function(err) {
@@ -269,6 +278,30 @@
         btn.disabled = false;
         btn.textContent = 'Verify and Delete Account';
       });
+    }
+
+    // Function to perform soft deletion of user data
+    async function performSoftDeletion(userId, deletionRequestId) {
+      try {
+        console.log('Performing soft deletion for user:', userId);
+        
+        // Call the Supabase RPC function to soft delete all user data
+        var { data: deletionResult, error: deletionError } = await supabase.rpc('perform_account_deletion', {
+          user_id: userId,
+          deleted_by: userId
+        });
+
+        if (deletionError) {
+          console.error('Error performing soft deletion via RPC:', deletionError);
+          return { success: false, error: deletionError.message };
+        }
+
+        console.log('Deletion result:', deletionResult);
+        return { success: true, data: deletionResult };
+      } catch (error) {
+        console.error('Error performing soft deletion:', error);
+        return { success: false, error: error.message };
+      }
     }
   </script>
 </body>
