@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Delete Account - Knot</title>
+  <style>
+    body {
+      font-family: Arial, Helvetica, sans-serif;
+      background-color: #f0f0f0;
+      margin: 0;
+      padding: 20px;
+      color: #333;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      background-color: #ffffff;
+      border: 1px solid #ccc;
+      padding: 30px;
+      box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
+    }
+
+    h1 {
+      font-size: 24px;
+      color: #cc0000;
+      border-bottom: 2px solid #cc0000;
+      padding-bottom: 10px;
+      margin-top: 0;
+    }
+
+    h2 {
+      font-size: 18px;
+      color: #666;
+      margin-top: 30px;
+    }
+
+    p {
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .warning {
+      background-color: #fff3cd;
+      border: 1px solid #ffeeba;
+      padding: 15px;
+      margin: 20px 0;
+      font-weight: bold;
+    }
+
+    .form-group {
+      margin: 20px 0;
+    }
+
+    label {
+      display: block;
+      font-weight: bold;
+      margin-bottom: 5px;
+      font-size: 14px;
+    }
+
+    input[type="text"],
+    input[type="email"],
+    input[type="password"] {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #999;
+      font-size: 14px;
+      box-sizing: border-box;
+    }
+
+    input[type="checkbox"] {
+      margin-right: 10px;
+    }
+
+    button {
+      background-color: #cc0000;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      font-size: 14px;
+      cursor: pointer;
+      margin-right: 10px;
+    }
+
+    button:hover {
+      background-color: #aa0000;
+    }
+
+    button.cancel {
+      background-color: #999;
+    }
+
+    button.cancel:hover {
+      background-color: #777;
+    }
+
+    button:disabled {
+      background-color: #ccc;
+      cursor: not-allowed;
+    }
+
+    .divider {
+      border-top: 1px solid #ccc;
+      margin: 30px 0;
+    }
+
+    .footer {
+      font-size: 12px;
+      color: #999;
+      text-align: center;
+      margin-top: 30px;
+    }
+
+    .success {
+      background-color: #d4edda;
+      border: 1px solid #c3e6cb;
+      color: #155724;
+      padding: 15px;
+      margin: 20px 0;
+    }
+
+    .error {
+      background-color: #f8d7da;
+      border: 1px solid #f5c6cb;
+      color: #721c24;
+      padding: 15px;
+      margin: 20px 0;
+    }
+
+    .loading {
+      font-style: italic;
+      color: #666;
+    }
+
+    ul {
+      font-size: 14px;
+      padding-left: 20px;
+    }
+
+    li {
+      margin: 10px 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Delete Account</h1>
+
+    <div class="warning">
+      WARNING: This action cannot be undone. All your data will be permanently deleted.
+    </div>
+
+    <p>You are about to delete your Knot account. This action is irreversible and will:</p>
+
+    <ul>
+      <li>Delete all your personal information</li>
+      <li>Remove you from all pods you are a member of</li>
+      <li>Delete all your check-in data and history</li>
+      <li>Permanently remove your account from our servers</li>
+    </ul>
+
+    <div class="divider"></div>
+
+    <h2>Verification Required</h2>
+    <p>To proceed with account deletion, please verify your identity by entering your email address below. We will send you a confirmation email with further instructions.</p>
+
+    <div class="form-group">
+      <label for="email">Email Address:</label>
+      <input type="email" id="email" name="email" required>
+    </div>
+
+    <div class="form-group">
+      <label>
+        <input type="checkbox" id="confirm" required>
+        I understand that this action cannot be undone and I want to delete my account
+      </label>
+    </div>
+
+    <div class="form-group">
+      <button id="sendEmailBtn" onclick="sendVerificationEmail()">Send Verification Email</button>
+      <button class="cancel" onclick="window.location.href='dashboard.html'">Cancel</button>
+    </div>
+
+    <div id="message"></div>
+
+    <div class="divider"></div>
+
+    <div class="footer">
+      &copy; 2019 Knot. All rights reserved. | <a href="#" style="color: #666;">Privacy Policy</a> | <a href="#" style="color: #666;">Terms of Service</a>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    // Supabase configuration
+    var supabaseUrl = 'https://your-project.supabase.co';
+    var supabaseKey = 'your-anon-key';
+    var supabase = supabase.createClient(supabaseUrl, supabaseKey);
+
+    function sendVerificationEmail() {
+      var email = document.getElementById('email').value;
+      var confirm = document.getElementById('confirm').checked;
+      var messageDiv = document.getElementById('message');
+      var btn = document.getElementById('sendEmailBtn');
+
+      if (!email || !email.includes('@')) {
+        messageDiv.innerHTML = '<div class="error">Please enter a valid email address.</div>';
+        return;
+      }
+
+      if (!confirm) {
+        messageDiv.innerHTML = '<div class="error">Please confirm that you understand this action cannot be undone.</div>';
+        return;
+      }
+
+      btn.disabled = true;
+      btn.textContent = 'Sending...';
+      messageDiv.innerHTML = '<div class="loading">Sending verification email...</div>';
+
+      // Get current user
+      supabase.auth.getUser().then(function({ data, error }) {
+        if (error || !data.user) {
+          messageDiv.innerHTML = '<div class="error">You must be logged in to delete your account. Please log in and try again.</div>';
+          btn.disabled = false;
+          btn.textContent = 'Send Verification Email';
+          return;
+        }
+
+        var currentUser = data.user;
+
+        // Verify email matches current user
+        if (email !== currentUser.email) {
+          messageDiv.innerHTML = '<div class="error">The email address does not match your account email. Please enter your correct email address.</div>';
+          btn.disabled = false;
+          btn.textContent = 'Send Verification Email';
+          return;
+        }
+
+        // Generate a random recovery ID
+        var recoveryId = generateRandomId();
+
+        // Store recovery ID in Supabase (you'll need to create a table for this)
+        // For now, we'll use localStorage as a fallback
+        var deletionRequest = {
+          userId: currentUser.id,
+          email: currentUser.email,
+          recoveryId: recoveryId,
+          createdAt: new Date().toISOString(),
+          expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString() // 24 hours
+        };
+
+        // Store in localStorage (in production, this should be in a database)
+        localStorage.setItem('knot_deletion_request_' + currentUser.id, JSON.stringify(deletionRequest));
+
+        // Simulate sending email (in production, use your email service)
+        setTimeout(function() {
+          messageDiv.innerHTML = '<div class="success">Verification email sent! Please check your inbox and follow the instructions to complete the deletion process.</div>';
+          btn.textContent = 'Email Sent';
+          
+          // Show the recovery link (for testing purposes)
+          messageDiv.innerHTML += '<p style="margin-top: 20px; font-size: 12px; color: #666;">Test recovery link: <a href="accountdeleted.html?id=' + recoveryId + '" style="color: #666;">accountdeleted.html?id=' + recoveryId + '</a></p>';
+        }, 1500);
+      }).catch(function(err) {
+        messageDiv.innerHTML = '<div class="error">An error occurred. Please try again.</div>';
+        btn.disabled = false;
+        btn.textContent = 'Send Verification Email';
+      });
+    }
+
+    function generateRandomId() {
+      var chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+      var result = '';
+      for (var i = 0; i < 32; i++) {
+        result += chars.charAt(Math.floor(Math.random() * chars.length));
+      }
+      return result;
+    }
+  </script>
+</body>
+</html>

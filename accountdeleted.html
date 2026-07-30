@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Account Deleted - Knot</title>
+  <style>
+    body {
+      font-family: Arial, Helvetica, sans-serif;
+      background-color: #f0f0f0;
+      margin: 0;
+      padding: 20px;
+      color: #333;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      background-color: #ffffff;
+      border: 1px solid #ccc;
+      padding: 30px;
+      box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
+      text-align: center;
+    }
+
+    h1 {
+      font-size: 24px;
+      color: #cc0000;
+      border-bottom: 2px solid #cc0000;
+      padding-bottom: 10px;
+      margin-top: 0;
+    }
+
+    h2 {
+      font-size: 18px;
+      color: #666;
+      margin-top: 30px;
+    }
+
+    p {
+      font-size: 14px;
+      line-height: 1.5;
+      margin: 20px 0;
+    }
+
+    .icon {
+      font-size: 64px;
+      color: #cc0000;
+      margin: 20px 0;
+    }
+
+    .success-box {
+      background-color: #d4edda;
+      border: 1px solid #c3e6cb;
+      color: #155724;
+      padding: 20px;
+      margin: 30px 0;
+      text-align: left;
+    }
+
+    .success-box h3 {
+      margin-top: 0;
+      color: #155724;
+    }
+
+    .recovery-link {
+      background-color: #f8f9fa;
+      border: 1px solid #dee2e6;
+      padding: 15px;
+      margin: 20px 0;
+      word-break: break-all;
+      font-family: monospace;
+      font-size: 12px;
+    }
+
+    .warning {
+      background-color: #fff3cd;
+      border: 1px solid #ffeeba;
+      padding: 15px;
+      margin: 20px 0;
+      font-weight: bold;
+    }
+
+    button {
+      background-color: #007bff;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      font-size: 14px;
+      cursor: pointer;
+      margin: 10px;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    button.secondary {
+      background-color: #6c757d;
+    }
+
+    button.secondary:hover {
+      background-color: #545b62;
+    }
+
+    .divider {
+      border-top: 1px solid #ccc;
+      margin: 30px 0;
+    }
+
+    .footer {
+      font-size: 12px;
+      color: #999;
+      text-align: center;
+      margin-top: 30px;
+    }
+
+    .error {
+      background-color: #f8d7da;
+      border: 1px solid #f5c6cb;
+      color: #721c24;
+      padding: 15px;
+      margin: 20px 0;
+    }
+
+    .loading {
+      font-style: italic;
+      color: #666;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="icon">&#9888;</div>
+    <h1>Account Deleted</h1>
+
+    <p>Your Knot account has been successfully deleted.</p>
+
+    <div class="success-box">
+      <h3>Account Recovery Available</h3>
+      <p>Good news! Your account can be reactivated. We have generated a unique recovery link for you. Save this link safely - it will allow you to restore your account and all your data.</p>
+      
+      <p><strong>Your Recovery Link:</strong></p>
+      <div class="recovery-link" id="recoveryLink">Loading...</div>
+      
+      <p><strong>Important:</strong></p>
+      <ul>
+        <li>This recovery link will expire in 24 hours</li>
+        <li>Only you can use this link to recover your account</li>
+        <li>Keep this link private and secure</li>
+        <li>After recovery, your account will be restored exactly as it was</li>
+      </ul>
+    </div>
+
+    <div class="warning">
+      If you did not request to delete your account, please use the recovery link above immediately to restore your account.
+    </div>
+
+    <div class="divider"></div>
+
+    <button onclick="copyRecoveryLink()">Copy Recovery Link</button>
+    <button class="secondary" onclick="window.location.href='index.html'">Go to Homepage</button>
+
+    <div id="message"></div>
+
+    <div class="divider"></div>
+
+    <div class="footer">
+      &copy; 2019 Knot. All rights reserved. | <a href="#" style="color: #666;">Privacy Policy</a> | <a href="#" style="color: #666;">Terms of Service</a>
+    </div>
+  </div>
+
+  <script>
+    // Get the recovery ID from URL parameter
+    var urlParams = new URLSearchParams(window.location.search);
+    var recoveryId = urlParams.get('id');
+
+    if (recoveryId) {
+      var recoveryLink = 'https://knotapp.pages.dev/recover?type=account&id=' + recoveryId;
+      document.getElementById('recoveryLink').textContent = recoveryLink;
+    } else {
+      document.getElementById('recoveryLink').textContent = 'Error: No recovery ID provided';
+      document.getElementById('message').innerHTML = '<div class="error">Invalid recovery link. Please contact support if you believe this is an error.</div>';
+    }
+
+    function copyRecoveryLink() {
+      var recoveryLink = document.getElementById('recoveryLink').textContent;
+      if (recoveryLink && recoveryLink !== 'Loading...' && recoveryLink !== 'Error: No recovery ID provided') {
+        navigator.clipboard.writeText(recoveryLink).then(function() {
+          var messageDiv = document.getElementById('message');
+          messageDiv.innerHTML = '<div class="success-box" style="margin: 10px 0; padding: 10px;">Recovery link copied to clipboard!</div>';
+          setTimeout(function() {
+            messageDiv.innerHTML = '';
+          }, 3000);
+        }).catch(function(err) {
+          // Fallback for older browsers
+          var textArea = document.createElement('textarea');
+          textArea.value = recoveryLink;
+          document.body.appendChild(textArea);
+          textArea.select();
+          document.execCommand('copy');
+          document.body.removeChild(textArea);
+          
+          var messageDiv = document.getElementById('message');
+          messageDiv.innerHTML = '<div class="success-box" style="margin: 10px 0; padding: 10px;">Recovery link copied to clipboard!</div>';
+          setTimeout(function() {
+            messageDiv.innerHTML = '';
+          }, 3000);
+        });
+      }
+    }
+  </script>
+</body>
+</html>

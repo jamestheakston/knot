@@ -6238,6 +6238,7 @@
             <div class="settings-actions">
               <button class="btn btn-ghost" id="resetSessionBtn">Reset Session</button>
               <button class="btn btn-ghost" id="logoutBtn">Log Out</button>
+              <button class="btn btn-danger" id="deleteAccountBtn" style="background: #ef4444; color: white;">Delete Account</button>
             </div>
           </div>
         </div>
@@ -6249,6 +6250,9 @@
 
       document.getElementById('resetSessionBtn').addEventListener('click', handleResetSession);
       document.getElementById('logoutBtn').addEventListener('click', handleLogout);
+      document.getElementById('deleteAccountBtn').addEventListener('click', function(){
+        window.location.href = 'deleteaccount.html';
+      });
 
       // MyID handlers
       document.getElementById('addPasskeyBtn').addEventListener('click', handleAddPasskey);

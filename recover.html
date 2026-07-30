@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Recover Account - Knot</title>
+  <style>
+    body {
+      font-family: Arial, Helvetica, sans-serif;
+      background-color: #f0f0f0;
+      margin: 0;
+      padding: 20px;
+      color: #333;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      background-color: #ffffff;
+      border: 1px solid #ccc;
+      padding: 30px;
+      box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
+      text-align: center;
+    }
+
+    h1 {
+      font-size: 24px;
+      color: #007bff;
+      border-bottom: 2px solid #007bff;
+      padding-bottom: 10px;
+      margin-top: 0;
+    }
+
+    h2 {
+      font-size: 18px;
+      color: #666;
+      margin-top: 30px;
+    }
+
+    p {
+      font-size: 14px;
+      line-height: 1.5;
+      margin: 20px 0;
+    }
+
+    .icon {
+      font-size: 64px;
+      color: #007bff;
+      margin: 20px 0;
+    }
+
+    .success-box {
+      background-color: #d4edda;
+      border: 1px solid #c3e6cb;
+      color: #155724;
+      padding: 20px;
+      margin: 30px 0;
+      text-align: left;
+    }
+
+    .success-box h3 {
+      margin-top: 0;
+      color: #155724;
+    }
+
+    .warning {
+      background-color: #fff3cd;
+      border: 1px solid #ffeeba;
+      padding: 15px;
+      margin: 20px 0;
+      font-weight: bold;
+    }
+
+    .error {
+      background-color: #f8d7da;
+      border: 1px solid #f5c6cb;
+      color: #721c24;
+      padding: 15px;
+      margin: 20px 0;
+    }
+
+    .form-group {
+      margin: 20px 0;
+      text-align: left;
+    }
+
+    label {
+      display: block;
+      font-weight: bold;
+      margin-bottom: 5px;
+      font-size: 14px;
+    }
+
+    input[type="email"],
+    input[type="password"] {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #999;
+      font-size: 14px;
+      box-sizing: border-box;
+    }
+
+    button {
+      background-color: #007bff;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      font-size: 14px;
+      cursor: pointer;
+      margin: 10px;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    button:disabled {
+      background-color: #ccc;
+      cursor: not-allowed;
+    }
+
+    button.secondary {
+      background-color: #6c757d;
+    }
+
+    button.secondary:hover {
+      background-color: #545b62;
+    }
+
+    .divider {
+      border-top: 1px solid #ccc;
+      margin: 30px 0;
+    }
+
+    .footer {
+      font-size: 12px;
+      color: #999;
+      text-align: center;
+      margin-top: 30px;
+    }
+
+    .loading {
+      font-style: italic;
+      color: #666;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="icon">&#8635;</div>
+    <h1>Recover Your Account</h1>
+
+    <div id="initialContent">
+      <p>You can recover your deleted account using your unique recovery link. This will restore all your data and account settings.</p>
+
+      <div class="warning">
+        Note: Recovery links expire after 24 hours for security reasons.
+      </div>
+
+      <div class="form-group">
+        <label for="email">Email Address:</label>
+        <input type="email" id="email" placeholder="Enter your email address" required>
+      </div>
+
+      <div class="form-group">
+        <label for="password">Password:</label>
+        <input type="password" id="password" placeholder="Enter your password" required>
+      </div>
+
+      <button id="recoverBtn" onclick="recoverAccount()">Recover Account</button>
+      <button class="secondary" onclick="window.location.href='index.html'">Cancel</button>
+
+      <div id="message"></div>
+    </div>
+
+    <div id="successContent" style="display: none;">
+      <div class="success-box">
+        <h3>Account Recovered Successfully!</h3>
+        <p>Your account has been restored. All your data, pods, and settings have been recovered.</p>
+        <p>You can now log in to your account using your existing credentials.</p>
+      </div>
+
+      <button onclick="window.location.href='login.html'">Go to Login</button>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="footer">
+      &copy; 2019 Knot. All rights reserved. | <a href="#" style="color: #666;">Privacy Policy</a> | <a href="#" style="color: #666;">Terms of Service</a>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    // Supabase configuration
+    var supabaseUrl = 'https://your-project.supabase.co';
+    var supabaseKey = 'your-anon-key';
+    var supabase = supabase.createClient(supabaseUrl, supabaseKey);
+
+    // Get the recovery ID from URL parameter
+    var urlParams = new URLSearchParams(window.location.search);
+    var recoveryId = urlParams.get('id');
+    var type = urlParams.get('type');
+
+    if (!recoveryId || type !== 'account') {
+      document.getElementById('initialContent').innerHTML = '<div class="error">Invalid recovery link. Please contact support if you believe this is an error.</div>';
+    }
+
+    function recoverAccount() {
+      var email = document.getElementById('email').value;
+      var password = document.getElementById('password').value;
+      var messageDiv = document.getElementById('message');
+      var btn = document.getElementById('recoverBtn');
+
+      if (!email || !email.includes('@')) {
+        messageDiv.innerHTML = '<div class="error">Please enter a valid email address.</div>';
+        return;
+      }
+
+      if (!password) {
+        messageDiv.innerHTML = '<div class="error">Please enter your password.</div>';
+        return;
+      }
+
+      btn.disabled = true;
+      btn.textContent = 'Recovering...';
+      messageDiv.innerHTML = '<div class="loading">Verifying recovery credentials...</div>';
+
+      // Check if recovery ID exists in localStorage (in production, check database)
+      var deletionRequests = [];
+      for (var i = 0; i < localStorage.length; i++) {
+        var key = localStorage.key(i);
+        if (key.startsWith('knot_deletion_request_')) {
+          var request = JSON.parse(localStorage.getItem(key));
+          if (request.recoveryId === recoveryId) {
+            deletionRequests.push(request);
+          }
+        }
+      }
+
+      if (deletionRequests.length === 0) {
+        messageDiv.innerHTML = '<div class="error">Invalid or expired recovery link. The recovery link may have expired (24 hours) or has already been used.</div>';
+        btn.disabled = false;
+        btn.textContent = 'Recover Account';
+        return;
+      }
+
+      var deletionRequest = deletionRequests[0];
+
+      // Verify email matches the deletion request
+      if (email !== deletionRequest.email) {
+        messageDiv.innerHTML = '<div class="error">Email address does not match the deleted account. Please enter the correct email address.</div>';
+        btn.disabled = false;
+        btn.textContent = 'Recover Account';
+        return;
+      }
+
+      // Check if recovery link has expired
+      var expiresAt = new Date(deletionRequest.expiresAt);
+      var now = new Date();
+      if (now > expiresAt) {
+        messageDiv.innerHTML = '<div class="error">This recovery link has expired. Recovery links are valid for 24 hours only.</div>';
+        btn.disabled = false;
+        btn.textContent = 'Recover Account';
+        return;
+      }
+
+      // Attempt to sign in with the provided credentials to verify ownership
+      supabase.auth.signInWithPassword({
+        email: email,
+        password: password
+      }).then(function({ data, error }) {
+        if (error) {
+          messageDiv.innerHTML = '<div class="error">Invalid credentials. Please check your email and password and try again.</div>';
+          btn.disabled = false;
+          btn.textContent = 'Recover Account';
+          return;
+        }
+
+        // Successfully authenticated - verify this is the same user
+        if (data.user.id !== deletionRequest.userId) {
+          messageDiv.innerHTML = '<div class="error">Security verification failed. You can only recover your own account.</div>';
+          btn.disabled = false;
+          btn.textContent = 'Recover Account';
+          return;
+        }
+
+        // User verified - remove the deletion request
+        localStorage.removeItem('knot_deletion_request_' + deletionRequest.userId);
+
+        // In a real implementation, you would:
+        // 1. Restore the user's account in the database
+        // 2. Restore all associated data (pods, check-ins, etc.)
+        // 3. Send a confirmation email
+
+        // For now, show success message
+        messageDiv.innerHTML = '';
+        document.getElementById('initialContent').style.display = 'none';
+        document.getElementById('successContent').style.display = 'block';
+
+      }).catch(function(err) {
+        messageDiv.innerHTML = '<div class="error">An error occurred during recovery. Please try again or contact support.</div>';
+        btn.disabled = false;
+        btn.textContent = 'Recover Account';
+      });
+    }
+  </script>
+</body>
+</html>
