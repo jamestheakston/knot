@@ -187,7 +187,12 @@
     var expectedCode = urlParams.get('code');
     var recoveryId = urlParams.get('id');
 
+    console.log('Verification page loaded');
+    console.log('Expected code:', expectedCode);
+    console.log('Recovery ID:', recoveryId);
+
     if (!expectedCode || !recoveryId) {
+      console.error('Missing URL parameters');
       document.getElementById('message').innerHTML = '<div class="error">Invalid verification link. Please request a new deletion verification email.</div>';
       document.getElementById('verifyBtn').disabled = true;
     }
@@ -196,6 +201,10 @@
       var enteredCode = document.getElementById('verificationCode').value;
       var messageDiv = document.getElementById('message');
       var btn = document.getElementById('verifyBtn');
+
+      console.log('Verifying deletion');
+      console.log('Entered code:', enteredCode);
+      console.log('Expected code:', expectedCode);
 
       if (!enteredCode || enteredCode.length !== 6) {
         messageDiv.innerHTML = '<div class="error">Please enter a valid 6-digit verification code.</div>';
@@ -212,8 +221,11 @@
       messageDiv.innerHTML = '<div class="loading">Verifying deletion request...</div>';
 
       // Get current user
+      console.log('Getting current user...');
       supabase.auth.getUser().then(function({ data, error }) {
+        console.log('Auth result:', { data, error });
         if (error || !data.user) {
+          console.error('User not authenticated:', error);
           messageDiv.innerHTML = '<div class="error">You must be logged in to delete your account. Please log in and try again.</div>';
           btn.disabled = false;
           btn.textContent = 'Verify and Delete Account';
@@ -221,8 +233,11 @@
         }
 
         var currentUser = data.user;
+        console.log('Current user ID:', currentUser.id);
+        console.log('Current user email:', currentUser.email);
 
         // Check if deletion request exists and is valid
+        console.log('Querying deletion requests...');
         supabase.from('account_deletion_requests')
           .select('*')
           .eq('recovery_id', recoveryId)
@@ -230,6 +245,7 @@
           .in('status', ['pending', 'verified'])
           .single()
           .then(function({ data: deletionRequest, error }) {
+            console.log('Deletion request query result:', { deletionRequest, error });
             if (error || !deletionRequest) {
               console.error('Verification lookup error:', error);
               console.log('Looking for recovery_id:', recoveryId, 'user_id:', currentUser.id);
