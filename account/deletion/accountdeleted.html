@@ -161,7 +161,7 @@
     <div class="divider"></div>
 
     <button onclick="copyRecoveryLink()">Copy Recovery Link</button>
-    <button class="secondary" onclick="window.location.href='index.html'">Go to Homepage</button>
+    <button class="secondary" onclick="window.location.href='/index.html'">Go to Homepage</button>
 
     <div id="message"></div>
 
@@ -185,7 +185,7 @@
     var recoveryId = urlParams.get('id');
 
     if (recoveryId) {
-      var recoveryLink = 'https://knotapp.pages.dev/recover.html?type=account&id=' + recoveryId;
+      var recoveryLink = 'https://knotapp.pages.dev/account/deletion/recover.html?type=account&id=' + recoveryId;
       document.getElementById('recoveryLink').textContent = recoveryLink;
 
       // Update deletion request status to deleted and send recovery email

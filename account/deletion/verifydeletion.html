@@ -161,7 +161,7 @@
 
     <div class="form-group">
       <button id="verifyBtn" onclick="verifyDeletion()">Verify and Delete Account</button>
-      <button class="cancel" onclick="window.location.href='dashboard.html'">Cancel</button>
+      <button class="cancel" onclick="window.location.href='/dashboard.html'">Cancel</button>
     </div>
 
     <div id="message"></div>
@@ -261,7 +261,7 @@
                 }
 
                 // Redirect to account deleted page
-                window.location.href = 'accountdeleted.html?id=' + recoveryId;
+                window.location.href = '/account/deletion/accountdeleted.html?id=' + recoveryId;
               });
           });
       }).catch(function(err) {
