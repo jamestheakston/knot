@@ -243,11 +243,19 @@
           .eq('recovery_id', recoveryId)
           .eq('user_id', currentUser.id)
           .in('status', ['pending', 'verified'])
-          .single()
+          .maybeSingle()
           .then(function({ data: deletionRequest, error }) {
             console.log('Deletion request query result:', { deletionRequest, error });
-            if (error || !deletionRequest) {
+            if (error) {
               console.error('Verification lookup error:', error);
+              messageDiv.innerHTML = '<div class="error">Database error: ' + error.message + '</div>';
+              btn.disabled = false;
+              btn.textContent = 'Verify and Delete Account';
+              return;
+            }
+            
+            if (!deletionRequest) {
+              console.error('No deletion request found');
               console.log('Looking for recovery_id:', recoveryId, 'user_id:', currentUser.id);
               messageDiv.innerHTML = '<div class="error">Invalid or expired deletion request. Please request a new verification email.</div>';
               btn.disabled = false;
