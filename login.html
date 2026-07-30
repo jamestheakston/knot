@@ -618,7 +618,7 @@
       </button>
 
       <div style="margin-top: 12px; text-align: center;">
-        <button onclick="showMyIDExplanation()" style="background: none; border: none; color: #64748b; cursor: pointer; display: flex; align-items: center; gap: 6px; margin: 0 auto; font-size: 14px;">
+        <button id="myidWhatsThisBtn" style="background: none; border: none; color: #64748b; cursor: pointer; display: flex; align-items: center; gap: 6px; margin: 0 auto; font-size: 14px;">
           <i data-lucide="help-circle" style="width: 16px; height: 16px;"></i>
           What's this?
         </button>
@@ -760,7 +760,7 @@
           var accountData = {
             id: data.user.id,
             email: data.user.email,
-            name: data.user.user_metadata?.name || data.user.email,
+            name: data.user.user_metadata?.full_name || data.user.user_metadata?.name || data.user.email,
             avatar: data.user.user_metadata?.avatar_url || null,
             access_token: data.session.access_token,
             refresh_token: data.session.refresh_token,
@@ -768,16 +768,20 @@
             provider: 'passkey'
           };
           
-          // Add to account manager
+          // Check if account already exists
           var accounts = JSON.parse(localStorage.getItem('knot_accounts') || '[]');
-          var existingIndex = accounts.findIndex(function(acc){
+          var existingAccountIndex = accounts.findIndex(function(acc){
             return acc.id === accountData.id;
           });
-          if(existingIndex >= 0){
-            accounts[existingIndex] = accountData;
+
+          if(existingAccountIndex >= 0){
+            // Update existing account
+            accounts[existingAccountIndex] = accountData;
           }else{
+            // Add new account
             accounts.push(accountData);
           }
+
           localStorage.setItem('knot_accounts', JSON.stringify(accounts));
           localStorage.setItem('knot_active_account', accountData.id);
         }
@@ -800,6 +804,9 @@
         }
       }
     });
+
+    // What's this button for MyID
+    document.getElementById('myidWhatsThisBtn').addEventListener('click', showMyIDExplanation);
 
     function showMyIDExplanation(){
       alert('We\'ve changed the name from Passkeys to MyID to make it more personal and easier to understand. MyID works the same way - it\'s a secure, passwordless way to sign in to your account using your device\'s biometric authentication (fingerprint, face recognition, etc.) or a PIN.\n\nVisit /aboutmyid to learn more.');

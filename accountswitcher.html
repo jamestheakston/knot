@@ -1528,7 +1528,7 @@
           Sign in with MyID
         </button>
         <div style="margin-top: 12px; text-align: center;">
-          <button onclick="showMyIDExplanation()" style="background: none; border: none; color: #64748b; cursor: pointer; display: flex; align-items: center; gap: 6px; margin: 0 auto; font-size: 14px;">
+          <button id="myidWhatsThisBtn" style="background: none; border: none; color: #64748b; cursor: pointer; display: flex; align-items: center; gap: 6px; margin: 0 auto; font-size: 14px;">
             <i data-lucide="help-circle" style="width: 16px; height: 16px;"></i>
             What's this?
           </button>
@@ -1550,8 +1550,15 @@
         </button>
       </div>
     `;
+    
     if(typeof lucide !== 'undefined'){
       lucide.createIcons();
+    }
+    
+    // Attach event listener to What's this button
+    var whatsThisBtn = document.getElementById('myidWhatsThisBtn');
+    if(whatsThisBtn){
+      whatsThisBtn.addEventListener('click', showMyIDExplanation);
     }
   }
 
