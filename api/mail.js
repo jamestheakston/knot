@@ -963,23 +963,13 @@ function generateAccountDeletionVerificationHTML(email, verificationCode, verifi
               </table>
 
               <p style="font-size: 16px; line-height: 1.65; color: #5B6472; margin: 24px 0 32px 0; text-align: center;">
-                Or click the button below to verify and delete your account.
+                Or visit the verification page below and enter your code to complete the deletion process.
               </p>
 
-              <!-- Button CTA -->
-              <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
-                <tr>
-                  <td align="center">
-                    <table role="presentation" border="0" cellpadding="0" cellspacing="0">
-                      <tr>
-                        <td align="center" bgcolor="#C4432A" style="border-radius: 10px;">
-                          <a href="${verificationLink}" class="btn-primary" target="_blank" style="background-color: #C4432A; border-radius: 10px; color: #FFFFFF; display: inline-block; font-size: 16px; font-weight: 500; text-align: center; text-decoration: none; padding: 16px 32px;">Verify and Delete Account</a>
-                        </td>
-                      </tr>
-                    </table>
-                  </td>
-                </tr>
-              </table>
+              <!-- Verification Link -->
+              <p style="font-size: 16px; line-height: 1.65; color: #5B6472; margin: 20px 0; text-align: center;">
+                <a href="${verificationLink}" target="_blank" style="color: #C4432A; text-decoration: underline; font-weight: 500;">${verificationLink}</a>
+              </p>
 
             </td>
           </tr>
@@ -1179,23 +1169,13 @@ function generateAccountRecoveryEmail(email, recoveryLink){
               </table>
 
               <p style="font-size: 16px; line-height: 1.65; color: #5B6472; margin: 24px 0 32px 0; text-align: center;">
-                Click the button below to recover your account. This link will expire in 24 hours.
+                Visit the recovery page below to restore your account. This link will expire in 24 hours.
               </p>
 
-              <!-- Button CTA -->
-              <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
-                <tr>
-                  <td align="center">
-                    <table role="presentation" border="0" cellpadding="0" cellspacing="0">
-                      <tr>
-                        <td align="center" bgcolor="#2A4BD7" style="border-radius: 10px;">
-                          <a href="${recoveryLink}" class="btn-primary" target="_blank" style="background-color: #2A4BD7; border-radius: 10px; color: #FFFFFF; display: inline-block; font-size: 16px; font-weight: 500; text-align: center; text-decoration: none; padding: 16px 32px;">Recover Your Account</a>
-                        </td>
-                      </tr>
-                    </table>
-                  </td>
-                </tr>
-              </table>
+              <!-- Recovery Link -->
+              <p style="font-size: 16px; line-height: 1.65; color: #5B6472; margin: 20px 0; text-align: center;">
+                <a href="${recoveryLink}" target="_blank" style="color: #2A4BD7; text-decoration: underline; font-weight: 500;">${recoveryLink}</a>
+              </p>
 
             </td>
           </tr>

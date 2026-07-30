@@ -227,10 +227,12 @@
           .select('*')
           .eq('recovery_id', recoveryId)
           .eq('user_id', currentUser.id)
-          .eq('status', 'pending')
+          .in('status', ['pending', 'verified'])
           .single()
           .then(function({ data: deletionRequest, error }) {
             if (error || !deletionRequest) {
+              console.error('Verification lookup error:', error);
+              console.log('Looking for recovery_id:', recoveryId, 'user_id:', currentUser.id);
               messageDiv.innerHTML = '<div class="error">Invalid or expired deletion request. Please request a new verification email.</div>';
               btn.disabled = false;
               btn.textContent = 'Verify and Delete Account';
