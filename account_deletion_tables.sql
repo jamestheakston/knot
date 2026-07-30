@@ -35,6 +35,13 @@ CREATE INDEX IF NOT EXISTS idx_account_deletion_expires_at ON account_deletion_r
 ALTER TABLE account_deletion_requests ENABLE ROW LEVEL SECURITY;
 ALTER TABLE account_recovery_attempts ENABLE ROW LEVEL SECURITY;
 
+-- Grant necessary permissions to authenticated role
+GRANT USAGE ON SCHEMA public TO authenticated;
+GRANT ALL ON TABLE account_deletion_requests TO authenticated;
+GRANT ALL ON TABLE account_recovery_attempts TO authenticated;
+GRANT USAGE, SELECT ON SEQUENCE account_deletion_requests_id_seq TO authenticated;
+GRANT USAGE, SELECT ON SEQUENCE account_recovery_attempts_id_seq TO authenticated;
+
 -- RLS Policies for account_deletion_requests
 -- Users can only see their own deletion requests
 CREATE POLICY "Users can view own deletion requests"
@@ -45,6 +52,11 @@ CREATE POLICY "Users can view own deletion requests"
 CREATE POLICY "Users can insert own deletion requests"
   ON account_deletion_requests FOR INSERT
   WITH CHECK (auth.uid() = user_id);
+
+-- Users can update their own deletion requests
+CREATE POLICY "Users can update own deletion requests"
+  ON account_deletion_requests FOR UPDATE
+  USING (auth.uid() = user_id);
 
 -- Service role can update deletion requests (for verification/deletion)
 CREATE POLICY "Service role can update deletion requests"
