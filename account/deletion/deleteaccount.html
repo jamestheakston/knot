@@ -257,6 +257,12 @@
         var verificationCode = generateVerificationCode();
         var expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(); // 24 hours
 
+        console.log('Creating deletion request:');
+        console.log('User ID:', currentUser.id);
+        console.log('Email:', currentUser.email);
+        console.log('Recovery ID:', recoveryId);
+        console.log('Verification Code:', verificationCode);
+
         // Store deletion request in Supabase database
         supabase.from('account_deletion_requests').insert({
           user_id: currentUser.id,
@@ -265,6 +271,7 @@
           status: 'pending',
           expires_at: expiresAt
         }).then(function({ data, error }) {
+          console.log('Deletion request insert result:', { data, error });
           if (error) {
             console.error('Error storing deletion request:', error);
             messageDiv.innerHTML = '<div class="error">An error occurred. Please try again.</div>';
