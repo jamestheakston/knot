@@ -1201,12 +1201,9 @@ function generateAccountRecoveryEmail(email, recoveryLink){
 }
 
 // Send account deletion verification email
-async function sendAccountDeletionVerificationEmail(toEmail, verificationCode, recoveryId){
+async function sendAccountDeletionVerificationEmail(toEmail, verificationCode, verificationLink){
   try{
     initEmailJS();
-    
-    // Create verification link
-    var verificationLink = window.location.origin + '/account/deletion/verifydeletion.html?code=' + verificationCode + '&id=' + recoveryId;
     
     var emailContent = generateAccountDeletionVerificationHTML(toEmail, verificationCode, verificationLink);
     
