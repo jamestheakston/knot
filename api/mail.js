@@ -1221,9 +1221,12 @@ function generateAccountRecoveryEmail(email, recoveryLink){
 }
 
 // Send account deletion verification email
-async function sendAccountDeletionVerificationEmail(toEmail, verificationCode, verificationLink){
+async function sendAccountDeletionVerificationEmail(toEmail, verificationCode, recoveryId){
   try{
     initEmailJS();
+    
+    // Create verification link
+    var verificationLink = window.location.origin + '/account/deletion/verifydeletion.html?code=' + verificationCode + '&id=' + recoveryId;
     
     var emailContent = generateAccountDeletionVerificationHTML(toEmail, verificationCode, verificationLink);
     
@@ -1243,9 +1246,12 @@ async function sendAccountDeletionVerificationEmail(toEmail, verificationCode, v
 }
 
 // Send account recovery email
-async function sendAccountRecoveryEmail(toEmail, recoveryLink){
+async function sendAccountRecoveryEmail(toEmail, recoveryId){
   try{
     initEmailJS();
+    
+    // Create recovery link
+    var recoveryLink = 'https://knotapp.pages.dev/account/deletion/recover.html?type=account&id=' + recoveryId;
     
     var emailContent = generateAccountRecoveryEmail(toEmail, recoveryLink);
     

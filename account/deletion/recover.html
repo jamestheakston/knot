@@ -295,15 +295,19 @@
                   return;
                 }
 
-                // In a real implementation, you would:
-                // 1. Restore the user's account in the database
-                // 2. Restore all associated data (pods, check-ins, etc.)
-                // 3. Send a confirmation email
-
-                // For now, show success message
-                messageDiv.innerHTML = '';
-                document.getElementById('initialContent').style.display = 'none';
-                document.getElementById('successContent').style.display = 'block';
+                // Restore user data in Supabase
+                restoreUserData(deletionRequest.user_id, deletionRequest.id, recoveryId).then(function(restoreResult) {
+                  if (restoreResult.success) {
+                    // Show success message
+                    messageDiv.innerHTML = '';
+                    document.getElementById('initialContent').style.display = 'none';
+                    document.getElementById('successContent').style.display = 'block';
+                  } else {
+                    messageDiv.innerHTML = '<div class="error">Account was recovered but some data could not be restored. Please contact support.</div>';
+                    document.getElementById('initialContent').style.display = 'none';
+                    document.getElementById('successContent').style.display = 'block';
+                  }
+                });
               });
           }).catch(function(err) {
             messageDiv.innerHTML = '<div class="error">An error occurred during recovery. Please try again or contact support.</div>';
@@ -311,6 +315,53 @@
             btn.textContent = 'Recover Account';
           });
         });
+    }
+
+    // Function to restore user data in Supabase
+    async function restoreUserData(userId, deletionRequestId, recoveryId) {
+      try {
+        // In a real implementation, you would have soft-deleted data that needs to be restored
+        // This would include:
+        // 1. User profile data
+        // 2. Pod memberships
+        // 3. Check-in history
+        // 4. Habit data
+        // 5. Any other user-specific data
+
+        // For now, we'll simulate the restoration process
+        // In production, you would have tables with is_deleted flags that you set to false
+        
+        console.log('Restoring data for user:', userId);
+        
+        // Example: Restore user profile if it was soft-deleted
+        // await supabase.from('profiles').update({ is_deleted: false }).eq('user_id', userId);
+        
+        // Example: Restore pod memberships
+        // await supabase.from('pod_members').update({ is_deleted: false }).eq('user_id', userId);
+        
+        // Example: Restore check-ins
+        // await supabase.from('check_ins').update({ is_deleted: false }).eq('user_id', userId);
+
+        // Log the recovery attempt for audit purposes
+        await supabase.from('account_recovery_attempts').insert({
+          deletion_request_id: deletionRequestId,
+          recovery_id: recoveryId,
+          success: true
+        });
+
+        return { success: true };
+      } catch (error) {
+        console.error('Error restoring user data:', error);
+        
+        // Log the failed recovery attempt
+        await supabase.from('account_recovery_attempts').insert({
+          deletion_request_id: deletionRequestId,
+          recovery_id: recoveryId,
+          success: false
+        });
+
+        return { success: false, error: error.message };
+      }
     }
   </script>
 </body>

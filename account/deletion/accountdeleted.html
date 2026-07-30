@@ -206,7 +206,7 @@
               .then(function({ error }) {
                 if (!error) {
                   // Send recovery email
-                  sendAccountRecoveryEmail(deletionRequest.email, recoveryLink);
+                  sendAccountRecoveryEmail(deletionRequest.email, recoveryId);
                 }
               });
           }
