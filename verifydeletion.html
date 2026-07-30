@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Verify Account Deletion - Knot</title>
+  <style>
+    body {
+      font-family: Arial, Helvetica, sans-serif;
+      background-color: #f0f0f0;
+      margin: 0;
+      padding: 20px;
+      color: #333;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      background-color: #ffffff;
+      border: 1px solid #ccc;
+      padding: 30px;
+      box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
+    }
+
+    h1 {
+      font-size: 24px;
+      color: #cc0000;
+      border-bottom: 2px solid #cc0000;
+      padding-bottom: 10px;
+      margin-top: 0;
+    }
+
+    h2 {
+      font-size: 18px;
+      color: #666;
+      margin-top: 30px;
+    }
+
+    p {
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .warning {
+      background-color: #fff3cd;
+      border: 1px solid #ffeeba;
+      padding: 15px;
+      margin: 20px 0;
+      font-weight: bold;
+    }
+
+    .form-group {
+      margin: 20px 0;
+    }
+
+    label {
+      display: block;
+      font-weight: bold;
+      margin-bottom: 5px;
+      font-size: 14px;
+    }
+
+    input[type="text"] {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #999;
+      font-size: 14px;
+      box-sizing: border-box;
+    }
+
+    button {
+      background-color: #cc0000;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      font-size: 14px;
+      cursor: pointer;
+      margin-right: 10px;
+    }
+
+    button:hover {
+      background-color: #aa0000;
+    }
+
+    button.cancel {
+      background-color: #999;
+    }
+
+    button.cancel:hover {
+      background-color: #777;
+    }
+
+    button:disabled {
+      background-color: #ccc;
+      cursor: not-allowed;
+    }
+
+    .divider {
+      border-top: 1px solid #ccc;
+      margin: 30px 0;
+    }
+
+    .footer {
+      font-size: 12px;
+      color: #999;
+      text-align: center;
+      margin-top: 30px;
+    }
+
+    .success {
+      background-color: #d4edda;
+      border: 1px solid #c3e6cb;
+      color: #155724;
+      padding: 15px;
+      margin: 20px 0;
+    }
+
+    .error {
+      background-color: #f8d7da;
+      border: 1px solid #f5c6cb;
+      color: #721c24;
+      padding: 15px;
+      margin: 20px 0;
+    }
+
+    .loading {
+      font-style: italic;
+      color: #666;
+    }
+
+    .code-display {
+      background-color: #f0f0f0;
+      border: 2px dashed #cc0000;
+      padding: 20px;
+      text-align: center;
+      margin: 20px 0;
+      font-family: monospace;
+      font-size: 24px;
+      font-weight: bold;
+      color: #cc0000;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div style="text-align: center; margin-bottom: 20px;">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/2/2c/Oxygen480-actions-edit-delete.svg" alt="Delete Icon" style="width: 48px; height: 48px;">
+    </div>
+    <h1>Verify Account Deletion</h1>
+
+    <div class="warning">
+      WARNING: This action cannot be undone. All your data will be permanently deleted.
+    </div>
+
+    <p>Please enter the 6-digit verification code from your email to confirm your account deletion.</p>
+
+    <div class="form-group">
+      <label for="verificationCode">Verification Code:</label>
+      <input type="text" id="verificationCode" placeholder="Enter 6-digit code" maxlength="6" style="text-align: center; letter-spacing: 0.5em; font-size: 18px;">
+    </div>
+
+    <div class="form-group">
+      <button id="verifyBtn" onclick="verifyDeletion()">Verify and Delete Account</button>
+      <button class="cancel" onclick="window.location.href='dashboard.html'">Cancel</button>
+    </div>
+
+    <div id="message"></div>
+
+    <div class="divider"></div>
+
+    <div class="footer">
+      &copy; 2026 Knot. All rights reserved. | <a href="#" style="color: #666;">Privacy Policy</a> | <a href="#" style="color: #666;">Terms of Service</a>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    // Supabase configuration (from dashboard.html)
+    var supabaseUrl = 'https://mfjtdrqvmuwtoarkiezi.supabase.co';
+    var supabaseKey = 'sb_publishable_SPhsUI31nYbrrLjPBAaRBw_OkWQ2_Xn';
+    var supabase = supabase.createClient(supabaseUrl, supabaseKey);
+
+    // Get URL parameters
+    var urlParams = new URLSearchParams(window.location.search);
+    var expectedCode = urlParams.get('code');
+    var recoveryId = urlParams.get('id');
+
+    if (!expectedCode || !recoveryId) {
+      document.getElementById('message').innerHTML = '<div class="error">Invalid verification link. Please request a new deletion verification email.</div>';
+      document.getElementById('verifyBtn').disabled = true;
+    }
+
+    function verifyDeletion() {
+      var enteredCode = document.getElementById('verificationCode').value;
+      var messageDiv = document.getElementById('message');
+      var btn = document.getElementById('verifyBtn');
+
+      if (!enteredCode || enteredCode.length !== 6) {
+        messageDiv.innerHTML = '<div class="error">Please enter a valid 6-digit verification code.</div>';
+        return;
+      }
+
+      if (enteredCode !== expectedCode) {
+        messageDiv.innerHTML = '<div class="error">Invalid verification code. Please check your email and try again.</div>';
+        return;
+      }
+
+      btn.disabled = true;
+      btn.textContent = 'Verifying...';
+      messageDiv.innerHTML = '<div class="loading">Verifying deletion request...</div>';
+
+      // Get current user
+      supabase.auth.getUser().then(function({ data, error }) {
+        if (error || !data.user) {
+          messageDiv.innerHTML = '<div class="error">You must be logged in to delete your account. Please log in and try again.</div>';
+          btn.disabled = false;
+          btn.textContent = 'Verify and Delete Account';
+          return;
+        }
+
+        var currentUser = data.user;
+
+        // Check if deletion request exists and is valid
+        supabase.from('account_deletion_requests')
+          .select('*')
+          .eq('recovery_id', recoveryId)
+          .eq('user_id', currentUser.id)
+          .eq('status', 'pending')
+          .single()
+          .then(function({ data: deletionRequest, error }) {
+            if (error || !deletionRequest) {
+              messageDiv.innerHTML = '<div class="error">Invalid or expired deletion request. Please request a new verification email.</div>';
+              btn.disabled = false;
+              btn.textContent = 'Verify and Delete Account';
+              return;
+            }
+
+            // Check if request has expired
+            var expiresAt = new Date(deletionRequest.expires_at);
+            var now = new Date();
+            if (now > expiresAt) {
+              messageDiv.innerHTML = '<div class="error">This deletion request has expired (24 hours). Please request a new verification email.</div>';
+              btn.disabled = false;
+              btn.textContent = 'Verify and Delete Account';
+              return;
+            }
+
+            // Update deletion request status to verified
+            supabase.from('account_deletion_requests')
+              .update({ 
+                status: 'verified',
+                verified_at: new Date().toISOString()
+              })
+              .eq('id', deletionRequest.id)
+              .then(function({ error }) {
+                if (error) {
+                  messageDiv.innerHTML = '<div class="error">An error occurred during verification. Please try again.</div>';
+                  btn.disabled = false;
+                  btn.textContent = 'Verify and Delete Account';
+                  return;
+                }
+
+                // Redirect to account deleted page
+                window.location.href = 'accountdeleted.html?id=' + recoveryId;
+              });
+          });
+      }).catch(function(err) {
+        messageDiv.innerHTML = '<div class="error">An error occurred. Please try again.</div>';
+        btn.disabled = false;
+        btn.textContent = 'Verify and Delete Account';
+      });
+    }
+  </script>
+</body>
+</html>

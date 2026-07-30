@@ -194,9 +194,9 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
-    // Supabase configuration
-    var supabaseUrl = 'https://your-project.supabase.co';
-    var supabaseKey = 'your-anon-key';
+    // Supabase configuration (from dashboard.html)
+    var supabaseUrl = 'https://mfjtdrqvmuwtoarkiezi.supabase.co';
+    var supabaseKey = 'sb_publishable_SPhsUI31nYbrrLjPBAaRBw_OkWQ2_Xn';
     var supabase = supabase.createClient(supabaseUrl, supabaseKey);
 
     // Get the recovery ID from URL parameter
@@ -228,83 +228,89 @@
       btn.textContent = 'Recovering...';
       messageDiv.innerHTML = '<div class="loading">Verifying recovery credentials...</div>';
 
-      // Check if recovery ID exists in localStorage (in production, check database)
-      var deletionRequests = [];
-      for (var i = 0; i < localStorage.length; i++) {
-        var key = localStorage.key(i);
-        if (key.startsWith('knot_deletion_request_')) {
-          var request = JSON.parse(localStorage.getItem(key));
-          if (request.recoveryId === recoveryId) {
-            deletionRequests.push(request);
+      // Check if recovery ID exists in database
+      supabase.from('account_deletion_requests')
+        .select('*')
+        .eq('recovery_id', recoveryId)
+        .eq('status', 'deleted')
+        .single()
+        .then(function({ data: deletionRequest, error }) {
+          if (error || !deletionRequest) {
+            messageDiv.innerHTML = '<div class="error">Invalid or expired recovery link. The recovery link may have expired (24 hours) or has already been used.</div>';
+            btn.disabled = false;
+            btn.textContent = 'Recover Account';
+            return;
           }
-        }
-      }
 
-      if (deletionRequests.length === 0) {
-        messageDiv.innerHTML = '<div class="error">Invalid or expired recovery link. The recovery link may have expired (24 hours) or has already been used.</div>';
-        btn.disabled = false;
-        btn.textContent = 'Recover Account';
-        return;
-      }
+          // Verify email matches the deletion request
+          if (email !== deletionRequest.email) {
+            messageDiv.innerHTML = '<div class="error">Email address does not match the deleted account. Please enter the correct email address.</div>';
+            btn.disabled = false;
+            btn.textContent = 'Recover Account';
+            return;
+          }
 
-      var deletionRequest = deletionRequests[0];
+          // Check if recovery link has expired
+          var expiresAt = new Date(deletionRequest.expires_at);
+          var now = new Date();
+          if (now > expiresAt) {
+            messageDiv.innerHTML = '<div class="error">This recovery link has expired. Recovery links are valid for 24 hours only.</div>';
+            btn.disabled = false;
+            btn.textContent = 'Recover Account';
+            return;
+          }
 
-      // Verify email matches the deletion request
-      if (email !== deletionRequest.email) {
-        messageDiv.innerHTML = '<div class="error">Email address does not match the deleted account. Please enter the correct email address.</div>';
-        btn.disabled = false;
-        btn.textContent = 'Recover Account';
-        return;
-      }
+          // Attempt to sign in with the provided credentials to verify ownership
+          supabase.auth.signInWithPassword({
+            email: email,
+            password: password
+          }).then(function({ data, error }) {
+            if (error) {
+              messageDiv.innerHTML = '<div class="error">Invalid credentials. Please check your email and password and try again.</div>';
+              btn.disabled = false;
+              btn.textContent = 'Recover Account';
+              return;
+            }
 
-      // Check if recovery link has expired
-      var expiresAt = new Date(deletionRequest.expiresAt);
-      var now = new Date();
-      if (now > expiresAt) {
-        messageDiv.innerHTML = '<div class="error">This recovery link has expired. Recovery links are valid for 24 hours only.</div>';
-        btn.disabled = false;
-        btn.textContent = 'Recover Account';
-        return;
-      }
+            // Successfully authenticated - verify this is the same user
+            if (data.user.id !== deletionRequest.user_id) {
+              messageDiv.innerHTML = '<div class="error">Security verification failed. You can only recover your own account.</div>';
+              btn.disabled = false;
+              btn.textContent = 'Recover Account';
+              return;
+            }
 
-      // Attempt to sign in with the provided credentials to verify ownership
-      supabase.auth.signInWithPassword({
-        email: email,
-        password: password
-      }).then(function({ data, error }) {
-        if (error) {
-          messageDiv.innerHTML = '<div class="error">Invalid credentials. Please check your email and password and try again.</div>';
-          btn.disabled = false;
-          btn.textContent = 'Recover Account';
-          return;
-        }
+            // User verified - update deletion request status to recovered
+            supabase.from('account_deletion_requests')
+              .update({ 
+                status: 'recovered',
+                recovered_at: new Date().toISOString()
+              })
+              .eq('id', deletionRequest.id)
+              .then(function({ error }) {
+                if (error) {
+                  messageDiv.innerHTML = '<div class="error">An error occurred during recovery. Please try again or contact support.</div>';
+                  btn.disabled = false;
+                  btn.textContent = 'Recover Account';
+                  return;
+                }
 
-        // Successfully authenticated - verify this is the same user
-        if (data.user.id !== deletionRequest.userId) {
-          messageDiv.innerHTML = '<div class="error">Security verification failed. You can only recover your own account.</div>';
-          btn.disabled = false;
-          btn.textContent = 'Recover Account';
-          return;
-        }
+                // In a real implementation, you would:
+                // 1. Restore the user's account in the database
+                // 2. Restore all associated data (pods, check-ins, etc.)
+                // 3. Send a confirmation email
 
-        // User verified - remove the deletion request
-        localStorage.removeItem('knot_deletion_request_' + deletionRequest.userId);
-
-        // In a real implementation, you would:
-        // 1. Restore the user's account in the database
-        // 2. Restore all associated data (pods, check-ins, etc.)
-        // 3. Send a confirmation email
-
-        // For now, show success message
-        messageDiv.innerHTML = '';
-        document.getElementById('initialContent').style.display = 'none';
-        document.getElementById('successContent').style.display = 'block';
-
-      }).catch(function(err) {
-        messageDiv.innerHTML = '<div class="error">An error occurred during recovery. Please try again or contact support.</div>';
-        btn.disabled = false;
-        btn.textContent = 'Recover Account';
-      });
+                // For now, show success message
+                messageDiv.innerHTML = '';
+                document.getElementById('initialContent').style.display = 'none';
+                document.getElementById('successContent').style.display = 'block';
+              });
+          }).catch(function(err) {
+            messageDiv.innerHTML = '<div class="error">An error occurred during recovery. Please try again or contact support.</div>';
+            btn.disabled = false;
+            btn.textContent = 'Recover Account';
+          });
+        });
     }
   </script>
 </body>

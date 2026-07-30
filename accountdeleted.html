@@ -172,14 +172,45 @@
     </div>
   </div>
 
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="/api/mail.js"></script>
   <script>
+    // Supabase configuration (from dashboard.html)
+    var supabaseUrl = 'https://mfjtdrqvmuwtoarkiezi.supabase.co';
+    var supabaseKey = 'sb_publishable_SPhsUI31nYbrrLjPBAaRBw_OkWQ2_Xn';
+    var supabase = supabase.createClient(supabaseUrl, supabaseKey);
+
     // Get the recovery ID from URL parameter
     var urlParams = new URLSearchParams(window.location.search);
     var recoveryId = urlParams.get('id');
 
     if (recoveryId) {
-      var recoveryLink = 'https://knotapp.pages.dev/recover?type=account&id=' + recoveryId;
+      var recoveryLink = 'https://knotapp.pages.dev/recover.html?type=account&id=' + recoveryId;
       document.getElementById('recoveryLink').textContent = recoveryLink;
+
+      // Update deletion request status to deleted and send recovery email
+      supabase.from('account_deletion_requests')
+        .select('*')
+        .eq('recovery_id', recoveryId)
+        .eq('status', 'verified')
+        .single()
+        .then(function({ data: deletionRequest, error }) {
+          if (!error && deletionRequest) {
+            // Update status to deleted
+            supabase.from('account_deletion_requests')
+              .update({ 
+                status: 'deleted',
+                deleted_at: new Date().toISOString()
+              })
+              .eq('id', deletionRequest.id)
+              .then(function({ error }) {
+                if (!error) {
+                  // Send recovery email
+                  sendAccountRecoveryEmail(deletionRequest.email, recoveryLink);
+                }
+              });
+          }
+        });
     } else {
       document.getElementById('recoveryLink').textContent = 'Error: No recovery ID provided';
       document.getElementById('message').innerHTML = '<div class="error">Invalid recovery link. Please contact support if you believe this is an error.</div>';

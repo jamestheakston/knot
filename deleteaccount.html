@@ -215,10 +215,11 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="/api/mail.js"></script>
   <script>
-    // Supabase configuration
-    var supabaseUrl = 'https://your-project.supabase.co';
-    var supabaseKey = 'your-anon-key';
+    // Supabase configuration (from dashboard.html)
+    var supabaseUrl = 'https://mfjtdrqvmuwtoarkiezi.supabase.co';
+    var supabaseKey = 'sb_publishable_SPhsUI31nYbrrLjPBAaRBw_OkWQ2_Xn';
     var supabase = supabase.createClient(supabaseUrl, supabaseKey);
 
     function handleOAuthLogin(provider) {
@@ -284,30 +285,42 @@
           return;
         }
 
-        // Generate a random recovery ID
+        // Generate a random recovery ID and verification code
         var recoveryId = generateRandomId();
+        var verificationCode = generateVerificationCode();
+        var expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(); // 24 hours
 
-        // Store recovery ID in Supabase (you'll need to create a table for this)
-        // For now, we'll use localStorage as a fallback
-        var deletionRequest = {
-          userId: currentUser.id,
+        // Store deletion request in Supabase database
+        supabase.from('account_deletion_requests').insert({
+          user_id: currentUser.id,
           email: currentUser.email,
-          recoveryId: recoveryId,
-          createdAt: new Date().toISOString(),
-          expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString() // 24 hours
-        };
+          recovery_id: recoveryId,
+          status: 'pending',
+          expires_at: expiresAt
+        }).then(function({ data, error }) {
+          if (error) {
+            console.error('Error storing deletion request:', error);
+            messageDiv.innerHTML = '<div class="error">An error occurred. Please try again.</div>';
+            btn.disabled = false;
+            btn.textContent = 'Send Verification Email';
+            return;
+          }
 
-        // Store in localStorage (in production, this should be in a database)
-        localStorage.setItem('knot_deletion_request_' + currentUser.id, JSON.stringify(deletionRequest));
+          // Create verification link
+          var verificationLink = window.location.origin + '/verifydeletion.html?code=' + verificationCode + '&id=' + recoveryId;
 
-        // Simulate sending email (in production, use your email service)
-        setTimeout(function() {
-          messageDiv.innerHTML = '<div class="success">Verification email sent! Please check your inbox and follow the instructions to complete the deletion process.</div>';
-          btn.textContent = 'Email Sent';
-          
-          // Show the recovery link (for testing purposes)
-          messageDiv.innerHTML += '<p style="margin-top: 20px; font-size: 12px; color: #666;">Test recovery link: <a href="accountdeleted.html?id=' + recoveryId + '" style="color: #666;">accountdeleted.html?id=' + recoveryId + '</a></p>';
-        }, 1500);
+          // Send verification email
+          sendAccountDeletionVerificationEmail(currentUser.email, verificationCode, verificationLink).then(function(result) {
+            if (result.success) {
+              messageDiv.innerHTML = '<div class="success">Verification email sent! Please check your inbox and click the verification link to complete the deletion process.</div>';
+              btn.textContent = 'Email Sent';
+            } else {
+              messageDiv.innerHTML = '<div class="error">Failed to send verification email. Please try again.</div>';
+              btn.disabled = false;
+              btn.textContent = 'Send Verification Email';
+            }
+          });
+        });
       }).catch(function(err) {
         messageDiv.innerHTML = '<div class="error">An error occurred. Please try again.</div>';
         btn.disabled = false;
@@ -319,6 +332,15 @@
       var chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
       var result = '';
       for (var i = 0; i < 32; i++) {
+        result += chars.charAt(Math.floor(Math.random() * chars.length));
+      }
+      return result;
+    }
+
+    function generateVerificationCode() {
+      var chars = '0123456789';
+      var result = '';
+      for (var i = 0; i < 6; i++) {
         result += chars.charAt(Math.floor(Math.random() * chars.length));
       }
       return result;

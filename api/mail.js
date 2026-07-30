@@ -754,3 +754,512 @@ async function sendLoginNotification(email){
     // Don't alert user for login notifications - silently fail
   }
 }
+
+// Generate account deletion verification email HTML
+function generateAccountDeletionVerificationHTML(email, verificationCode, verificationLink){
+  return `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>Verify account deletion - Knot</title>
+  <style>
+    body, table, td, a { -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
+    table, td { mso-table-lspace: 0pt; mso-table-rspace: 0pt; }
+    img { -ms-interpolation-mode: bicubic; border: 0; height: auto; line-height: 100%; outline: none; text-decoration: none; }
+    table { border-collapse: collapse !important; }
+    body { height: 100% !important; margin: 0 !important; padding: 0 !important; width: 100% !important; background-color: #F7F8FB; font-family: 'Work Sans', Helvetica, Arial, sans-serif; color: #151922; }
+
+    .email-container {
+      max-width: 600px;
+      margin: 0 auto;
+      background-color: #FFFFFF;
+      border-radius: 20px;
+      overflow: hidden;
+      border: 1px solid rgba(21, 25, 34, 0.08);
+      box-shadow: 0 10px 30px rgba(21, 25, 34, 0.03);
+    }
+    .header {
+      padding: 40px 40px 28px;
+      text-align: center;
+      border-bottom: 1px solid rgba(21, 25, 34, 0.06);
+      background: linear-gradient(135deg, #C4432A 0%, #A33822 100%);
+    }
+    .logo-text {
+      font-family: Georgia, serif;
+      font-size: 32px;
+      color: #FFFFFF;
+      font-weight: normal;
+      text-decoration: none;
+      letter-spacing: -0.01em;
+    }
+    .header-subtitle {
+      font-size: 15px;
+      color: rgba(255,255,255,0.9);
+      margin-top: 8px;
+    }
+    .content {
+      padding: 48px 40px;
+    }
+    .eyebrow {
+      font-family: monospace;
+      font-size: 11.5px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #C4432A;
+      background: #FFF0ED;
+      border: 1px solid rgba(196, 67, 42, 0.15);
+      padding: 6px 14px;
+      border-radius: 100px;
+      display: inline-block;
+      margin-bottom: 24px;
+    }
+    h1 {
+      font-family: Georgia, serif;
+      font-size: 34px;
+      font-weight: normal;
+      line-height: 1.15;
+      margin: 0 0 18px 0;
+      color: #151922;
+    }
+    p {
+      font-size: 16px;
+      line-height: 1.65;
+      color: #5B6472;
+      margin: 0 0 24px 0;
+    }
+    .code-box {
+      background: linear-gradient(135deg, #EEF1F6 0%, #E6EAF2 100%);
+      border: 1px dashed rgba(196, 67, 42, 0.3);
+      border-radius: 14px;
+      padding: 28px;
+      text-align: center;
+      margin: 32px 0;
+    }
+    .code-label {
+      font-size: 12.5px;
+      font-weight: 500;
+      color: #5B6472;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 10px;
+    }
+    .code-value {
+      font-family: monospace;
+      font-size: 32px;
+      letter-spacing: 0.18em;
+      color: #C4432A;
+      font-weight: bold;
+    }
+    .btn-primary {
+      background-color: #C4432A;
+      border-radius: 10px;
+      color: #FFFFFF;
+      display: inline-block;
+      font-size: 16px;
+      font-weight: 500;
+      text-align: center;
+      text-decoration: none;
+      padding: 16px 32px;
+      -webkit-text-size-adjust: none;
+      box-shadow: 0 4px 14px rgba(196, 67, 42, 0.25);
+    }
+    .btn-primary:hover {
+      background-color: #A33822;
+    }
+    .alert-box {
+      background: #FFF0ED;
+      border: 1px solid rgba(196, 67, 42, 0.2);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 32px;
+    }
+    .alert-box p {
+      font-size: 15px;
+      color: #C4432A;
+      margin: 0;
+    }
+    .footer {
+      padding: 28px 40px 36px;
+      text-align: center;
+      background-color: #F7F8FB;
+      border-top: 1px solid rgba(21, 25, 34, 0.06);
+    }
+    .footer p {
+      font-size: 13px;
+      color: #8890A0;
+      margin: 0;
+    }
+
+    @media screen and (max-width: 600px) {
+      .email-container {
+        width: 100% !important;
+        border-radius: 0 !important;
+        border: none !important;
+      }
+      .content {
+        padding: 32px 20px !important;
+      }
+      .header {
+        padding: 32px 20px 20px !important;
+      }
+      .footer {
+        padding: 24px 20px 28px !important;
+      }
+    }
+  </style>
+</head>
+<body style="margin: 0; padding: 40px 0; background-color: #F7F8FB;">
+
+  <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color: #F7F8FB;">
+    <tr>
+      <td align="center" style="padding: 0 16px;">
+        
+        <!-- Email Container -->
+        <table role="presentation" border="0" cellpadding="0" cellspacing="0" class="email-container" width="600" style="background-color: #FFFFFF; border-radius: 20px;">
+          
+          <!-- Header -->
+          <tr>
+            <td class="header" style="padding: 40px 40px 28px; text-align: center; border-bottom: 1px solid rgba(21, 25, 34, 0.06); background: linear-gradient(135deg, #C4432A 0%, #A33822 100%);">
+              <div class="logo-text" style="font-family: Georgia, serif; font-size: 32px; color: #FFFFFF; font-weight: normal; text-decoration: none;">Knot</div>
+              <div class="header-subtitle" style="font-size: 15px; color: rgba(255,255,255,0.9); margin-top: 8px;">Account deletion verification</div>
+            </td>
+          </tr>
+
+          <!-- Main Content -->
+          <tr>
+            <td class="content" style="padding: 48px 40px;">
+              <span class="eyebrow" style="font-family: monospace; font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.08em; color: #C4432A; background: #FFF0ED; padding: 6px 14px; border-radius: 100px; display: inline-block; margin-bottom: 24px;">Action Required</span>
+              
+              <h1 style="font-family: Georgia, serif; font-size: 34px; font-weight: normal; line-height: 1.15; margin: 0 0 18px 0; color: #151922;">
+                Confirm your account deletion
+              </h1>
+              
+              <p style="font-size: 16px; line-height: 1.65; color: #5B6472; margin: 0 0 24px 0;">
+                You requested to delete your Knot account. To complete this action, please verify your identity using the code below or click the verification link.
+              </p>
+
+              <!-- Verification Code Box -->
+              <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+                <tr>
+                  <td class="code-box" style="background: #EEF1F6; border: 1px dashed rgba(196, 67, 42, 0.3); border-radius: 14px; padding: 28px; text-align: center;">
+                    <div class="code-label" style="font-size: 12.5px; font-weight: 500; color: #5B6472; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 10px;">Your verification code</div>
+                    <div class="code-value" style="font-family: monospace; font-size: 32px; letter-spacing: 0.18em; color: #C4432A; font-weight: bold;">${verificationCode}</div>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- Security Alert Box -->
+              <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+                <tr>
+                  <td class="alert-box" style="background: #FFF0ED; border: 1px solid rgba(196, 67, 42, 0.2); border-radius: 12px; padding: 20px;">
+                    <p style="font-size: 15px; line-height: 1.65; color: #C4432A; margin: 0;">
+                      <strong>Warning:</strong> This action cannot be undone. All your data will be permanently deleted.
+                    </p>
+                  </td>
+                </tr>
+              </table>
+
+              <p style="font-size: 16px; line-height: 1.65; color: #5B6472; margin: 24px 0 32px 0; text-align: center;">
+                Or click the button below to verify and delete your account.
+              </p>
+
+              <!-- Button CTA -->
+              <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+                <tr>
+                  <td align="center">
+                    <table role="presentation" border="0" cellpadding="0" cellspacing="0">
+                      <tr>
+                        <td align="center" bgcolor="#C4432A" style="border-radius: 10px;">
+                          <a href="${verificationLink}" class="btn-primary" target="_blank" style="background-color: #C4432A; border-radius: 10px; color: #FFFFFF; display: inline-block; font-size: 16px; font-weight: 500; text-align: center; text-decoration: none; padding: 16px 32px;">Verify and Delete Account</a>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td class="footer" style="padding: 28px 40px 36px; text-align: center; background-color: #F7F8FB; border-top: 1px solid rgba(21, 25, 34, 0.06);">
+              <p style="font-size: 13px; color: #8890A0; margin: 0;">
+                © 2026 Knot. A habit is easier to keep than a promise, when both are shared.
+              </p>
+            </td>
+          </tr>
+
+        </table>
+        
+      </td>
+    </tr>
+  </table>
+
+</body>
+</html>
+  `;
+}
+
+// Generate account recovery email HTML
+function generateAccountRecoveryEmail(email, recoveryLink){
+  return `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>Account recovery - Knot</title>
+  <style>
+    body, table, td, a { -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
+    table, td { mso-table-lspace: 0pt; mso-table-rspace: 0pt; }
+    img { -ms-interpolation-mode: bicubic; border: 0; height: auto; line-height: 100%; outline: none; text-decoration: none; }
+    table { border-collapse: collapse !important; }
+    body { height: 100% !important; margin: 0 !important; padding: 0 !important; width: 100% !important; background-color: #F7F8FB; font-family: 'Work Sans', Helvetica, Arial, sans-serif; color: #151922; }
+
+    .email-container {
+      max-width: 600px;
+      margin: 0 auto;
+      background-color: #FFFFFF;
+      border-radius: 20px;
+      overflow: hidden;
+      border: 1px solid rgba(21, 25, 34, 0.08);
+      box-shadow: 0 10px 30px rgba(21, 25, 34, 0.03);
+    }
+    .header {
+      padding: 40px 40px 28px;
+      text-align: center;
+      border-bottom: 1px solid rgba(21, 25, 34, 0.06);
+      background: linear-gradient(135deg, #2A4BD7 0%, #1B37AE 100%);
+    }
+    .logo-text {
+      font-family: Georgia, serif;
+      font-size: 32px;
+      color: #FFFFFF;
+      font-weight: normal;
+      text-decoration: none;
+      letter-spacing: -0.01em;
+    }
+    .header-subtitle {
+      font-size: 15px;
+      color: rgba(255,255,255,0.9);
+      margin-top: 8px;
+    }
+    .content {
+      padding: 48px 40px;
+    }
+    .eyebrow {
+      font-family: monospace;
+      font-size: 11.5px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #2A4BD7;
+      background: #EAEFFF;
+      border: 1px solid rgba(42, 75, 215, 0.15);
+      padding: 6px 14px;
+      border-radius: 100px;
+      display: inline-block;
+      margin-bottom: 24px;
+    }
+    h1 {
+      font-family: Georgia, serif;
+      font-size: 34px;
+      font-weight: normal;
+      line-height: 1.15;
+      margin: 0 0 18px 0;
+      color: #151922;
+    }
+    p {
+      font-size: 16px;
+      line-height: 1.65;
+      color: #5B6472;
+      margin: 0 0 24px 0;
+    }
+    .success-box {
+      background: #EAEFFF;
+      border: 1px solid rgba(42, 75, 215, 0.2);
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 32px;
+    }
+    .success-box p {
+      font-size: 15px;
+      color: #2A4BD7;
+      margin: 0;
+    }
+    .btn-primary {
+      background-color: #2A4BD7;
+      border-radius: 10px;
+      color: #FFFFFF;
+      display: inline-block;
+      font-size: 16px;
+      font-weight: 500;
+      text-align: center;
+      text-decoration: none;
+      padding: 16px 32px;
+      -webkit-text-size-adjust: none;
+      box-shadow: 0 4px 14px rgba(42, 75, 215, 0.25);
+    }
+    .btn-primary:hover {
+      background-color: #1B37AE;
+    }
+    .footer {
+      padding: 28px 40px 36px;
+      text-align: center;
+      background-color: #F7F8FB;
+      border-top: 1px solid rgba(21, 25, 34, 0.06);
+    }
+    .footer p {
+      font-size: 13px;
+      color: #8890A0;
+      margin: 0;
+    }
+
+    @media screen and (max-width: 600px) {
+      .email-container {
+        width: 100% !important;
+        border-radius: 0 !important;
+        border: none !important;
+      }
+      .content {
+        padding: 32px 20px !important;
+      }
+      .header {
+        padding: 32px 20px 20px !important;
+      }
+      .footer {
+        padding: 24px 20px 28px !important;
+      }
+    }
+  </style>
+</head>
+<body style="margin: 0; padding: 40px 0; background-color: #F7F8FB;">
+
+  <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color: #F7F8FB;">
+    <tr>
+      <td align="center" style="padding: 0 16px;">
+        
+        <!-- Email Container -->
+        <table role="presentation" border="0" cellpadding="0" cellspacing="0" class="email-container" width="600" style="background-color: #FFFFFF; border-radius: 20px;">
+          
+          <!-- Header -->
+          <tr>
+            <td class="header" style="padding: 40px 40px 28px; text-align: center; border-bottom: 1px solid rgba(21, 25, 34, 0.06); background: linear-gradient(135deg, #2A4BD7 0%, #1B37AE 100%);">
+              <div class="logo-text" style="font-family: Georgia, serif; font-size: 32px; color: #FFFFFF; font-weight: normal; text-decoration: none;">Knot</div>
+              <div class="header-subtitle" style="font-size: 15px; color: rgba(255,255,255,0.9); margin-top: 8px;">Account recovery</div>
+            </td>
+          </tr>
+
+          <!-- Main Content -->
+          <tr>
+            <td class="content" style="padding: 48px 40px;">
+              <span class="eyebrow" style="font-family: monospace; font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.08em; color: #2A4BD7; background: #EAEFFF; padding: 6px 14px; border-radius: 100px; display: inline-block; margin-bottom: 24px;">Account Deleted</span>
+              
+              <h1 style="font-family: Georgia, serif; font-size: 34px; font-weight: normal; line-height: 1.15; margin: 0 0 18px 0; color: #151922;">
+                Your account has been deleted
+              </h1>
+              
+              <p style="font-size: 16px; line-height: 1.65; color: #5B6472; margin: 0 0 24px 0;">
+                Your Knot account has been successfully deleted. All your data has been permanently removed from our servers.
+              </p>
+
+              <!-- Success Box -->
+              <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+                <tr>
+                  <td class="success-box" style="background: #EAEFFF; border: 1px solid rgba(42, 75, 215, 0.2); border-radius: 12px; padding: 24px;">
+                    <p style="font-size: 15px; line-height: 1.65; color: #2A4BD7; margin: 0;">
+                      <strong>Good news:</strong> Your account can be recovered! We have generated a unique recovery link for you that will allow you to restore your account and all your data.
+                    </p>
+                  </td>
+                </tr>
+              </table>
+
+              <p style="font-size: 16px; line-height: 1.65; color: #5B6472; margin: 24px 0 32px 0; text-align: center;">
+                Click the button below to recover your account. This link will expire in 24 hours.
+              </p>
+
+              <!-- Button CTA -->
+              <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+                <tr>
+                  <td align="center">
+                    <table role="presentation" border="0" cellpadding="0" cellspacing="0">
+                      <tr>
+                        <td align="center" bgcolor="#2A4BD7" style="border-radius: 10px;">
+                          <a href="${recoveryLink}" class="btn-primary" target="_blank" style="background-color: #2A4BD7; border-radius: 10px; color: #FFFFFF; display: inline-block; font-size: 16px; font-weight: 500; text-align: center; text-decoration: none; padding: 16px 32px;">Recover Your Account</a>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td class="footer" style="padding: 28px 40px 36px; text-align: center; background-color: #F7F8FB; border-top: 1px solid rgba(21, 25, 34, 0.06);">
+              <p style="font-size: 13px; color: #8890A0; margin: 0;">
+                © 2026 Knot. A habit is easier to keep than a promise, when both are shared.
+              </p>
+            </td>
+          </tr>
+
+        </table>
+        
+      </td>
+    </tr>
+  </table>
+
+</body>
+</html>
+  `;
+}
+
+// Send account deletion verification email
+async function sendAccountDeletionVerificationEmail(toEmail, verificationCode, verificationLink){
+  try{
+    initEmailJS();
+    
+    var emailContent = generateAccountDeletionVerificationHTML(toEmail, verificationCode, verificationLink);
+    
+    var templateParams = {
+      toemail: toEmail,
+      fromname: 'Knot Security',
+      subject: 'Verify your account deletion',
+      email_content: emailContent
+    };
+    
+    await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, templateParams);
+    return { success: true };
+  }catch(err){
+    console.error('Error sending account deletion verification email:', err);
+    return { success: false, error: err.message };
+  }
+}
+
+// Send account recovery email
+async function sendAccountRecoveryEmail(toEmail, recoveryLink){
+  try{
+    initEmailJS();
+    
+    var emailContent = generateAccountRecoveryEmail(toEmail, recoveryLink);
+    
+    var templateParams = {
+      toemail: toEmail,
+      fromname: 'Knot Security',
+      subject: 'Your account has been deleted - Recovery link included',
+      email_content: emailContent
+    };
+    
+    await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, templateParams);
+    return { success: true };
+  }catch(err){
+    console.error('Error sending account recovery email:', err);
+    return { success: false, error: err.message };
+  }
+}
