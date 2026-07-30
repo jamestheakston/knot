@@ -293,7 +293,7 @@
     width: 44px;
     height: 44px;
     border-radius: 50%;
-    background: linear-gradient(135deg, var(--blue), var(--blue-bright));
+    background: var(--blue);
     color: #fff;
     display: flex;
     align-items: center;
@@ -745,7 +745,7 @@
     width: 32px;
     height: 32px;
     border-radius: 50%;
-    background: linear-gradient(135deg, var(--blue), var(--blue-bright));
+    background: var(--blue);
     color: #fff;
     display: flex;
     align-items: center;
@@ -979,7 +979,7 @@
     width: 30px;
     height: 30px;
     border-radius: 50%;
-    background: linear-gradient(135deg, var(--blue), var(--blue-bright));
+    background: var(--blue);
     color: #fff;
     display: flex;
     align-items: center;
@@ -1043,7 +1043,7 @@
   }
   .check-in-status{
     padding: 20px 32px;
-    background: linear-gradient(135deg, #10B981, #059669);
+    background: #10B981;
     color: #fff;
     border-radius: 16px;
     font-size: 16px;
@@ -1943,7 +1943,7 @@
     width: 96px;
     height: 96px;
     border-radius: 50%;
-    background: linear-gradient(135deg, var(--blue), var(--blue-bright));
+    background: var(--blue);
     color: #fff;
     display: flex;
     align-items: center;
@@ -2426,7 +2426,7 @@
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+    background: #FFA500;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -6210,20 +6210,26 @@
                   <i data-lucide="key" style="width: 24px; height: 24px;"></i>
                 </div>
                 <div class="social-connection-info">
-                  <div class="social-connection-name">Passkeys</div>
+                  <div class="social-connection-name">MyID</div>
                   <div class="social-connection-status" id="passkeyStatus">Loading...</div>
                 </div>
                 <button class="btn btn-primary social-connection-btn" id="addPasskeyBtn">
-                  Add Passkey
+                  Add MyID
+                </button>
+              </div>
+              <div style="margin-top: 12px; text-align: center;">
+                <button id="myidWhatsThisBtn" style="background: none; border: none; color: #64748b; cursor: pointer; display: flex; align-items: center; gap: 6px; margin: 0 auto; font-size: 14px;">
+                  <i data-lucide="help-circle" style="width: 16px; height: 16px;"></i>
+                  What's this?
                 </button>
               </div>
             </div>
           </div>
 
           <div class="settings-card" id="passkeysCard" style="display: none;">
-            <h3>Your Passkeys</h3>
+            <h3>Your MyIDs</h3>
             <div id="passkeysList" class="passkeys-list">
-              <div class="loading">Loading passkeys...</div>
+              <div class="loading">Loading MyIDs...</div>
             </div>
           </div>
 
@@ -6244,10 +6250,11 @@
       document.getElementById('resetSessionBtn').addEventListener('click', handleResetSession);
       document.getElementById('logoutBtn').addEventListener('click', handleLogout);
 
-      // Passkey handlers
+      // MyID handlers
       document.getElementById('addPasskeyBtn').addEventListener('click', handleAddPasskey);
+      document.getElementById('myidWhatsThisBtn').addEventListener('click', showMyIDExplanation);
 
-      // Load passkeys
+      // Load MyIDs
       loadPasskeys();
 
       // Tight security toggle handler
@@ -6325,13 +6332,13 @@
       var hasGitHub = identities.some(function(id){ return id.provider === 'github'; });
       var hasGoogle = identities.some(function(id){ return id.provider === 'google'; });
       
-      // Also check for passkeys
+      // Also check for MyIDs
       var hasPasskeys = false;
       try{
         var { data: passkeys } = await client.auth.passkey.list();
         hasPasskeys = passkeys && passkeys.length > 0;
       }catch(e){
-        console.error('Error checking passkeys:', e);
+        console.error('Error checking MyIDs:', e);
       }
       
       var remainingMethods = 0;
@@ -6450,7 +6457,7 @@
             return `
               <div class="passkey-item">
                 <div class="passkey-item-info">
-                  <div class="passkey-item-name">${passkey.friendly_name || 'Unnamed Passkey'}</div>
+                  <div class="passkey-item-name">${passkey.friendly_name || 'Unnamed MyID'}</div>
                   <div class="passkey-item-meta">
                     Added: ${formatDate(passkey.created_at)}
                     ${passkey.last_used_at ? '• Last used: ' + formatDate(passkey.last_used_at) : ''}
@@ -6477,34 +6484,34 @@
       
       // Show loading state
       btn.disabled = true;
-      btn.innerHTML = '<i data-lucide="loader-2" class="spinner"></i> Registering Passkey...';
+      btn.innerHTML = '<i data-lucide="loader-2" class="spinner"></i> Registering MyID...';
       if(typeof lucide !== 'undefined'){
         lucide.createIcons();
       }
       
-      showToast('Registering Passkey', 'Registering your passkey...', 'info');
+      showToast('Registering MyID', 'Registering your MyID...', 'info');
 
       try{
         var { data, error } = await client.auth.registerPasskey();
 
         if(error) throw error;
 
-        showToast('Success', 'Passkey registered successfully!', 'success');
+        showToast('Success', 'MyID registered successfully!', 'success');
         loadPasskeys();
       }catch(err){
         console.error('Error registering passkey:', err);
         
         if(err.message && err.message.includes('not supported')){
-          showToast('Not supported', 'Passkeys are not supported on this device or browser.', 'error');
+          showToast('Not supported', 'MyIDs are not supported on this device or browser.', 'error');
         }else if(err.message && err.message.includes('cancelled')){
-          showToast('Cancelled', 'Passkey registration was cancelled.', 'info');
+          showToast('Cancelled', 'MyID registration was cancelled.', 'info');
         }else{
-          showToast('Error', 'Failed to register passkey. ' + (err.message || 'Please try again.'), 'error');
+          showToast('Error', 'Failed to register MyID. ' + (err.message || 'Please try again.'), 'error');
         }
       }finally{
         // Restore button state
         btn.disabled = false;
-        btn.innerHTML = 'Add Passkey';
+        btn.innerHTML = 'Add MyID';
         if(typeof lucide !== 'undefined'){
           lucide.createIcons();
         }
@@ -6512,7 +6519,7 @@
     }
 
     async function renamePasskey(passkeyId){
-      var newName = prompt('Enter a name for this passkey:');
+      var newName = prompt('Enter a name for this MyID:');
       
       if(!newName || newName.trim() === ''){
         return;
@@ -6533,22 +6540,22 @@
 
         if(error) throw error;
 
-        showToast('Success', 'Passkey renamed successfully!', 'success');
+        showToast('Success', 'MyID renamed successfully!', 'success');
         loadPasskeys();
       }catch(err){
         console.error('Error renaming passkey:', err);
-        showToast('Error', 'Failed to rename passkey: ' + err.message, 'error');
+        showToast('Error', 'Failed to rename MyID: ' + err.message, 'error');
       }
     }
 
     async function deletePasskey(passkeyId){
-      showConfirmModal('Delete Passkey', 'Are you sure you want to delete this passkey? You will not be able to use it for sign-in anymore.', function(){
+      showConfirmModal('Delete MyID', 'Are you sure you want to delete this MyID? You will not be able to use it for sign-in anymore.', function(){
         deletePasskeyConfirm(passkeyId);
       }, function(){});
     }
 
     async function deletePasskeyConfirm(passkeyId){
-      showToast('Deleting passkey', 'Deleting passkey...', 'info');
+      showToast('Deleting MyID', 'Deleting MyID...', 'info');
 
       var client = getSupabaseClient();
 
@@ -6559,12 +6566,16 @@
 
         if(error) throw error;
 
-        showToast('Success', 'Passkey deleted successfully!', 'success');
+        showToast('Success', 'MyID deleted successfully!', 'success');
         loadPasskeys();
       }catch(err){
         console.error('Error deleting passkey:', err);
-        showToast('Error', 'Failed to delete passkey: ' + err.message, 'error');
+        showToast('Error', 'Failed to delete MyID: ' + err.message, 'error');
       }
+    }
+
+    function showMyIDExplanation(){
+      showCustomModal('What is MyID?', 'We\'ve changed the name from Passkeys to MyID to make it more personal and easier to understand. MyID works the same way - it\'s a secure, passwordless way to sign in to your account using your device\'s biometric authentication (fingerprint, face recognition, etc.) or a PIN.<br><br><a href="/aboutmyid" style="color: #2563eb; text-decoration: underline;">Learn More</a>');
     }
 
     function handleTightSecurityToggle(e){
