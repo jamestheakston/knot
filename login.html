@@ -890,6 +890,24 @@
 
         if(error) throw error;
 
+        // Check if user account has been soft-deleted
+        var { data: profile, error: profileError } = await client
+          .from('user_profiles')
+          .select('is_deleted')
+          .eq('user_id', data.user.id)
+          .maybeSingle();
+
+        if(profileError){
+          console.error('Error checking user profile:', profileError);
+          // Continue with login if profile check fails
+        } else if(profile && profile.is_deleted){
+          // Account has been soft-deleted, prevent login
+          await client.auth.signOut();
+          showToast('Account deleted', 'This account has been deleted. Please use the recovery link sent to your email to restore your account.', 'error');
+          setButtonLoading(btn, false);
+          return;
+        }
+
         showToast('Success', 'Login successful!', 'success');
         
         // Save account to account manager with tokens

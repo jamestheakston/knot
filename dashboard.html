@@ -3156,6 +3156,20 @@
       currentUser = session.user;
       console.log('User authenticated:', currentUser.email);
       
+      // Check if user account has been soft-deleted (for existing sessions)
+      var { data: profile, error: profileError } = await client
+        .from('user_profiles')
+        .select('is_deleted')
+        .eq('user_id', currentUser.id)
+        .maybeSingle();
+
+      if(profile && profile.is_deleted){
+        // Account has been soft-deleted, sign out and redirect
+        await client.auth.signOut();
+        window.location.href = 'login.html?error=account_deleted';
+        return;
+      }
+      
       // Check if this is an OAuth login (from URL parameter)
       var urlParams = new URLSearchParams(window.location.search);
       var isOAuthLogin = urlParams.get('oauth_login') === 'true';
