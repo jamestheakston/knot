@@ -161,7 +161,7 @@
 
     <div class="form-group">
       <button id="verifyBtn" onclick="verifyDeletion()">Verify and Delete Account</button>
-      <button class="cancel" onclick="window.location.href='/dashboard.html'">Cancel</button>
+      <button class="cancel" onclick="window.location.href='https://knotapp.pages.dev/dashboard.html'">Cancel</button>
     </div>
 
     <div id="message"></div>
@@ -294,7 +294,7 @@
                 performSoftDeletion(currentUser.id, deletionRequest.id).then(function(deletionResult) {
                   if (deletionResult.success) {
                     // Redirect to account deleted page
-                    window.location.href = '/account/deletion/accountdeleted.html?id=' + recoveryId;
+                    window.location.href = 'https://knotapp.pages.dev/account/deletion/accountdeleted.html?id=' + recoveryId;
                   } else {
                     messageDiv.innerHTML = '<div class="error">Verification succeeded but deletion failed. Please contact support.</div>';
                     btn.disabled = false;
