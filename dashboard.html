@@ -6917,7 +6917,7 @@
 
     // Kebab menu actions
     document.querySelectorAll('.kebab-option').forEach(function(option){
-      option.addEventListener('click', function(){
+      option.addEventListener('click', async function(){
         var action = option.dataset.action;
         
         if(action === 'logout'){
@@ -6932,6 +6932,21 @@
             showToast('Tight Security Enabled', 'Account switching is disabled when Tight Security is enabled.', 'info');
             return;
           }
+          
+          // Check if current account has been soft-deleted
+          var { data: profile, error: profileError } = await client
+            .from('user_profiles')
+            .select('is_deleted')
+            .eq('user_id', currentUser.id)
+            .maybeSingle();
+
+          if(profile && profile.is_deleted){
+            // Account has been soft-deleted, redirect to error page
+            var errorUrl = 'error.html?title=Account+Deleted&code=DELETED-001&errormsg=Your+account+has+been+deleted.+Please+use+the+recovery+link+sent+to+your+email+to+restore+your+account.&cta1title=Go+to+Login&cta1link=login.html';
+            window.location.href = errorUrl;
+            return;
+          }
+          
           window.location.href = 'accountswitcher.html';
         }
         
@@ -6941,6 +6956,28 @@
 
     async function handleLogout(){
       var client = getSupabaseClient();
+      
+      // Remove current account from accountswitcher
+      try{
+        var accounts = JSON.parse(localStorage.getItem('knot_accounts') || '[]');
+        var accountIndex = accounts.findIndex(function(acc){
+          return acc.id === currentUser.id;
+        });
+        
+        if(accountIndex >= 0){
+          accounts.splice(accountIndex, 1);
+          localStorage.setItem('knot_accounts', JSON.stringify(accounts));
+        }
+        
+        // Clear active account if it was the current one
+        var activeAccountId = localStorage.getItem('knot_active_account');
+        if(activeAccountId === currentUser.id){
+          localStorage.removeItem('knot_active_account');
+        }
+      }catch(e){
+        console.error('Error removing account from accountswitcher:', e);
+      }
+      
       await client.auth.signOut();
       window.location.href = 'index.html';
     }
