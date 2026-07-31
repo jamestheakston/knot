@@ -314,6 +314,10 @@
       <a href="index.html" class="btn btn-ghost">Go to Home</a>
     </div>
     
+    <div id="logoutSection" style="display: none; margin-top: 24px;">
+      <button onclick="handleLogout()" class="btn btn-ghost" style="border: 1px solid #DC2626; color: #DC2626;">Logout</button>
+    </div>
+    
     <div class="error-code-section" id="errorCodeSection" style="display: none;">
       <div class="error-code-wrapper">
         <span class="error-code-text">C0DE:</span>
@@ -327,7 +331,13 @@
 
 <div class="toast-container" id="toastContainer"></div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
+  // Supabase configuration
+  var supabaseUrl = 'https://mfjtdrqvmuwtoarkiezi.supabase.co';
+  var supabaseKey = 'sb_publishable_SPhsUI31nYbrrLjPBAaRBw_OkWQ2_Xn';
+  var supabase = supabase.createClient(supabaseUrl, supabaseKey);
+
   // Handle URL parameters
   function handleUrlParameters(){
     var urlParams = new URLSearchParams(window.location.search);
@@ -358,7 +368,7 @@
     if(cta1Title && cta1Link){
       document.getElementById('errorActions').innerHTML = `
         <a href="${cta1Link}" class="btn btn-primary">${cta1Title}</a>
-        <a href="index.html" class="btn btn-ghost">Go to Home</a>
+        <a href="https://knotapp.pages.dev/index.html" class="btn btn-ghost">Go to Home</a>
       `;
     }
     
@@ -368,9 +378,25 @@
       document.getElementById('errorCodeValue').textContent = code;
     }
     
+    // Show logout button if this is an account deletion error
+    if(code === 'DELETED-001'){
+      document.getElementById('logoutSection').style.display = 'block';
+    }
+    
     // Clear parameters from URL
     var cleanUrl = window.location.pathname;
     window.history.replaceState({}, document.title, cleanUrl);
+  }
+  
+  // Handle logout
+  async function handleLogout(){
+    try {
+      await supabase.auth.signOut();
+      window.location.href = 'https://knotapp.pages.dev/index.html';
+    } catch(err) {
+      console.error('Error during logout:', err);
+      window.location.href = 'https://knotapp.pages.dev/index.html';
+    }
   }
   
   // Initialize Lucide icons
