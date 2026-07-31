@@ -728,12 +728,18 @@
                     .eq('user_id', session.user.id)
                     .maybeSingle()
                     .then(function({ data: profile, error }){
+                      if(error){
+                        // If there's an error checking profile, just redirect to accountswitcher
+                        console.error('Error checking profile for soft deletion:', error);
+                        window.location.href = 'accountswitcher.html';
+                        return;
+                      }
                       if(profile && profile.is_deleted){
                         // Account has been soft-deleted, stay on login page
                         console.log('Current account is deleted, staying on login page');
                         return;
                       }
-                      // Account is not deleted, redirect to accountswitcher
+                      // Account is not deleted or profile doesn't exist, redirect to accountswitcher
                       window.location.href = 'accountswitcher.html';
                     });
                 } else {
