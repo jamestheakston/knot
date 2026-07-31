@@ -233,6 +233,10 @@ GRANT EXECUTE ON FUNCTION perform_account_restoration TO authenticated;
 -- Drop existing policies if they exist
 DROP POLICY IF EXISTS "Users can view own profiles" ON user_profiles;
 DROP POLICY IF EXISTS "Users can update own profiles" ON user_profiles;
+DROP POLICY IF EXISTS "Users can view own active profiles" ON user_profiles;
+DROP POLICY IF EXISTS "Users can update own active profiles" ON user_profiles;
+DROP POLICY IF EXISTS "Service role can soft delete user profiles" ON user_profiles;
+DROP POLICY IF EXISTS "Service role can restore user profiles" ON user_profiles;
 
 -- Create new policies that respect soft deletion
 CREATE POLICY "Users can view own active profiles"
@@ -246,6 +250,7 @@ CREATE POLICY "Users can update own active profiles"
 -- Similar policies for pod_members
 DROP POLICY IF EXISTS "Users can view own pod memberships" ON pod_members;
 DROP POLICY IF EXISTS "Users can insert own pod memberships" ON pod_members;
+DROP POLICY IF EXISTS "Users can view own active pod memberships" ON pod_members;
 
 CREATE POLICY "Users can view own active pod memberships"
   ON pod_members FOR SELECT
@@ -258,6 +263,7 @@ CREATE POLICY "Users can insert own pod memberships"
 -- Similar policies for check_ins
 DROP POLICY IF EXISTS "Users can view own check-ins" ON check_ins;
 DROP POLICY IF EXISTS "Users can insert own check-ins" ON check_ins;
+DROP POLICY IF EXISTS "Users can view own active check-ins" ON check_ins;
 
 CREATE POLICY "Users can view own active check-ins"
   ON check_ins FOR SELECT
@@ -268,6 +274,11 @@ CREATE POLICY "Users can insert own check-ins"
   WITH CHECK (auth.uid() = user_id);
 
 -- Service role policies for deletion/restoration
+DROP POLICY IF EXISTS "Service role can soft delete pod members" ON pod_members;
+DROP POLICY IF EXISTS "Service role can restore pod members" ON pod_members;
+DROP POLICY IF EXISTS "Service role can soft delete check-ins" ON check_ins;
+DROP POLICY IF EXISTS "Service role can restore check-ins" ON check_ins;
+
 CREATE POLICY "Service role can soft delete user profiles"
   ON user_profiles FOR UPDATE
   USING (auth.role() = 'service_role');
