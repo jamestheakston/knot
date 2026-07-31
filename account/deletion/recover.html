@@ -505,8 +505,15 @@
         var recoveryUserId = localStorage.getItem('knot_recovery_user_id');
         var messageDiv = document.getElementById('message');
         
+        // Hide initial content and show loading
+        document.getElementById('initialContent').style.display = 'none';
+        document.getElementById('errorContent').style.display = 'none';
+        document.getElementById('successContent').style.display = 'none';
+        messageDiv.innerHTML = '<div class="loading">Processing OAuth authentication...</div>';
+        
         if (!recoveryId || !recoveryUserId) {
           messageDiv.innerHTML = '<div class="error">Recovery session expired. Please try again.</div>';
+          document.getElementById('initialContent').style.display = 'block';
           return;
         }
 
@@ -514,12 +521,14 @@
         supabase.auth.getSession().then(function({ data: { session } }) {
           if (!session || !session.user) {
             messageDiv.innerHTML = '<div class="error">OAuth authentication failed. Please try again.</div>';
+            document.getElementById('initialContent').style.display = 'block';
             return;
           }
 
           // Verify this is the same user
           if (session.user.id !== recoveryUserId) {
             messageDiv.innerHTML = '<div class="error">Security verification failed. You can only recover your own account.</div>';
+            document.getElementById('initialContent').style.display = 'block';
             return;
           }
 
@@ -532,6 +541,7 @@
             .then(function({ data: deletionRequest, error }) {
               if (error || !deletionRequest) {
                 messageDiv.innerHTML = '<div class="error">Invalid or expired recovery link.</div>';
+                document.getElementById('initialContent').style.display = 'block';
                 return;
               }
 
@@ -544,6 +554,7 @@
                 .then(function({ error }) {
                   if (error) {
                     messageDiv.innerHTML = '<div class="error">An error occurred during recovery. Please try again or contact support.</div>';
+                    document.getElementById('initialContent').style.display = 'block';
                     return;
                   }
 
@@ -556,11 +567,9 @@
                     if (restoreResult.success) {
                       // Show success message
                       messageDiv.innerHTML = '';
-                      document.getElementById('initialContent').style.display = 'none';
                       document.getElementById('successContent').style.display = 'block';
                     } else {
                       messageDiv.innerHTML = '<div class="error">Account was recovered but some data could not be restored. Please contact support.</div>';
-                      document.getElementById('initialContent').style.display = 'none';
                       document.getElementById('successContent').style.display = 'block';
                     }
                   });
@@ -575,6 +584,15 @@
 
     // Fetch expiry time and start timer
     function startExpiryTimer() {
+      // Check if this is an OAuth callback - don't show error if so
+      var urlParams = new URLSearchParams(window.location.search);
+      var isOAuthCallback = urlParams.get('oauth_callback') === 'true';
+      
+      if (isOAuthCallback) {
+        // Let the OAuth callback handler deal with validation
+        return;
+      }
+      
       if (!recoveryId) {
         showErrorContent();
         return;
