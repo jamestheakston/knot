@@ -107,7 +107,9 @@
       padding: 10px 20px;
       font-size: 14px;
       cursor: pointer;
-      margin: 10px;
+      margin: 10px 0;
+      width: 100%;
+      box-sizing: border-box;
     }
 
     button:hover {
@@ -670,10 +672,26 @@
           var appMetadata = user.app_metadata || {};
           var hasOAuth = appMetadata.providers && appMetadata.providers.length > 0;
           
+          console.log('OAuth detection debug:', {
+            user_metadata: user,
+            app_metadata: appMetadata,
+            hasOAuth_from_providers: hasOAuth,
+            provider: user.provider,
+            app_metadata_provider: appMetadata.provider
+          });
+          
           // Also check if user_metadata has provider information
           if (!hasOAuth && user.provider && user.provider !== 'email') {
             hasOAuth = true;
+            console.log('OAuth detected from user.provider:', user.provider);
           }
+          
+          if (!hasOAuth && appMetadata.provider && appMetadata.provider !== 'email') {
+            hasOAuth = true;
+            console.log('OAuth detected from app_metadata.provider:', appMetadata.provider);
+          }
+          
+          console.log('Final hasOAuth decision:', hasOAuth);
           
           document.getElementById('authButtons').style.display = 'block';
           
