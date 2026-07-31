@@ -6,51 +6,57 @@
   <title>About MyID - Knot</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Work+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
   <script src="https://unpkg.com/lucide@latest"></script>
   <style>
-    :root {
-      --bg: #ffffff;
-      --bg-2: #f8fafc;
-      --bg-3: #f1f5f9;
-      --line: #e2e8f0;
-      --text: #0f172a;
-      --muted: #64748b;
-      --blue: #2563eb;
-      --blue-bright: #3b82f6;
+    :root{
+      --bg: #F7F8FB;
+      --bg-2: #FFFFFF;
+      --bg-3: #EEF1F6;
+      --ink: #151922;
+      --muted: #5B6472;
+      --muted-2: #8890A0;
+      --blue: #2A4BD7;
+      --blue-bright: #1B37AE;
+      --blue-soft: #EAEFFF;
+      --red: #C4432A;
+      --line: rgba(21,25,34,0.10);
+      --line-strong: rgba(21,25,34,0.18);
       --green: #10b981;
-      --red: #ef4444;
     }
 
-    @media (prefers-color-scheme: dark) {
-      :root {
-        --bg: #0f172a;
-        --bg-2: #1e293b;
-        --bg-3: #334155;
-        --line: #334155;
-        --text: #f8fafc;
-        --muted: #94a3b8;
-      }
-    }
-
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
-    body {
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    *{ box-sizing: border-box; }
+    html{ scroll-behavior: smooth; }
+    body{
+      margin:0;
       background: var(--bg);
-      color: var(--text);
-      line-height: 1.6;
+      color: var(--ink);
+      font-family: 'Work Sans', sans-serif;
+      -webkit-font-smoothing: antialiased;
+      line-height: 1.5;
       min-height: 100vh;
+    }
+    h1,h2,h3{
+      font-family: 'Instrument Serif', serif;
+      font-weight: 400;
+      margin: 0;
+      letter-spacing: -0.01em;
+    }
+    a{ color: inherit; }
+    .mono{ font-family: 'IBM Plex Mono', monospace; }
+
+    ::selection{ background: var(--blue); color: #fff; }
+
+    :focus-visible{
+      outline: 2px solid var(--blue);
+      outline-offset: 3px;
+      border-radius: 4px;
     }
 
     .container {
       max-width: 800px;
       margin: 0 auto;
-      padding: 40px 20px;
+      padding: 40px 32px;
     }
 
     .header {
@@ -60,30 +66,18 @@
 
     .header h1 {
       font-size: 48px;
-      font-weight: 700;
       margin-bottom: 16px;
-      background: var(--blue);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
+      color: var(--blue);
     }
 
     .header p {
       color: var(--muted);
       font-size: 18px;
-    }
-
-    .section {
-      background: var(--bg-2);
-      border: 1px solid var(--line);
-      border-radius: 16px;
-      padding: 32px;
       margin-bottom: 24px;
     }
 
     .section h2 {
       font-size: 24px;
-      font-weight: 600;
       margin-bottom: 16px;
       display: flex;
       align-items: center;
@@ -134,10 +128,11 @@
       text-decoration: none;
       font-weight: 500;
       margin-bottom: 24px;
+      transition: color 0.2s ease;
     }
 
     .back-link:hover {
-      text-decoration: underline;
+      color: var(--blue-bright);
     }
 
     .icon-large {
@@ -164,6 +159,10 @@
 
       .section {
         padding: 24px;
+      }
+      
+      .container {
+        padding: 40px 20px;
       }
     }
   </style>
