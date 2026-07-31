@@ -244,8 +244,7 @@
           .select('*')
           .eq('recovery_id', recoveryId)
           .eq('user_id', currentUser.id)
-          .in('status', ['pending', 'verified'])
-          .maybeSingle()
+          .single()
           .then(function({ data: deletionRequest, error }) {
             console.log('Deletion request query result:', { deletionRequest, error });
             if (error) {
@@ -260,6 +259,30 @@
               console.error('No deletion request found');
               console.log('Looking for recovery_id:', recoveryId, 'user_id:', currentUser.id);
               messageDiv.innerHTML = '<div class="error">Invalid or expired deletion request. Please request a new verification email.</div>';
+              btn.disabled = false;
+              btn.textContent = 'Verify and Delete Account';
+              return;
+            }
+
+            // Check if account has already been deleted
+            if (deletionRequest.status === 'deleted') {
+              messageDiv.innerHTML = '<div class="error">This account has already been deleted. Use the recovery link sent to your email to restore your account.</div>';
+              btn.disabled = false;
+              btn.textContent = 'Verify and Delete Account';
+              return;
+            }
+
+            // Check if account has already been recovered
+            if (deletionRequest.status === 'recovered') {
+              messageDiv.innerHTML = '<div class="error">This account has already been recovered and is no longer pending deletion.</div>';
+              btn.disabled = false;
+              btn.textContent = 'Verify and Delete Account';
+              return;
+            }
+
+            // Check if request is in valid state for verification
+            if (deletionRequest.status !== 'pending' && deletionRequest.status !== 'verified') {
+              messageDiv.innerHTML = '<div class="error">Invalid deletion request status. Please request a new verification email.</div>';
               btn.disabled = false;
               btn.textContent = 'Verify and Delete Account';
               return;
