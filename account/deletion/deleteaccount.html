@@ -311,12 +311,30 @@
               if (isQuotaError) {
                 var resetDate = getNextQuotaResetDate();
                 var formattedDate = formatResetDate(resetDate);
-                messageDiv.innerHTML = '<div class="error">We are currently experiencing high traffic. Please try again after our system resets on ' + formattedDate + '.</div>';
+                // Replace entire form with quota error message
+                var container = document.querySelector('.container');
+                container.innerHTML = `
+                  <div style="text-align: center; margin-bottom: 20px;">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/2/2c/Oxygen480-actions-edit-delete.svg" alt="Delete Icon" style="width: 48px; height: 48px;">
+                  </div>
+                  <h1>Delete Account</h1>
+                  <div class="error" style="margin: 20px 0;">
+                    We are currently experiencing high traffic. Please try again after our system resets on ${formattedDate}.
+                  </div>
+                  <div class="form-group">
+                    <button class="cancel" onclick="window.location.reload()">Try Again Later</button>
+                    <button class="cancel" onclick="window.location.href='https://knotapp.pages.dev/dashboard.html'">Return to Dashboard</button>
+                  </div>
+                  <div class="divider"></div>
+                  <div class="footer">
+                    &copy; 2026 Knot. All rights reserved. | <a href="#" style="color: #666;">Privacy Policy</a> | <a href="#" style="color: #666;">Terms of Service</a>
+                  </div>
+                `;
               } else {
                 messageDiv.innerHTML = '<div class="error">Failed to send verification email. Please try again.</div>';
+                btn.disabled = false;
+                btn.textContent = 'Send Verification Email';
               }
-              btn.disabled = false;
-              btn.textContent = 'Send Verification Email';
             }
           });
         });
