@@ -3139,6 +3139,23 @@
         }
       }
 
+      // Check if account switching is disabled and hide switch account button
+      if(localStorage.getItem('knot_disable_account_switching') === 'true'){
+        var switchAccountBtn = document.getElementById('switchAccountBtn');
+        if(switchAccountBtn){
+          switchAccountBtn.style.display = 'none';
+        }
+      }
+
+      // Show switch account button if there are multiple accounts and switching is enabled
+      var accounts = JSON.parse(localStorage.getItem('knot_accounts') || '[]');
+      var switchAccountBtn = document.getElementById('switchAccountBtn');
+      if(switchAccountBtn && accounts.length > 1 && 
+         localStorage.getItem('knot_disable_account_switching') !== 'true' && 
+         localStorage.getItem('knot_tight_security') !== 'true'){
+        switchAccountBtn.style.display = 'block';
+      }
+
       // Initialize custom modal
       initCustomModal();
 
@@ -6179,6 +6196,24 @@
           </div>
 
           <div class="settings-card">
+            <h3>Account Switching</h3>
+            <div class="settings-item">
+              <div class="settings-item-label">
+                <div>
+                  <div>Enable Account Switching</div>
+                  <div class="settings-item-description">Allow switching between multiple accounts on this device. Disable this to restrict access to your current account only.</div>
+                </div>
+              </div>
+              <div class="settings-item-value">
+                <label class="toggle-switch">
+                  <input type="checkbox" id="accountSwitchingToggle" ${localStorage.getItem('knot_disable_account_switching') !== 'true' ? 'checked' : ''}>
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <div class="settings-card">
             <h3>Connected Accounts</h3>
             <div class="social-connections">
               <div class="social-connection ${hasGitHub ? 'is-connected' : ''}">
@@ -6278,6 +6313,9 @@
 
       // Tight security toggle handler
       document.getElementById('tightSecurityToggle').addEventListener('change', handleTightSecurityToggle);
+
+      // Account switching toggle handler
+      document.getElementById('accountSwitchingToggle').addEventListener('change', handleAccountSwitchingToggle);
 
       // Password modal handlers
       document.getElementById('cancelPasswordBtn').addEventListener('click', hidePasswordModal);
@@ -6629,6 +6667,38 @@
       }
     }
 
+    function handleAccountSwitchingToggle(e){
+      var isEnabled = e.target.checked;
+      var message = isEnabled
+        ? 'Are you sure you want to enable account switching?<br><br>This will:<br>• Allow you to switch between multiple accounts<br>• Store account data in localStorage<br><br>You can always disable this later.'
+        : 'Are you sure you want to disable account switching?<br><br>This will:<br>• Prevent switching between accounts<br>• Clear stored account data from localStorage<br><br>You can always re-enable this later.';
+
+      showConfirmModal('Account Switching', message, function(){
+        toggleAccountSwitching(isEnabled);
+      }, function(){
+        // Revert checkbox if cancelled
+        e.target.checked = !isEnabled;
+      });
+    }
+
+    function toggleAccountSwitching(isEnabled){
+      if(isEnabled){
+        // Enable account switching
+        localStorage.removeItem('knot_disable_account_switching');
+        showToast('Account Switching Enabled', 'You can now switch between multiple accounts.', 'success');
+      }else{
+        // Disable account switching
+        localStorage.setItem('knot_disable_account_switching', 'true');
+        
+        // Clear all account-related data from localStorage
+        localStorage.removeItem('knot_accounts');
+        localStorage.removeItem('knot_active_account');
+        localStorage.removeItem('knot_tokens_' + currentUser.id);
+        
+        showToast('Account Switching Disabled', 'Account switching disabled and stored account data cleared.', 'success');
+      }
+    }
+
     async function handleLogout(){
       var client = getSupabaseClient();
       await client.auth.signOut();
@@ -6951,6 +7021,18 @@
             // Account has been soft-deleted, redirect to error page
             var errorUrl = 'error.html?title=Account+Deleted&code=DELETED-001&errormsg=Your+account+has+been+deleted.+Please+use+the+recovery+link+sent+to+your+email+to+restore+your+account.&cta1title=Go+to+Login&cta1link=login.html';
             window.location.href = errorUrl;
+            return;
+          }
+          
+          // Check if account switching is disabled
+          if(localStorage.getItem('knot_disable_account_switching') === 'true'){
+            showToast('Account Switching Disabled', 'Account switching is disabled. You can enable this in Account Settings.', 'error');
+            return;
+          }
+
+          // Check if tight security is enabled
+          if(localStorage.getItem('knot_tight_security') === 'true'){
+            showToast('Tight Security Enabled', 'Account switching is disabled when Tight Security is enabled. You can disable this in Account Settings.', 'error');
             return;
           }
           
