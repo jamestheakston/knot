@@ -6933,6 +6933,12 @@
             return;
           }
           
+          var client = getSupabaseClient();
+          if(!client){
+            showToast('Error', 'Authentication service unavailable. Please try again later.', 'error');
+            return;
+          }
+          
           // Check if current account has been soft-deleted
           var { data: profile, error: profileError } = await client
             .from('user_profiles')
