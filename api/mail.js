@@ -736,6 +736,21 @@ async function sendInviteEmail(toEmail, podName, inviteCode, inviterName){
 // Send login notification email
 async function sendLoginNotification(email){
   try{
+    // Check if we should send email based on 15-minute cooldown
+    var cooldownKey = 'login_notification_' + email;
+    var lastSentTime = localStorage.getItem(cooldownKey);
+    var cooldownPeriod = 15 * 60 * 1000; // 15 minutes in milliseconds
+    
+    var now = Date.now();
+    
+    if (lastSentTime) {
+      var timeSinceLastSend = now - parseInt(lastSentTime);
+      if (timeSinceLastSend < cooldownPeriod) {
+        console.log('Login notification skipped - cooldown period not elapsed');
+        return; // Skip sending email
+      }
+    }
+    
     initEmailJS();
     
     var loginTime = new Date();
@@ -749,6 +764,9 @@ async function sendLoginNotification(email){
     };
     
     await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, templateParams);
+    
+    // Store the timestamp of this email send
+    localStorage.setItem(cooldownKey, now.toString());
   }catch(err){
     console.error('Error sending login notification:', err);
     // Don't alert user for login notifications - silently fail
@@ -764,6 +782,10 @@ You requested to delete your Knot account. To complete this action, please verif
 
 Visit ${verificationLink}
 and enter your code: ${verificationCode} 
+
+This verification code will expire in 10 minutes for security reasons.
+
+Please check your spam folder if you don't see this email in your inbox.
 
 Best wishes,
 
@@ -784,6 +806,8 @@ We have generated a unique recovery link for you that will allow you to restore 
 
 Visit the recovery page below to restore your account. This link will expire in 24 hours.
 ${recoveryLink}
+
+Please check your spam folder if you don't see this email in your inbox.
 
 Best wishes,
 
@@ -834,6 +858,45 @@ async function sendAccountRecoveryEmail(toEmail, recoveryId, expiryDate){
     return { success: true };
   }catch(err){
     console.error('Error sending account recovery email:', err);
+    return { success: false, error: err.message };
+  }
+}
+
+// Generate account recovery confirmation email
+function generateAccountRecoveryConfirmationEmail(email){
+  return `
+Hi there,
+
+Great news! Your Knot account has been successfully recovered and restored.
+
+All your data, pods, and settings have been restored to their previous state. You can now log in to your account using your existing credentials.
+
+If you did not request this recovery, please contact our support team immediately.
+
+Best wishes,
+
+The Knot team.
+  `;
+}
+
+// Send account recovery confirmation email
+async function sendAccountRecoveryConfirmationEmail(toEmail){
+  try{
+    initEmailJS();
+    
+    var emailContent = generateAccountRecoveryConfirmationEmail(toEmail);
+    
+    var templateParams = {
+      toemail: toEmail,
+      fromname: 'Knot Security',
+      subject: 'Your account has been successfully recovered',
+      email_content: emailContent
+    };
+    
+    await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, templateParams);
+    return { success: true };
+  }catch(err){
+    console.error('Error sending account recovery confirmation email:', err);
     return { success: false, error: err.message };
   }
 }

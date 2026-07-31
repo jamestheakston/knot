@@ -255,7 +255,7 @@
         // Generate a random recovery ID and verification code
         var recoveryId = generateRandomId();
         var verificationCode = generateVerificationCode();
-        var expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(); // 24 hours
+        var expiresAt = new Date(Date.now() + 10 * 60 * 1000).toISOString(); // 10 minutes
 
         console.log('Creating deletion request:');
         console.log('User ID:', currentUser.id);
@@ -295,7 +295,7 @@
           // Send verification email
           sendAccountDeletionVerificationEmail(currentUser.email, verificationCode, verificationLink).then(function(result) {
             if (result.success) {
-              messageDiv.innerHTML = '<div class="success">Verification email sent! Please check your inbox and click the verification link to complete the deletion process.</div>';
+              messageDiv.innerHTML = '<div class="success">Verification email sent! Please check your inbox (and spam folder) and click the verification link to complete the deletion process. The code expires in 10 minutes.</div>';
               btn.textContent = 'Email Sent';
             } else {
               messageDiv.innerHTML = '<div class="error">Failed to send verification email. Please try again.</div>';

@@ -63,6 +63,20 @@
       color: #155724;
     }
 
+    .already-recovered-box {
+      background-color: #d1ecf1;
+      border: 1px solid #bee5eb;
+      color: #0c5460;
+      padding: 20px;
+      margin: 30px 0;
+      text-align: left;
+    }
+
+    .already-recovered-box h3 {
+      margin-top: 0;
+      color: #0c5460;
+    }
+
     .warning {
       background-color: #fff3cd;
       border: 1px solid #ffeeba;
@@ -262,8 +276,8 @@
         
         <div class="oauth-section" id="oauthSection" style="display: none;">
           <p>Sign in with OAuth to recover your account:</p>
-          <button class="oauth-btn" onclick="recoverWithOAuth('github')">Sign in with GitHub</button>
-          <button class="oauth-btn" onclick="recoverWithOAuth('google')">Sign in with Google</button>
+          <button class="oauth-btn" id="githubOAuthBtn" onclick="recoverWithOAuth('github')" style="display: none;">Sign in with GitHub</button>
+          <button class="oauth-btn" id="googleOAuthBtn" onclick="recoverWithOAuth('google')" style="display: none;">Sign in with Google</button>
         </div>
       </div>
       
@@ -285,6 +299,15 @@
       </div>
     </div>
 
+    <div id="alreadyRecoveredContent" style="display: none;">
+      <div class="already-recovered-box">
+        <h3>Account Already Recovered</h3>
+        <p>This recovery link has already been used and the account has been successfully restored.</p>
+        <p>You can now log in to your account using your existing credentials.</p>
+      </div>
+      <button onclick="window.location.href='https://knotapp.pages.dev/login.html'">Go to Login</button>
+    </div>
+
     <div id="successContent" style="display: none;">
       <div class="success-box">
         <h3>Account Recovered Successfully!</h3>
@@ -303,6 +326,8 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+  <script src="/api/mail.js"></script>
   <script>
     // Supabase configuration (from dashboard.html)
     var supabaseUrl = 'https://mfjtdrqvmuwtoarkiezi.supabase.co';
@@ -342,10 +367,25 @@
       supabase.from('account_deletion_requests')
         .select('*')
         .eq('recovery_id', recoveryId)
-        .eq('status', 'deleted')
         .single()
         .then(function({ data: deletionRequest, error }) {
           if (error || !deletionRequest) {
+            messageDiv.innerHTML = '<div class="error">Invalid or expired recovery link. The recovery link may have expired (24 hours) or has already been used.</div>';
+            btn.disabled = false;
+            btn.textContent = 'Recover Account';
+            return;
+          }
+
+          // Check if account has already been recovered
+          if (deletionRequest.status === 'recovered') {
+            messageDiv.innerHTML = '';
+            document.getElementById('initialContent').style.display = 'none';
+            document.getElementById('alreadyRecoveredContent').style.display = 'block';
+            return;
+          }
+
+          // Check if the link is expired or invalid status
+          if (deletionRequest.status !== 'deleted') {
             messageDiv.innerHTML = '<div class="error">Invalid or expired recovery link. The recovery link may have expired (24 hours) or has already been used.</div>';
             btn.disabled = false;
             btn.textContent = 'Recover Account';
@@ -440,10 +480,23 @@
       supabase.from('account_deletion_requests')
         .select('*')
         .eq('recovery_id', recoveryId)
-        .eq('status', 'deleted')
         .single()
         .then(function({ data: deletionRequest, error }) {
           if (error || !deletionRequest) {
+            messageDiv.innerHTML = '<div class="error">Invalid or expired recovery link. The recovery link may have expired (24 hours) or has already been used.</div>';
+            return;
+          }
+
+          // Check if account has already been recovered
+          if (deletionRequest.status === 'recovered') {
+            messageDiv.innerHTML = '';
+            document.getElementById('initialContent').style.display = 'none';
+            document.getElementById('alreadyRecoveredContent').style.display = 'block';
+            return;
+          }
+
+          // Check if the link is expired or invalid status
+          if (deletionRequest.status !== 'deleted') {
             messageDiv.innerHTML = '<div class="error">Invalid or expired recovery link. The recovery link may have expired (24 hours) or has already been used.</div>';
             return;
           }
@@ -515,6 +568,7 @@
         document.getElementById('initialContent').style.display = 'none';
         document.getElementById('errorContent').style.display = 'none';
         document.getElementById('successContent').style.display = 'none';
+        document.getElementById('alreadyRecoveredContent').style.display = 'none';
         messageDiv.innerHTML = '<div class="loading">Processing OAuth authentication...</div>';
         
         if (!recoveryId || !recoveryUserId) {
@@ -542,10 +596,26 @@
           supabase.from('account_deletion_requests')
             .select('*')
             .eq('recovery_id', recoveryId)
-            .eq('status', 'deleted')
             .single()
             .then(function({ data: deletionRequest, error }) {
               if (error || !deletionRequest) {
+                messageDiv.innerHTML = '<div class="error">Invalid or expired recovery link.</div>';
+                document.getElementById('initialContent').style.display = 'block';
+                return;
+              }
+
+              // Check if account has already been recovered
+              if (deletionRequest.status === 'recovered') {
+                // Clear recovery session
+                localStorage.removeItem('knot_recovery_id');
+                localStorage.removeItem('knot_recovery_user_id');
+                messageDiv.innerHTML = '';
+                document.getElementById('alreadyRecoveredContent').style.display = 'block';
+                return;
+              }
+
+              // Check if the link is expired or invalid status
+              if (deletionRequest.status !== 'deleted') {
                 messageDiv.innerHTML = '<div class="error">Invalid or expired recovery link.</div>';
                 document.getElementById('initialContent').style.display = 'block';
                 return;
@@ -605,12 +675,23 @@
       }
 
       supabase.from('account_deletion_requests')
-        .select('expires_at')
+        .select('expires_at, status')
         .eq('recovery_id', recoveryId)
-        .eq('status', 'deleted')
         .maybeSingle()
         .then(function({ data: deletionRequest, error }) {
           if (error || !deletionRequest) {
+            showErrorContent();
+            return;
+          }
+
+          // Check if account has already been recovered
+          if (deletionRequest.status === 'recovered') {
+            showAlreadyRecoveredContent();
+            return;
+          }
+
+          // Check if the link is expired or invalid status
+          if (deletionRequest.status !== 'deleted') {
             showErrorContent();
             return;
           }
@@ -633,6 +714,11 @@
     function showErrorContent() {
       document.getElementById('initialContent').style.display = 'none';
       document.getElementById('errorContent').style.display = 'block';
+    }
+
+    function showAlreadyRecoveredContent() {
+      document.getElementById('initialContent').style.display = 'none';
+      document.getElementById('alreadyRecoveredContent').style.display = 'block';
     }
 
     function updateTimer(expiresAt) {
@@ -674,10 +760,21 @@
       supabase.from('account_deletion_requests')
         .select('*')
         .eq('recovery_id', recoveryId)
-        .eq('status', 'deleted')
         .maybeSingle()
         .then(function({ data: deletionRequest, error }) {
           if (error || !deletionRequest) {
+            showErrorContent();
+            return;
+          }
+
+          // Check if account has already been recovered
+          if (deletionRequest.status === 'recovered') {
+            showAlreadyRecoveredContent();
+            return;
+          }
+
+          // Check if the link is expired or invalid status
+          if (deletionRequest.status !== 'deleted') {
             showErrorContent();
             return;
           }
@@ -696,34 +793,45 @@
           var appMetadata = user.app_metadata || {};
           var hasOAuth = appMetadata.providers && appMetadata.providers.length > 0;
           
+          // Determine the specific OAuth provider
+          var oauthProvider = null;
+          
+          // Check app_metadata.providers array first
+          if (appMetadata.providers && appMetadata.providers.length > 0) {
+            oauthProvider = appMetadata.providers[0]; // Use the first provider
+          }
+          // Check user.provider
+          else if (user.provider && user.provider !== 'email') {
+            oauthProvider = user.provider;
+          }
+          // Check app_metadata.provider
+          else if (appMetadata.provider && appMetadata.provider !== 'email') {
+            oauthProvider = appMetadata.provider;
+          }
+          
           console.log('OAuth detection debug:', {
             user_metadata: user,
             app_metadata: appMetadata,
             hasOAuth_from_providers: hasOAuth,
             provider: user.provider,
-            app_metadata_provider: appMetadata.provider
+            app_metadata_provider: appMetadata.provider,
+            detected_oauth_provider: oauthProvider
           });
           
-          // Also check if user_metadata has provider information
-          if (!hasOAuth && user.provider && user.provider !== 'email') {
-            hasOAuth = true;
-            console.log('OAuth detected from user.provider:', user.provider);
-          }
-          
-          if (!hasOAuth && appMetadata.provider && appMetadata.provider !== 'email') {
-            hasOAuth = true;
-            console.log('OAuth detected from app_metadata.provider:', appMetadata.provider);
-          }
-          
-          console.log('Final hasOAuth decision:', hasOAuth);
+          hasOAuth = oauthProvider !== null;
+          console.log('Final hasOAuth decision:', hasOAuth, 'Provider:', oauthProvider);
           
           document.getElementById('authButtons').style.display = 'block';
           
-          if (hasOAuth) {
-            // User has OAuth, show OAuth buttons only
+          if (hasOAuth && oauthProvider) {
+            // User has OAuth, show only the specific OAuth button
             document.getElementById('passwordSection').style.display = 'none';
             document.getElementById('oauthSection').style.display = 'block';
             document.getElementById('recoverBtn').style.display = 'none';
+            
+            // Show only the specific provider button
+            document.getElementById('githubOAuthBtn').style.display = oauthProvider === 'github' ? 'flex' : 'none';
+            document.getElementById('googleOAuthBtn').style.display = oauthProvider === 'google' ? 'flex' : 'none';
           } else {
             // User has email/password, show password field and recover button
             document.getElementById('passwordSection').style.display = 'block';
@@ -747,37 +855,28 @@
 
         if (restoreError) {
           console.error('Error restoring user data via RPC:', restoreError);
-          
-          // Log the failed recovery attempt
-          await supabase.from('account_recovery_attempts').insert({
-            deletion_request_id: deletionRequestId,
-            recovery_id: recoveryId,
-            success: false
-          });
-
           return { success: false, error: restoreError.message };
         }
 
         console.log('Restore result:', restoreResult);
 
-        // Log the successful recovery attempt
-        await supabase.from('account_recovery_attempts').insert({
-          deletion_request_id: deletionRequestId,
-          recovery_id: recoveryId,
-          success: true
-        });
+        // Get the user's email to send confirmation email
+        var { data: deletionRequest } = await supabase.from('account_deletion_requests')
+          .select('email')
+          .eq('id', deletionRequestId)
+          .single();
+
+        if (deletionRequest && deletionRequest.email) {
+          // Send recovery confirmation email
+          await sendAccountRecoveryConfirmationEmail(deletionRequest.email);
+          console.log('Recovery confirmation email sent to:', deletionRequest.email);
+        } else {
+          console.log('Could not send confirmation email - no email found in deletion request');
+        }
 
         return { success: true, data: restoreResult };
       } catch (error) {
         console.error('Error restoring user data:', error);
-        
-        // Log the failed recovery attempt
-        await supabase.from('account_recovery_attempts').insert({
-          deletion_request_id: deletionRequestId,
-          recovery_id: recoveryId,
-          success: false
-        });
-
         return { success: false, error: error.message };
       }
     }

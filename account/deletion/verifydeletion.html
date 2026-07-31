@@ -152,7 +152,7 @@
       WARNING: This action cannot be undone. All your data will be permanently deleted.
     </div>
 
-    <p>Please enter the 6-digit verification code from your email to confirm your account deletion.</p>
+    <p>Please enter the 6-digit verification code from your email to confirm your account deletion. The verification code expires in 10 minutes.</p>
 
     <div class="form-group">
       <label for="verificationCode">Verification Code:</label>
@@ -195,7 +195,7 @@
 
     if (!expectedCode || !recoveryId) {
       console.error('Missing URL parameters');
-      document.getElementById('message').innerHTML = '<div class="error">Invalid verification link. Please request a new deletion verification email.</div>';
+      document.getElementById('message').innerHTML = '<div class="error">Invalid verification link. Please request a new deletion verification email. Verification codes expire in 10 minutes.</div>';
       document.getElementById('verifyBtn').disabled = true;
     }
 
@@ -258,7 +258,7 @@
             if (!deletionRequest) {
               console.error('No deletion request found');
               console.log('Looking for recovery_id:', recoveryId, 'user_id:', currentUser.id);
-              messageDiv.innerHTML = '<div class="error">Invalid or expired deletion request. Please request a new verification email.</div>';
+              messageDiv.innerHTML = '<div class="error">Invalid or expired deletion request. Please request a new verification email. Verification codes expire in 10 minutes.</div>';
               btn.disabled = false;
               btn.textContent = 'Verify and Delete Account';
               return;
@@ -292,7 +292,7 @@
             var expiresAt = new Date(deletionRequest.expires_at);
             var now = new Date();
             if (now > expiresAt) {
-              messageDiv.innerHTML = '<div class="error">This deletion request has expired (24 hours). Please request a new verification email.</div>';
+              messageDiv.innerHTML = '<div class="error">This deletion request has expired (10 minutes). Please request a new verification email.</div>';
               btn.disabled = false;
               btn.textContent = 'Verify and Delete Account';
               return;
