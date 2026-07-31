@@ -33,7 +33,7 @@ CREATE INDEX IF NOT EXISTS idx_pods_is_deleted ON pods(is_deleted);
 CREATE INDEX IF NOT EXISTS idx_habits_is_deleted ON habits(is_deleted);
 
 -- Function to soft delete all user data
-CREATE OR REPLACE FUNCTION soft_delete_user_data(user_id UUID, deleted_by UUID)
+CREATE OR REPLACE FUNCTION soft_delete_user_data(target_user_id UUID, deleted_by UUID)
 RETURNS void AS $$
 BEGIN
   -- Soft delete user profile
@@ -41,21 +41,21 @@ BEGIN
   SET is_deleted = TRUE,
       deleted_at = NOW(),
       deleted_by = deleted_by
-  WHERE user_id = user_id AND is_deleted = FALSE;
+  WHERE user_id = target_user_id AND is_deleted = FALSE;
 
   -- Soft delete pod memberships
   UPDATE pod_members
   SET is_deleted = TRUE,
       deleted_at = NOW(),
       deleted_by = deleted_by
-  WHERE user_id = user_id AND is_deleted = FALSE;
+  WHERE user_id = target_user_id AND is_deleted = FALSE;
 
   -- Soft delete check-ins
   UPDATE check_ins
   SET is_deleted = TRUE,
       deleted_at = NOW(),
       deleted_by = deleted_by
-  WHERE user_id = user_id AND is_deleted = FALSE;
+  WHERE user_id = target_user_id AND is_deleted = FALSE;
 
   -- Note: We don't delete pods or habits as those may be shared
   -- Pods are only deleted if the user was the sole member
@@ -64,7 +64,7 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Function to restore all user data
-CREATE OR REPLACE FUNCTION restore_user_data(user_id UUID)
+CREATE OR REPLACE FUNCTION restore_user_data(target_user_id UUID)
 RETURNS TABLE(
   profiles_restored INTEGER,
   pod_members_restored INTEGER,
@@ -80,7 +80,7 @@ BEGIN
   SET is_deleted = FALSE,
       deleted_at = NULL,
       deleted_by = NULL
-  WHERE user_id = user_id AND is_deleted = TRUE;
+  WHERE user_id = target_user_id AND is_deleted = TRUE;
   GET DIAGNOSTICS profiles_count = ROW_COUNT;
 
   -- Restore pod memberships
@@ -88,7 +88,7 @@ BEGIN
   SET is_deleted = FALSE,
       deleted_at = NULL,
       deleted_by = NULL
-  WHERE user_id = user_id AND is_deleted = TRUE;
+  WHERE user_id = target_user_id AND is_deleted = TRUE;
   GET DIAGNOSTICS pod_members_count = ROW_COUNT;
 
   -- Restore check-ins
@@ -96,7 +96,7 @@ BEGIN
   SET is_deleted = FALSE,
       deleted_at = NULL,
       deleted_by = NULL
-  WHERE user_id = user_id AND is_deleted = TRUE;
+  WHERE user_id = target_user_id AND is_deleted = TRUE;
   GET DIAGNOSTICS check_ins_count = ROW_COUNT;
 
   RETURN QUERY SELECT profiles_count, pod_members_count, check_ins_count;
@@ -104,7 +104,7 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Function to delete pods where user was sole member
-CREATE OR REPLACE FUNCTION delete_sole_member_pods(user_id UUID, deleted_by UUID)
+CREATE OR REPLACE FUNCTION delete_sole_member_pods(target_user_id UUID, deleted_by UUID)
 RETURNS INTEGER AS $$
 DECLARE
   deleted_count INTEGER;
@@ -117,13 +117,13 @@ BEGIN
     AND NOT EXISTS (
       SELECT 1 FROM pod_members pm
       WHERE pm.pod_id = p.id
-      AND pm.user_id != user_id
+      AND pm.user_id != target_user_id
       AND pm.is_deleted = FALSE
     )
     AND EXISTS (
       SELECT 1 FROM pod_members pm
       WHERE pm.pod_id = p.id
-      AND pm.user_id = user_id
+      AND pm.user_id = target_user_id
       AND pm.is_deleted = FALSE
     )
   )
@@ -139,7 +139,7 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Function to restore pods that were deleted due to sole member
-CREATE OR REPLACE FUNCTION restore_sole_member_pods(user_id UUID)
+CREATE OR REPLACE FUNCTION restore_sole_member_pods(target_user_id UUID)
 RETURNS INTEGER AS $$
 DECLARE
   restored_count INTEGER;
@@ -150,11 +150,11 @@ BEGIN
       deleted_at = NULL,
       deleted_by = NULL
   WHERE p.is_deleted = TRUE
-  AND p.deleted_by = user_id
+  AND p.deleted_by = target_user_id
   AND EXISTS (
     SELECT 1 FROM pod_members pm
     WHERE pm.pod_id = p.id
-    AND pm.user_id = user_id
+    AND pm.user_id = target_user_id
     AND pm.is_deleted = FALSE
   );
   
@@ -164,17 +164,17 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Create a comprehensive account deletion function
-CREATE OR REPLACE FUNCTION perform_account_deletion(user_id UUID, deleted_by UUID)
+CREATE OR REPLACE FUNCTION perform_account_deletion(target_user_id UUID, deleted_by UUID)
 RETURNS JSON AS $$
 DECLARE
   pods_deleted INTEGER;
   result JSON;
 BEGIN
   -- Delete pods where user was sole member
-  pods_deleted := delete_sole_member_pods(user_id, deleted_by);
+  pods_deleted := delete_sole_member_pods(target_user_id, deleted_by);
   
   -- Soft delete all user data
-  PERFORM soft_delete_user_data(user_id, deleted_by);
+  PERFORM soft_delete_user_data(target_user_id, deleted_by);
   
   -- Return summary
   result := json_build_object(
@@ -188,7 +188,7 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Create a comprehensive account restoration function
-CREATE OR REPLACE FUNCTION perform_account_restoration(user_id UUID)
+CREATE OR REPLACE FUNCTION perform_account_restoration(target_user_id UUID)
 RETURNS JSON AS $$
 DECLARE
   data_restored RECORD;
@@ -196,10 +196,10 @@ DECLARE
   result JSON;
 BEGIN
   -- Restore user data
-  SELECT * INTO data_restored FROM restore_user_data(user_id);
+  SELECT * INTO data_restored FROM restore_user_data(target_user_id);
   
   -- Restore pods that were deleted due to sole member
-  pods_restored := restore_sole_member_pods(user_id);
+  pods_restored := restore_sole_member_pods(target_user_id);
   
   -- Return summary
   result := json_build_object(

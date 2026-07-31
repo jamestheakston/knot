@@ -324,7 +324,7 @@
         
         // Call the Supabase RPC function to restore all user data
         var { data: restoreResult, error: restoreError } = await supabase.rpc('perform_account_restoration', {
-          user_id: userId
+          target_user_id: userId
         });
 
         if (restoreError) {

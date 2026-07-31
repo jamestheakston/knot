@@ -317,7 +317,7 @@
         
         // Call the Supabase RPC function to soft delete all user data
         var { data: deletionResult, error: deletionError } = await supabase.rpc('perform_account_deletion', {
-          user_id: userId,
+          target_user_id: userId,
           deleted_by: userId
         });
 
