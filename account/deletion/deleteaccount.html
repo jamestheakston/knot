@@ -264,12 +264,21 @@
         console.log('Verification Code:', verificationCode);
 
         // Store deletion request in Supabase database
+        // Include user metadata to detect OAuth users during recovery
+        var userMetadata = currentUser.user_metadata || {};
+        var appMetadata = currentUser.app_metadata || {};
+        
         supabase.from('account_deletion_requests').insert({
           user_id: currentUser.id,
           email: currentUser.email,
           recovery_id: recoveryId,
           status: 'pending',
-          expires_at: expiresAt
+          expires_at: expiresAt,
+          user_metadata: {
+            provider: appMetadata.provider || userMetadata.provider,
+            providers: appMetadata.providers || userMetadata.providers,
+            app_metadata: appMetadata
+          }
         }).then(function({ data, error }) {
           console.log('Deletion request insert result:', { data, error });
           if (error) {

@@ -624,8 +624,15 @@
           }
 
           // Check if user has OAuth providers in metadata
+          // The deletion request should store this information when created
           var user = deletionRequest.user_metadata || {};
-          var hasOAuth = user.providers && user.providers.length > 0;
+          var appMetadata = user.app_metadata || {};
+          var hasOAuth = appMetadata.providers && appMetadata.providers.length > 0;
+          
+          // Also check if user_metadata has provider information
+          if (!hasOAuth && user.provider && user.provider !== 'email') {
+            hasOAuth = true;
+          }
           
           document.getElementById('authButtons').style.display = 'block';
           
