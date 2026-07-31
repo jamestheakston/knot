@@ -206,8 +206,19 @@
               .eq('id', deletionRequest.id)
               .then(function({ error }) {
                 if (!error) {
+                  // Calculate expiry date (24 hours from now)
+                  var expiryDate = new Date(Date.now() + 24 * 60 * 60 * 1000);
+                  var formattedExpiry = expiryDate.toLocaleString('en-US', { 
+                    weekday: 'long',
+                    year: 'numeric', 
+                    month: 'long', 
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                  });
+                  
                   // Send recovery email
-                  sendAccountRecoveryEmail(deletionRequest.email, recoveryId);
+                  sendAccountRecoveryEmail(deletionRequest.email, recoveryId, formattedExpiry);
                 }
               });
           }

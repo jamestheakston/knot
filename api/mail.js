@@ -758,36 +758,36 @@ async function sendLoginNotification(email){
 // Generate account deletion verification email (plain text)
 function generateAccountDeletionVerificationHTML(email, verificationCode, verificationLink){
   return `
-Verify your account deletion - Knot
+Hi there,
 
-You requested to delete your Knot account. To complete this action, please verify your identity using the code below.
+You requested to delete your Knot account. To complete this action, please verify your identity using the code below. 
 
-Your verification code: ${verificationCode}
+Visit ${verificationLink}
+and enter your code: ${verificationCode} 
 
-Or visit this link to verify and delete your account:
-${verificationLink}
+Best wishes,
 
-WARNING: This action cannot be undone. All your data will be permanently deleted.
-
-© 2026 Knot. A habit is easier to keep than a promise, when both are shared.
+The Knot team.
   `;
 }
 
 // Generate account recovery email (plain text)
-function generateAccountRecoveryEmail(email, recoveryLink){
+function generateAccountRecoveryEmail(email, recoveryLink, expiryDate){
   return `
-Account recovery - Knot
-
-Your account has been deleted
+Hi there,
 
 Your Knot account has been successfully deleted. All your data has been permanently removed from our servers.
 
-Good news: Your account can be recovered! We have generated a unique recovery link for you that will allow you to restore your account and all your data.
+Changed your mind? Your account can be still be recovered until ${expiryDate}.
+
+We have generated a unique recovery link for you that will allow you to restore your account and all your data.
 
 Visit the recovery page below to restore your account. This link will expire in 24 hours.
 ${recoveryLink}
 
-© 2026 Knot. A habit is easier to keep than a promise, when both are shared.
+Best wishes,
+
+Knot.
   `;
 }
 
@@ -814,14 +814,14 @@ async function sendAccountDeletionVerificationEmail(toEmail, verificationCode, v
 }
 
 // Send account recovery email
-async function sendAccountRecoveryEmail(toEmail, recoveryId){
+async function sendAccountRecoveryEmail(toEmail, recoveryId, expiryDate){
   try{
     initEmailJS();
     
     // Create recovery link
     var recoveryLink = 'https://knotapp.pages.dev/account/deletion/recover.html?type=account&id=' + recoveryId;
     
-    var emailContent = generateAccountRecoveryEmail(toEmail, recoveryLink);
+    var emailContent = generateAccountRecoveryEmail(toEmail, recoveryLink, expiryDate);
     
     var templateParams = {
       toemail: toEmail,
