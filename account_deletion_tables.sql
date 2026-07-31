@@ -40,6 +40,10 @@ GRANT USAGE ON SCHEMA public TO authenticated;
 GRANT ALL ON TABLE account_deletion_requests TO authenticated;
 GRANT ALL ON TABLE account_recovery_attempts TO authenticated;
 
+-- Grant SELECT permissions to anon role for recovery flow
+GRANT USAGE ON SCHEMA public TO anon;
+GRANT SELECT ON TABLE account_deletion_requests TO anon;
+
 -- RLS Policies for account_deletion_requests
 -- Drop existing policies if they exist
 DROP POLICY IF EXISTS "Users can view own deletion requests" ON account_deletion_requests;
@@ -47,6 +51,12 @@ DROP POLICY IF EXISTS "Users can insert own deletion requests" ON account_deleti
 DROP POLICY IF EXISTS "Users can update own deletion requests" ON account_deletion_requests;
 DROP POLICY IF EXISTS "Service role can update deletion requests" ON account_deletion_requests;
 DROP POLICY IF EXISTS "Service role can delete deletion requests" ON account_deletion_requests;
+DROP POLICY IF EXISTS "Anon can view deletion requests by recovery_id" ON account_deletion_requests;
+
+-- Anon users can view deletion requests by recovery_id (for recovery flow)
+CREATE POLICY "Anon can view deletion requests by recovery_id"
+  ON account_deletion_requests FOR SELECT
+  USING (recovery_id IS NOT NULL);
 
 -- Users can only see their own deletion requests
 CREATE POLICY "Users can view own deletion requests"
