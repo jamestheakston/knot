@@ -8,7 +8,8 @@ CREATE TABLE IF NOT EXISTS account_deletion_requests (
   recovery_id TEXT NOT NULL UNIQUE,
   status TEXT NOT NULL DEFAULT 'pending', -- pending, verified, deleted, recovered
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  expires_at TIMESTAMP WITH TIME ZONE NOT NULL,
+  expires_at TIMESTAMP WITH TIME ZONE NOT NULL, -- Recovery link expiration (24 hours)
+  code_expires_at TIMESTAMP WITH TIME ZONE, -- Verification code expiration (10 minutes)
   verified_at TIMESTAMP WITH TIME ZONE,
   deleted_at TIMESTAMP WITH TIME ZONE,
   recovered_at TIMESTAMP WITH TIME ZONE,
@@ -24,6 +25,18 @@ BEGIN
     AND column_name = 'user_metadata'
   ) THEN
     ALTER TABLE account_deletion_requests ADD COLUMN user_metadata JSONB;
+  END IF;
+END $$;
+
+-- Add code_expires_at column if table already exists and doesn't have it
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns 
+    WHERE table_name = 'account_deletion_requests' 
+    AND column_name = 'code_expires_at'
+  ) THEN
+    ALTER TABLE account_deletion_requests ADD COLUMN code_expires_at TIMESTAMP WITH TIME ZONE;
   END IF;
 END $$;
 

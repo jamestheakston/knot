@@ -198,11 +198,13 @@
         .single()
         .then(function({ data: deletionRequest, error }) {
           if (!error && deletionRequest) {
-            // Update status to deleted
+            // Update status to deleted and set recovery link expiration to 24 hours
+            var recoveryExpiryDate = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
             supabase.from('account_deletion_requests')
               .update({ 
                 status: 'deleted',
-                deleted_at: new Date().toISOString()
+                deleted_at: new Date().toISOString(),
+                expires_at: recoveryExpiryDate
               })
               .eq('id', deletionRequest.id)
               .then(function({ error }) {

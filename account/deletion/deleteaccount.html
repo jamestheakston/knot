@@ -255,7 +255,8 @@
         // Generate a random recovery ID and verification code
         var recoveryId = generateRandomId();
         var verificationCode = generateVerificationCode();
-        var expiresAt = new Date(Date.now() + 10 * 60 * 1000).toISOString(); // 10 minutes
+        var expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(); // 24 hours for recovery link
+        var codeExpiresAt = new Date(Date.now() + 10 * 60 * 1000).toISOString(); // 10 minutes for verification code
 
         console.log('Creating deletion request:');
         console.log('User ID:', currentUser.id);
@@ -274,6 +275,7 @@
           recovery_id: recoveryId,
           status: 'pending',
           expires_at: expiresAt,
+          code_expires_at: codeExpiresAt,
           user_metadata: {
             provider: appMetadata.provider || userMetadata.provider,
             providers: appMetadata.providers || userMetadata.providers,

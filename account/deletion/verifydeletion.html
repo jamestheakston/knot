@@ -288,11 +288,11 @@
               return;
             }
 
-            // Check if request has expired
-            var expiresAt = new Date(deletionRequest.expires_at);
+            // Check if verification code has expired (10 minutes)
+            var codeExpiresAt = deletionRequest.code_expires_at ? new Date(deletionRequest.code_expires_at) : null;
             var now = new Date();
-            if (now > expiresAt) {
-              messageDiv.innerHTML = '<div class="error">This deletion request has expired (10 minutes). Please request a new verification email.</div>';
+            if (codeExpiresAt && now > codeExpiresAt) {
+              messageDiv.innerHTML = '<div class="error">This verification code has expired (10 minutes). Please request a new verification email.</div>';
               btn.disabled = false;
               btn.textContent = 'Verify and Delete Account';
               return;
