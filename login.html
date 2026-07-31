@@ -708,6 +708,7 @@
 
     // Check if user has stored accounts - if so, redirect to accountswitcher
     // But allow access if ?from parameter is present
+    // Also check if account switching has been disabled
     var urlParams = new URLSearchParams(window.location.search);
     var fromParam = urlParams.get('from');
     
@@ -717,6 +718,28 @@
         try{
           var accounts = JSON.parse(storedAccounts);
           if(accounts && accounts.length > 0){
+            // Check if account switching is disabled
+            if(localStorage.getItem('knot_disable_account_switching') === 'true' || 
+               localStorage.getItem('knot_tight_security') === 'true'){
+              // Account switching is disabled, redirect to dashboard instead
+              var client = getSupabaseClient();
+              if(client){
+                client.auth.getSession().then(function({ data: { session } }){
+                  if(session && session.user){
+                    // User has a valid session, go to dashboard
+                    window.location.href = 'dashboard.html';
+                  } else {
+                    // No valid session, stay on login page
+                    console.log('Account switching disabled and no valid session');
+                  }
+                });
+              } else {
+                // No client available, stay on login page
+                console.log('Account switching disabled and no client available');
+              }
+              return;
+            }
+            
             // Check if user has a current session and if that account has been deleted
             var client = getSupabaseClient();
             if(client){

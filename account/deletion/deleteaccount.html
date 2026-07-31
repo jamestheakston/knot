@@ -300,7 +300,21 @@
               messageDiv.innerHTML = '<div class="success">Verification email sent! Please check your inbox (and spam folder) and click the verification link to complete the deletion process. The code expires in 10 minutes.</div>';
               btn.textContent = 'Email Sent';
             } else {
-              messageDiv.innerHTML = '<div class="error">Failed to send verification email. Please try again.</div>';
+              // Check if error is due to EmailJS quota limits (400, 402, or 429 status)
+              var errorMessage = result.error || '';
+              var isQuotaError = errorMessage.includes('400') || errorMessage.includes('402') || errorMessage.includes('429') || 
+                                 errorMessage.toLowerCase().includes('quota') || 
+                                 errorMessage.toLowerCase().includes('limit') ||
+                                 errorMessage.toLowerCase().includes('payment') ||
+                                 errorMessage.toLowerCase().includes('too many requests');
+              
+              if (isQuotaError) {
+                var resetDate = getNextQuotaResetDate();
+                var formattedDate = formatResetDate(resetDate);
+                messageDiv.innerHTML = '<div class="error">We are currently experiencing high traffic. Please try again after our system resets on ' + formattedDate + '.</div>';
+              } else {
+                messageDiv.innerHTML = '<div class="error">Failed to send verification email. Please try again.</div>';
+              }
               btn.disabled = false;
               btn.textContent = 'Send Verification Email';
             }
@@ -329,6 +343,56 @@
         result += chars.charAt(Math.floor(Math.random() * chars.length));
       }
       return result;
+    }
+
+    // Calculate next EmailJS quota reset date (20th of month)
+    function getNextQuotaResetDate() {
+      var now = new Date();
+      var currentDay = now.getDate();
+      var currentMonth = now.getMonth();
+      var currentYear = now.getFullYear();
+      
+      var resetDate;
+      
+      if (currentDay <= 20) {
+        // Reset is on the 20th of the current month
+        resetDate = new Date(currentYear, currentMonth, 20);
+      } else {
+        // Reset is on the 20th of the next month
+        // Handle year transition (December to January)
+        if (currentMonth === 11) {
+          resetDate = new Date(currentYear + 1, 0, 20);
+        } else {
+          resetDate = new Date(currentYear, currentMonth + 1, 20);
+        }
+      }
+      
+      return resetDate;
+    }
+
+    // Format date as "Month Dayth" (e.g., "August 20th")
+    function formatResetDate(date) {
+      var months = [
+        'January', 'February', 'March', 'April', 'May', 'June',
+        'July', 'August', 'September', 'October', 'November', 'December'
+      ];
+      var day = date.getDate();
+      var month = months[date.getMonth()];
+      
+      // Add ordinal suffix (st, nd, rd, th)
+      var suffix;
+      if (day >= 11 && day <= 13) {
+        suffix = 'th';
+      } else {
+        switch (day % 10) {
+          case 1: suffix = 'st'; break;
+          case 2: suffix = 'nd'; break;
+          case 3: suffix = 'rd'; break;
+          default: suffix = 'th';
+        }
+      }
+      
+      return month + ' ' + day + suffix;
     }
   </script>
 </body>
