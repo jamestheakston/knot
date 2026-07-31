@@ -1,0 +1,59 @@
+# Possible Error Codes
+
+This document lists all error codes used in the Knot application.
+
+## Error Codes
+
+### Authentication & Access Errors
+
+- **DASH-58580** - Dashboard authentication failure
+  - Location: dashboard.html
+  - Description: User is not authenticated or session is invalid
+  - Redirects to: 403.html
+
+- **DELETED-001** - Account deleted
+  - Location: dashboard.html, login.html
+  - Description: User's account has been soft-deleted
+  - Message: "Your account has been deleted. Please use the recovery link sent to your email to restore your account."
+  - Action: Shows logout button on error page
+
+### Account Switcher Errors
+
+- **ACCTSWITCH-1234** - Account switching disabled
+  - Location: accountswitcher.html
+  - Description: Account switching is disabled in user settings
+  - Message: "Account switching is disabled. You can enable this in Account Settings."
+  - Action: Redirects to dashboard
+
+- **SECURITY-1234** - Tight security enabled
+  - Location: accountswitcher.html
+  - Description: Tight security mode is enabled, which disables account switching
+  - Message: "Account switching is disabled when Tight Security is enabled. You can disable this in Account Settings."
+  - Action: Redirects to dashboard
+
+- **ACCTSWITCHER-5676** - Not authenticated
+  - Location: accountswitcher.html
+  - Description: User is not logged in and has no stored accounts
+  - Message: "You must be logged in to access the account switcher."
+  - Action: Redirects to login page
+
+- **ACCTSWITCHER-5677** - Authentication error
+  - Location: accountswitcher.html
+  - Description: Unable to initialize Supabase authentication
+  - Message: "Unable to initialize authentication."
+  - Action: Redirects to login page
+
+## Error Code Format
+
+Error codes follow the pattern: `[PREFIX]-[NUMBER]`
+
+- Prefixes indicate the system or feature (e.g., DASH for dashboard, ACCTSWITCH for account switching)
+- Numbers are 4-5 digits for unique identification
+
+## Usage
+
+Error codes are passed as URL parameters:
+- `code=` for error.html
+- `c0de=` for accountswitcher.html (typo in original code)
+
+Error pages display the code with a tooltip explaining what error codes are for debugging purposes.
