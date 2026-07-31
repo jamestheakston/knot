@@ -11,8 +11,21 @@ CREATE TABLE IF NOT EXISTS account_deletion_requests (
   expires_at TIMESTAMP WITH TIME ZONE NOT NULL,
   verified_at TIMESTAMP WITH TIME ZONE,
   deleted_at TIMESTAMP WITH TIME ZONE,
-  recovered_at TIMESTAMP WITH TIME ZONE
+  recovered_at TIMESTAMP WITH TIME ZONE,
+  user_metadata JSONB
 );
+
+-- Add user_metadata column if table already exists and doesn't have it
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns 
+    WHERE table_name = 'account_deletion_requests' 
+    AND column_name = 'user_metadata'
+  ) THEN
+    ALTER TABLE account_deletion_requests ADD COLUMN user_metadata JSONB;
+  END IF;
+END $$;
 
 -- Table to store account recovery attempts (for audit trail)
 CREATE TABLE IF NOT EXISTS account_recovery_attempts (
