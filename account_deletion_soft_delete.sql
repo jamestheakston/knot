@@ -34,28 +34,28 @@ CREATE INDEX IF NOT EXISTS idx_habits_is_deleted ON habits(is_deleted);
 
 -- Function to soft delete all user data
 DROP FUNCTION IF EXISTS soft_delete_user_data(UUID, UUID);
-CREATE OR REPLACE FUNCTION soft_delete_user_data(target_user_id UUID, deleted_by UUID)
+CREATE OR REPLACE FUNCTION soft_delete_user_data(target_user_id UUID, deleted_by_user UUID)
 RETURNS void AS $$
 BEGIN
   -- Soft delete user profile
   UPDATE user_profiles
   SET is_deleted = TRUE,
       deleted_at = NOW(),
-      deleted_by = deleted_by
+      deleted_by = deleted_by_user
   WHERE user_id = target_user_id AND is_deleted = FALSE;
 
   -- Soft delete pod memberships
   UPDATE pod_members
   SET is_deleted = TRUE,
       deleted_at = NOW(),
-      deleted_by = deleted_by
+      deleted_by = deleted_by_user
   WHERE user_id = target_user_id AND is_deleted = FALSE;
 
   -- Soft delete check-ins
   UPDATE check_ins
   SET is_deleted = TRUE,
       deleted_at = NOW(),
-      deleted_by = deleted_by
+      deleted_by = deleted_by_user
   WHERE user_id = target_user_id AND is_deleted = FALSE;
 
   -- Note: We don't delete pods or habits as those may be shared
@@ -107,7 +107,7 @@ $$ LANGUAGE plpgsql;
 
 -- Function to delete pods where user was sole member
 DROP FUNCTION IF EXISTS delete_sole_member_pods(UUID, UUID);
-CREATE OR REPLACE FUNCTION delete_sole_member_pods(target_user_id UUID, deleted_by UUID)
+CREATE OR REPLACE FUNCTION delete_sole_member_pods(target_user_id UUID, deleted_by_user UUID)
 RETURNS INTEGER AS $$
 DECLARE
   deleted_count INTEGER;
@@ -133,7 +133,7 @@ BEGIN
   UPDATE pods
   SET is_deleted = TRUE,
       deleted_at = NOW(),
-      deleted_by = deleted_by
+      deleted_by = deleted_by_user
   WHERE id IN (SELECT id FROM sole_member_pods);
   
   GET DIAGNOSTICS deleted_count = ROW_COUNT;
@@ -169,17 +169,17 @@ $$ LANGUAGE plpgsql;
 
 -- Create a comprehensive account deletion function
 DROP FUNCTION IF EXISTS perform_account_deletion(UUID, UUID);
-CREATE OR REPLACE FUNCTION perform_account_deletion(target_user_id UUID, deleted_by UUID)
+CREATE OR REPLACE FUNCTION perform_account_deletion(target_user_id UUID, deleted_by_user UUID)
 RETURNS JSON AS $$
 DECLARE
   pods_deleted INTEGER;
   result JSON;
 BEGIN
   -- Delete pods where user was sole member
-  pods_deleted := delete_sole_member_pods(target_user_id, deleted_by);
+  pods_deleted := delete_sole_member_pods(target_user_id, deleted_by_user);
   
   -- Soft delete all user data
-  PERFORM soft_delete_user_data(target_user_id, deleted_by);
+  PERFORM soft_delete_user_data(target_user_id, deleted_by_user);
   
   -- Return summary
   result := json_build_object(
