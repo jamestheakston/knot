@@ -701,7 +701,7 @@ async function sendPodDeletionEmail(toEmail, podName, deletedBy, userId){
     
     var templateParams = {
       toemail: toEmail,
-      fromname: 'Knot Notifications',
+      fromname: 'Knot',
       subject: 'Pod deleted on Knot',
       email_content: emailContent
     };
@@ -710,7 +710,7 @@ async function sendPodDeletionEmail(toEmail, podName, deletedBy, userId){
     
     // Create notification
     if(userId){
-      await createNotification(userId, 'pod', 'Pod Deleted', 'The pod "' + podName + '" has been deleted by ' + deletedBy, { podName: podName, deletedBy: deletedBy });
+      await createNotification(userId, 'pod', 'Pod Deleted', 'The pod "' + podName + '" has been deleted by ' + deletedBy, { podName: podName, deletedBy: deletedBy }, 'Knot');
     }
   }catch(err){
     console.error('Error sending pod deletion notification:', err);
@@ -725,7 +725,7 @@ async function sendInviteEmail(toEmail, podName, inviteCode, inviterName, sender
     
     var templateParams = {
       toemail: toEmail,
-      fromname: 'Knot Invitations',
+      fromname: 'Knot',
       subject: "You're invited to join a Knot pod",
       email_content: emailContent
     };
@@ -734,7 +734,7 @@ async function sendInviteEmail(toEmail, podName, inviteCode, inviterName, sender
     
     // Create notification for the sender
     if(senderUserId){
-      await createNotification(senderUserId, 'invite', 'Invite Sent', 'You have invited ' + toEmail + ' to join the pod "' + podName + '"', { podName: podName, inviteCode: inviteCode, toEmail: toEmail });
+      await createNotification(senderUserId, 'invite', 'Invite Sent', 'You have invited ' + toEmail + ' to join the pod "' + podName + '"', { podName: podName, inviteCode: inviteCode, toEmail: toEmail }, 'Knot');
     }
     
     return { success: true };
@@ -781,7 +781,7 @@ async function sendLoginNotification(email, userId){
     
     // Create notification
     if(userId){
-      await createNotification(userId, 'account', 'New Login', 'A new login was detected for your account at ' + loginTime.toLocaleString(), { loginTime: loginTime });
+      await createNotification(userId, 'account', 'New Login', 'A new login was detected for your account at ' + loginTime.toLocaleString(), { loginTime: loginTime }, 'Knot');
     }
   }catch(err){
     console.error('Error sending login notification:', err);
@@ -849,7 +849,7 @@ async function sendAccountDeletionVerificationEmail(toEmail, verificationCode, v
     
     // Create notification
     if(userId){
-      await createNotification(userId, 'account', 'Account Deletion Requested', 'You have requested to delete your account. Please verify your identity to complete the deletion.', { verificationCode: verificationCode });
+      await createNotification(userId, 'account', 'Account Deletion Requested', 'You have requested to delete your account. Please verify your identity to complete the deletion.', { verificationCode: verificationCode }, 'Knot');
     }
     
     return { success: true };
@@ -880,7 +880,7 @@ async function sendAccountRecoveryEmail(toEmail, recoveryId, expiryDate, userId)
     
     // Create notification
     if(userId){
-      await createNotification(userId, 'account', 'Account Deleted', 'Your account has been deleted. You can recover it until ' + expiryDate, { recoveryId: recoveryId, expiryDate: expiryDate });
+      await createNotification(userId, 'account', 'Account Deleted', 'Your account has been deleted. You can recover it until ' + expiryDate, { recoveryId: recoveryId, expiryDate: expiryDate }, 'Knot');
     }
     
     return { success: true };
@@ -925,7 +925,7 @@ async function sendAccountRecoveryConfirmationEmail(toEmail, userId){
     
     // Create notification
     if(userId){
-      await createNotification(userId, 'account', 'Account Recovered', 'Your account has been successfully recovered and restored.', {});
+      await createNotification(userId, 'account', 'Account Recovered', 'Your account has been successfully recovered and restored.', {}, 'Knot');
     }
     
     return { success: true };
@@ -936,7 +936,7 @@ async function sendAccountRecoveryConfirmationEmail(toEmail, userId){
 }
 
 // Create notification in database
-async function createNotification(userId, type, title, message, metadata){
+async function createNotification(userId, type, title, message, metadata, fromName){
   try{
     var supabase = window.supabase.createClient(
       'https://mfjtdrqvmuwtoarkiezi.supabase.co',
@@ -950,7 +950,8 @@ async function createNotification(userId, type, title, message, metadata){
         type: type,
         title: title,
         message: message,
-        metadata: metadata || {}
+        metadata: metadata || {},
+        from_name: fromName || 'Knot'
       });
     
     if(error) throw error;

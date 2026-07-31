@@ -479,6 +479,44 @@
     border-bottom: 1px solid var(--line);
     cursor: pointer;
     transition: background 0.2s ease;
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+  }
+  .notification-avatar{
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--blue);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    font-weight: 600;
+    flex-shrink: 0;
+  }
+  .notification-avatar.knot-avatar{
+    background: var(--blue);
+  }
+  .notification-avatar.knot-avatar i{
+    width: 20px;
+    height: 20px;
+  }
+  .notification-content{
+    flex: 1;
+    min-width: 0;
+  }
+  .notification-header{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 4px;
+  }
+  .notification-from{
+    font-size: 11px;
+    color: var(--muted-2);
+    font-weight: 500;
   }
   .notification-item:hover{
     background: var(--bg-3);
@@ -3340,6 +3378,14 @@
       }
       
       await loadUserData();
+      
+      // Check if this is user's first login (no welcome notification yet)
+      var hasSeenWelcome = localStorage.getItem('knot_welcome_seen_' + currentUser.id);
+      if(!hasSeenWelcome){
+        await createWelcomeNotification();
+        localStorage.setItem('knot_welcome_seen_' + currentUser.id, 'true');
+      }
+      
       await initializeDashboard();
     }
 
@@ -7260,11 +7306,22 @@
         notificationsList.innerHTML = notifications.map(function(notification){
           var timeAgo = formatNotificationTime(notification.created_at);
           var unreadClass = notification.is_read ? '' : 'unread';
+          var isFromKnot = notification.type === 'welcome' || notification.type === 'account' || notification.type === 'pod' || notification.type === 'invite';
+          var avatarHTML = isFromKnot 
+            ? '<div class="notification-avatar knot-avatar"><i data-lucide="link"></i></div>'
+            : '<div class="notification-avatar">' + (notification.title.charAt(0) || 'N') + '</div>';
+          var fromName = notification.from_name || 'Knot';
           return `
             <div class="notification-item ${unreadClass}" data-id="${notification.id}">
-              <div class="notification-title">${notification.title}</div>
-              <div class="notification-message">${notification.message}</div>
-              <div class="notification-time">${timeAgo}</div>
+              ${avatarHTML}
+              <div class="notification-content">
+                <div class="notification-header">
+                  <div class="notification-title">${notification.title}</div>
+                  <div class="notification-from">From: ${fromName}</div>
+                </div>
+                <div class="notification-message">${notification.message}</div>
+                <div class="notification-time">${timeAgo}</div>
+              </div>
             </div>
           `;
         }).join('');
@@ -7328,6 +7385,27 @@
         loadNotifications();
       }catch(err){
         console.error('Error marking all notifications as read:', err);
+      }
+    }
+
+    async function createWelcomeNotification(){
+      var client = getSupabaseClient();
+      try{
+        var { error } = await client
+          .from('notifications')
+          .insert({
+            user_id: currentUser.id,
+            type: 'welcome',
+            title: 'Welcome to Knot!',
+            message: 'Thanks for joining Knot. A habit, held by your pod. Start by creating or joining a pod to begin tracking habits together.',
+            metadata: { is_welcome: true },
+            from_name: 'Knot'
+          });
+
+        if(error) throw error;
+        console.log('Welcome notification created');
+      }catch(err){
+        console.error('Error creating welcome notification:', err);
       }
     }
 
