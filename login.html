@@ -717,8 +717,34 @@
         try{
           var accounts = JSON.parse(storedAccounts);
           if(accounts && accounts.length > 0){
-            // User has stored accounts, redirect to accountswitcher
-            window.location.href = 'accountswitcher.html';
+            // Check if user has a current session and if that account has been deleted
+            var client = getSupabaseClient();
+            if(client){
+              client.auth.getSession().then(function({ data: { session } }){
+                if(session && session.user){
+                  // Check if current account has been soft-deleted
+                  client.from('user_profiles')
+                    .select('is_deleted')
+                    .eq('user_id', session.user.id)
+                    .maybeSingle()
+                    .then(function({ data: profile, error }){
+                      if(profile && profile.is_deleted){
+                        // Account has been soft-deleted, stay on login page
+                        console.log('Current account is deleted, staying on login page');
+                        return;
+                      }
+                      // Account is not deleted, redirect to accountswitcher
+                      window.location.href = 'accountswitcher.html';
+                    });
+                } else {
+                  // No current session, redirect to accountswitcher
+                  window.location.href = 'accountswitcher.html';
+                }
+              });
+            } else {
+              // No client available, redirect to accountswitcher
+              window.location.href = 'accountswitcher.html';
+            }
             return;
           }
         }catch(e){
