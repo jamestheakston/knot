@@ -735,8 +735,9 @@
                         return;
                       }
                       if(profile && profile.is_deleted){
-                        // Account has been soft-deleted, stay on login page
-                        console.log('Current account is deleted, staying on login page');
+                        // Account has been soft-deleted, redirect to error page
+                        var errorUrl = 'error.html?title=Account+Deleted&code=DELETED-001&errormsg=Your+account+has+been+deleted.+Please+use+the+recovery+link+sent+to+your+email+to+restore+your+account.&cta1title=Go+to+Login&cta1link=login.html';
+                        window.location.href = errorUrl;
                         return;
                       }
                       // Account is not deleted or profile doesn't exist, redirect to accountswitcher
@@ -933,9 +934,10 @@
           console.error('Error checking user profile:', profileError);
           // Continue with login if profile check fails
         } else if(profile && profile.is_deleted){
-          // Account has been soft-deleted, prevent login
+          // Account has been soft-deleted, prevent login and redirect to error page
           await client.auth.signOut();
-          showToast('Account deleted', 'This account has been deleted. Please use the recovery link sent to your email to restore your account.', 'error');
+          var errorUrl = 'error.html?title=Account+Deleted&code=DELETED-001&errormsg=Your+account+has+been+deleted.+Please+use+the+recovery+link+sent+to+your+email+to+restore+your+account.&cta1title=Go+to+Login&cta1link=login.html';
+          window.location.href = errorUrl;
           setButtonLoading(btn, false);
           return;
         }

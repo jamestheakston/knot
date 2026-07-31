@@ -3164,9 +3164,10 @@
         .maybeSingle();
 
       if(profile && profile.is_deleted){
-        // Account has been soft-deleted, sign out and redirect
+        // Account has been soft-deleted, sign out and redirect to error page
         await client.auth.signOut();
-        window.location.href = 'login.html?error=account_deleted';
+        var errorUrl = 'error.html?title=Account+Deleted&code=DELETED-001&errormsg=Your+account+has+been+deleted.+Please+use+the+recovery+link+sent+to+your+email+to+restore+your+account.&cta1title=Go+to+Login&cta1link=login.html';
+        window.location.href = errorUrl;
         return;
       }
       
