@@ -206,6 +206,25 @@
       color: #333;
       text-decoration: underline;
     }
+
+    .error-box {
+      background: #f8d7da;
+      border: 1px solid #f5c6cb;
+      border-radius: 6px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+
+    .error-box h3 {
+      color: #721c24;
+      margin-top: 0;
+      margin-bottom: 10px;
+    }
+
+    .error-box p {
+      color: #721c24;
+      margin: 10px 0;
+    }
   </style>
 </head>
 <body>
@@ -253,6 +272,15 @@
       <div class="help-section">
         <a href="mailto:jamestheakston2@gmail.com?subject=Account Recovery Help">Need help with account recovery?</a>
       </div>
+    </div>
+
+    <div id="errorContent" style="display: none;">
+      <div class="error-box">
+        <h3>Invalid or Expired Recovery Link</h3>
+        <p>The recovery link you used is either invalid or has expired.</p>
+        <p>Recovery links are valid for 24 hours only for security reasons. If your link has expired, you will need to request a new account deletion and recovery.</p>
+      </div>
+      <button onclick="window.location.href='index.html'">Go to Home</button>
     </div>
 
     <div id="successContent" style="display: none;">
@@ -546,7 +574,7 @@
     // Fetch expiry time and start timer
     function startExpiryTimer() {
       if (!recoveryId) {
-        document.getElementById('expiryTimer').textContent = 'Invalid recovery link';
+        showErrorContent();
         return;
       }
 
@@ -557,16 +585,28 @@
         .maybeSingle()
         .then(function({ data: deletionRequest, error }) {
           if (error || !deletionRequest) {
-            document.getElementById('expiryTimer').textContent = 'Invalid or expired recovery link';
+            showErrorContent();
             return;
           }
 
           var expiresAt = new Date(deletionRequest.expires_at);
+          var now = new Date();
+          
+          if (now > expiresAt) {
+            showErrorContent();
+            return;
+          }
+          
           updateTimer(expiresAt);
           setInterval(function() {
             updateTimer(expiresAt);
           }, 1000);
         });
+    }
+
+    function showErrorContent() {
+      document.getElementById('initialContent').style.display = 'none';
+      document.getElementById('errorContent').style.display = 'block';
     }
 
     function updateTimer(expiresAt) {
@@ -612,6 +652,7 @@
         .maybeSingle()
         .then(function({ data: deletionRequest, error }) {
           if (error || !deletionRequest) {
+            showErrorContent();
             return;
           }
 
