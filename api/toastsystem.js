@@ -224,10 +224,12 @@
         }
         
         var latestCommit = branchData.meta.sha;
+        var lastShownCommit = localStorage.getItem('knot_last_shown_commit');
         
-        if(latestCommit !== this.CURRENT_COMMIT_SHA && !this.hasShownUpdateToast){
+        // Only show toast if there's actually a new commit that hasn't been shown before
+        if(latestCommit !== this.CURRENT_COMMIT_SHA && latestCommit !== lastShownCommit){
           // New commit detected, mark as shown immediately to prevent duplicate toasts
-          this.hasShownUpdateToast = true;
+          localStorage.setItem('knot_last_shown_commit', latestCommit);
           // Wait 20 seconds before showing toast
           setTimeout(function(){
             this.showNewUpdateToast();
