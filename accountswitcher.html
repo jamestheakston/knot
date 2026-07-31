@@ -1228,16 +1228,26 @@
       return;
     }
 
-    // Set the session for the target account
+    // First try to refresh the token to ensure it's valid
     console.log('Setting session for account:', account.id);
     
-    // First try to refresh the token to ensure it's valid
     client.auth.refreshSession({
       refresh_token: account.refresh_token
     }).then(function({ data: refreshData, error: refreshError }){
       if(refreshError){
         console.log('Token refresh failed, trying with existing tokens:', refreshError);
-        // If refresh fails, try with existing tokens anyway
+        
+        // Check if the error is specifically about the refresh token not being found
+        if(refreshError.message && refreshError.message.includes('Refresh Token Not Found')){
+          console.error('Refresh token is invalid or account may be deleted');
+          showToast('Account unavailable', 'This account may have been deleted or the session has expired. Please log in again.', 'warning', null, 5000);
+          setTimeout(function(){
+            window.location.href = 'login.html?email=' + encodeURIComponent(account.email) + '&from=accountswitcher';
+          }, 2000);
+          return;
+        }
+        
+        // If refresh fails for other reasons, try with existing tokens anyway
         client.auth.setSession({
           access_token: account.access_token,
           refresh_token: account.refresh_token
