@@ -692,7 +692,7 @@ function generatePodDeletionEmailHTML(podName, deletedBy, deletionTime){
 }
 
 // Send pod deletion notification email
-async function sendPodDeletionEmail(toEmail, podName, deletedBy){
+async function sendPodDeletionEmail(toEmail, podName, deletedBy, userId){
   try{
     initEmailJS();
     
@@ -707,12 +707,17 @@ async function sendPodDeletionEmail(toEmail, podName, deletedBy){
     };
     
     await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, templateParams);
+    
+    // Create notification
+    if(userId){
+      await createNotification(userId, 'pod', 'Pod Deleted', 'The pod "' + podName + '" has been deleted by ' + deletedBy, { podName: podName, deletedBy: deletedBy });
+    }
   }catch(err){
     console.error('Error sending pod deletion notification:', err);
     // Don't alert user for deletion notifications - silently fail
   }
 }
-async function sendInviteEmail(toEmail, podName, inviteCode, inviterName){
+async function sendInviteEmail(toEmail, podName, inviteCode, inviterName, senderUserId){
   try{
     initEmailJS();
     
@@ -726,6 +731,12 @@ async function sendInviteEmail(toEmail, podName, inviteCode, inviterName){
     };
     
     await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, templateParams);
+    
+    // Create notification for the sender
+    if(senderUserId){
+      await createNotification(senderUserId, 'invite', 'Invite Sent', 'You have invited ' + toEmail + ' to join the pod "' + podName + '"', { podName: podName, inviteCode: inviteCode, toEmail: toEmail });
+    }
+    
     return { success: true };
   }catch(err){
     console.error('Error sending invite email:', err);
@@ -734,7 +745,7 @@ async function sendInviteEmail(toEmail, podName, inviteCode, inviterName){
 }
 
 // Send login notification email
-async function sendLoginNotification(email){
+async function sendLoginNotification(email, userId){
   try{
     // Check if we should send email based on 15-minute cooldown
     var cooldownKey = 'login_notification_' + email;
@@ -767,6 +778,11 @@ async function sendLoginNotification(email){
     
     // Store the timestamp of this email send
     localStorage.setItem(cooldownKey, now.toString());
+    
+    // Create notification
+    if(userId){
+      await createNotification(userId, 'account', 'New Login', 'A new login was detected for your account at ' + loginTime.toLocaleString(), { loginTime: loginTime });
+    }
   }catch(err){
     console.error('Error sending login notification:', err);
     // Don't alert user for login notifications - silently fail
@@ -816,7 +832,7 @@ Knot.
 }
 
 // Send account deletion verification email
-async function sendAccountDeletionVerificationEmail(toEmail, verificationCode, verificationLink){
+async function sendAccountDeletionVerificationEmail(toEmail, verificationCode, verificationLink, userId){
   try{
     initEmailJS();
     
@@ -830,6 +846,12 @@ async function sendAccountDeletionVerificationEmail(toEmail, verificationCode, v
     };
     
     await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, templateParams);
+    
+    // Create notification
+    if(userId){
+      await createNotification(userId, 'account', 'Account Deletion Requested', 'You have requested to delete your account. Please verify your identity to complete the deletion.', { verificationCode: verificationCode });
+    }
+    
     return { success: true };
   }catch(err){
     console.error('Error sending account deletion verification email:', err);
@@ -838,7 +860,7 @@ async function sendAccountDeletionVerificationEmail(toEmail, verificationCode, v
 }
 
 // Send account recovery email
-async function sendAccountRecoveryEmail(toEmail, recoveryId, expiryDate){
+async function sendAccountRecoveryEmail(toEmail, recoveryId, expiryDate, userId){
   try{
     initEmailJS();
     
@@ -855,6 +877,12 @@ async function sendAccountRecoveryEmail(toEmail, recoveryId, expiryDate){
     };
     
     await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, templateParams);
+    
+    // Create notification
+    if(userId){
+      await createNotification(userId, 'account', 'Account Deleted', 'Your account has been deleted. You can recover it until ' + expiryDate, { recoveryId: recoveryId, expiryDate: expiryDate });
+    }
+    
     return { success: true };
   }catch(err){
     console.error('Error sending account recovery email:', err);
@@ -880,7 +908,7 @@ The Knot team.
 }
 
 // Send account recovery confirmation email
-async function sendAccountRecoveryConfirmationEmail(toEmail){
+async function sendAccountRecoveryConfirmationEmail(toEmail, userId){
   try{
     initEmailJS();
     
@@ -894,9 +922,41 @@ async function sendAccountRecoveryConfirmationEmail(toEmail){
     };
     
     await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, templateParams);
+    
+    // Create notification
+    if(userId){
+      await createNotification(userId, 'account', 'Account Recovered', 'Your account has been successfully recovered and restored.', {});
+    }
+    
     return { success: true };
   }catch(err){
     console.error('Error sending account recovery confirmation email:', err);
+    return { success: false, error: err.message };
+  }
+}
+
+// Create notification in database
+async function createNotification(userId, type, title, message, metadata){
+  try{
+    var supabase = window.supabase.createClient(
+      'https://mfjtdrqvmuwtoarkiezi.supabase.co',
+      'sb_publishable_SPhsUI31nYbrrLjPBAaRBw_OkWQ2_Xn'
+    );
+    
+    var { error } = await supabase
+      .from('notifications')
+      .insert({
+        user_id: userId,
+        type: type,
+        title: title,
+        message: message,
+        metadata: metadata || {}
+      });
+    
+    if(error) throw error;
+    return { success: true };
+  }catch(err){
+    console.error('Error creating notification:', err);
     return { success: false, error: err.message };
   }
 }

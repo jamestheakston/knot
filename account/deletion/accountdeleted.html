@@ -221,7 +221,7 @@
                   });
                   
                   // Send recovery email
-                  sendAccountRecoveryEmail(deletionRequest.email, recoveryId, formattedExpiry);
+                  sendAccountRecoveryEmail(deletionRequest.email, recoveryId, formattedExpiry, deletionRequest.user_id);
                 }
               });
           }

@@ -410,6 +410,106 @@
 
   .content-header{
     margin-bottom: 48px;
+    position: relative;
+  }
+
+  /* Notifications Styles */
+  .notifications-wrapper{
+    position: absolute;
+    top: 0;
+    right: 0;
+  }
+  .notifications-btn{
+    position: relative;
+    padding: 8px;
+    border-radius: 8px;
+  }
+  .notifications-btn i{
+    width: 20px;
+    height: 20px;
+  }
+  .notifications-badge{
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    background: #DC2626;
+    color: white;
+    font-size: 11px;
+    font-weight: 600;
+    min-width: 18px;
+    height: 18px;
+    border-radius: 9px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 5px;
+  }
+  .notifications-panel{
+    position: absolute;
+    top: 100%;
+    right: 0;
+    width: 360px;
+    max-height: 400px;
+    background: var(--bg-2);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    margin-top: 8px;
+    z-index: 1000;
+    overflow: hidden;
+  }
+  .notifications-header{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px;
+    border-bottom: 1px solid var(--line);
+  }
+  .notifications-header h3{
+    font-size: 15px;
+    font-weight: 600;
+    margin: 0;
+  }
+  .notifications-list{
+    max-height: 320px;
+    overflow-y: auto;
+  }
+  .notification-item{
+    padding: 16px;
+    border-bottom: 1px solid var(--line);
+    cursor: pointer;
+    transition: background 0.2s ease;
+  }
+  .notification-item:hover{
+    background: var(--bg-3);
+  }
+  .notification-item.unread{
+    background: var(--blue-soft);
+  }
+  .notification-item:last-child{
+    border-bottom: none;
+  }
+  .notification-title{
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: 4px;
+  }
+  .notification-message{
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.4;
+  }
+  .notification-time{
+    font-size: 11px;
+    color: var(--muted-2);
+    margin-top: 8px;
+  }
+  .no-notifications{
+    padding: 32px 16px;
+    text-align: center;
+    color: var(--muted);
+    font-size: 14px;
   }
 
   .section-eyebrow{
@@ -2983,6 +3083,21 @@
       <span class="section-eyebrow" id="pageEyebrow">DASHBOARD</span>
       <h1 id="pageTitle">Overview</h1>
       <p id="pageSubtitle">View your pod's progress and activity</p>
+      <div class="notifications-wrapper">
+        <button class="notifications-btn btn-ghost" id="notificationsBtn">
+          <i data-lucide="bell"></i>
+          <span class="notifications-badge" id="notificationsBadge" style="display: none;">0</span>
+        </button>
+        <div class="notifications-panel" id="notificationsPanel" style="display: none;">
+          <div class="notifications-header">
+            <h3>Notifications</h3>
+            <button class="btn btn-ghost btn-sm" id="markAllReadBtn">Mark all as read</button>
+          </div>
+          <div class="notifications-list" id="notificationsList">
+            <div class="loading">Loading notifications...</div>
+          </div>
+        </div>
+      </div>
     </div>
     <div id="contentArea">
       <div class="loading">Loading...</div>
@@ -3193,7 +3308,7 @@
       var isOAuthLogin = urlParams.get('oauth_login') === 'true';
       
       if(isOAuthLogin){
-        sendLoginNotification(currentUser.email);
+        sendLoginNotification(currentUser.email, currentUser.id);
         
         // Get current session to retrieve tokens
         var { data: { session } } = await client.auth.getSession();
@@ -5066,7 +5181,7 @@
         var deletedBy = currentUser.user_metadata?.display_name || currentUser.user_metadata?.full_name || currentUser.user_metadata?.name || currentUser.email?.split('@')[0] || currentUser.email;
         
         // Send deletion confirmation to admin
-        sendPodDeletionEmail(currentUser.email, currentPod.name, deletedBy);
+        sendPodDeletionEmail(currentUser.email, currentPod.name, deletedBy, currentUser.id);
         
         // Delete all check-ins for this pod
         console.log('Deleting check-ins for pod:', currentPod.id);
@@ -6035,7 +6150,7 @@
         var inviterName = currentUser.user_metadata?.full_name || currentUser.user_metadata?.name || currentUser.email?.split('@')[0] || '';
 
         // Send invite email using shared function
-        var result = await sendInviteEmail(email, currentPod.name, currentPod.inviteCode, inviterName);
+        var result = await sendInviteEmail(email, currentPod.name, currentPod.inviteCode, inviterName, currentUser.id);
 
         if(result.success){
           console.log('Invite sent successfully');
@@ -7108,6 +7223,114 @@
       });
     }
 
+    // Notifications functions
+    async function loadNotifications(){
+      var client = getSupabaseClient();
+      if(!client || !currentUser) return;
+
+      try{
+        var { data: notifications, error } = await client
+          .from('notifications')
+          .select('*')
+          .eq('user_id', currentUser.id)
+          .order('created_at', { ascending: false })
+          .limit(20);
+
+        if(error) throw error;
+
+        var notificationsList = document.getElementById('notificationsList');
+        var notificationsBadge = document.getElementById('notificationsBadge');
+
+        if(!notifications || notifications.length === 0){
+          notificationsList.innerHTML = '<div class="no-notifications">No notifications</div>';
+          notificationsBadge.style.display = 'none';
+          return;
+        }
+
+        // Count unread notifications
+        var unreadCount = notifications.filter(function(n){ return !n.is_read; }).length;
+        if(unreadCount > 0){
+          notificationsBadge.textContent = unreadCount;
+          notificationsBadge.style.display = 'flex';
+        }else{
+          notificationsBadge.style.display = 'none';
+        }
+
+        // Render notifications
+        notificationsList.innerHTML = notifications.map(function(notification){
+          var timeAgo = formatNotificationTime(notification.created_at);
+          var unreadClass = notification.is_read ? '' : 'unread';
+          return `
+            <div class="notification-item ${unreadClass}" data-id="${notification.id}">
+              <div class="notification-title">${notification.title}</div>
+              <div class="notification-message">${notification.message}</div>
+              <div class="notification-time">${timeAgo}</div>
+            </div>
+          `;
+        }).join('');
+
+        // Add click handlers to mark as read
+        document.querySelectorAll('.notification-item').forEach(function(item){
+          item.addEventListener('click', function(){
+            var notificationId = this.dataset.id;
+            markNotificationAsRead(notificationId);
+          });
+        });
+      }catch(err){
+        console.error('Error loading notifications:', err);
+      }
+    }
+
+    function formatNotificationTime(dateString){
+      var date = new Date(dateString);
+      var now = new Date();
+      var diffMs = now - date;
+      var diffMins = Math.floor(diffMs / 60000);
+      var diffHours = Math.floor(diffMs / 3600000);
+      var diffDays = Math.floor(diffMs / 86400000);
+
+      if(diffMins < 1) return 'Just now';
+      if(diffMins < 60) return diffMins + 'm ago';
+      if(diffHours < 24) return diffHours + 'h ago';
+      if(diffDays < 7) return diffDays + 'd ago';
+      return date.toLocaleDateString();
+    }
+
+    async function markNotificationAsRead(notificationId){
+      var client = getSupabaseClient();
+      try{
+        var { error } = await client
+          .from('notifications')
+          .update({ is_read: true })
+          .eq('id', notificationId);
+
+        if(error) throw error;
+
+        // Reload notifications
+        loadNotifications();
+      }catch(err){
+        console.error('Error marking notification as read:', err);
+      }
+    }
+
+    async function markAllNotificationsAsRead(){
+      var client = getSupabaseClient();
+      try{
+        var { error } = await client
+          .from('notifications')
+          .update({ is_read: true })
+          .eq('user_id', currentUser.id)
+          .eq('is_read', false);
+
+        if(error) throw error;
+
+        // Reload notifications
+        loadNotifications();
+      }catch(err){
+        console.error('Error marking all notifications as read:', err);
+      }
+    }
+
     // Initialize Lucide icons
     if(typeof lucide !== 'undefined'){
       lucide.createIcons();
@@ -7116,6 +7339,27 @@
     // Run cleanup and check auth on load
     cleanupStaleLocalStorage();
     checkAuth();
+
+    // Load notifications
+    loadNotifications();
+
+    // Notifications button toggle
+    document.getElementById('notificationsBtn').addEventListener('click', function(){
+      var panel = document.getElementById('notificationsPanel');
+      panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+    });
+
+    // Mark all as read button
+    document.getElementById('markAllReadBtn').addEventListener('click', markAllNotificationsAsRead);
+
+    // Close notifications panel when clicking outside
+    document.addEventListener('click', function(e){
+      var wrapper = document.querySelector('.notifications-wrapper');
+      var panel = document.getElementById('notificationsPanel');
+      if(!wrapper.contains(e.target) && panel.style.display === 'block'){
+        panel.style.display = 'none';
+      }
+    });
 
     // Handle hash-based navigation on page load
     window.addEventListener('hashchange', function(){

@@ -868,7 +868,7 @@
 
         if (deletionRequest && deletionRequest.email) {
           // Send recovery confirmation email
-          await sendAccountRecoveryConfirmationEmail(deletionRequest.email);
+          await sendAccountRecoveryConfirmationEmail(deletionRequest.email, userId);
           console.log('Recovery confirmation email sent to:', deletionRequest.email);
         } else {
           console.log('Could not send confirmation email - no email found in deletion request');

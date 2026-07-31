@@ -295,7 +295,7 @@
           var verificationLink = window.location.origin + '/account/deletion/verifydeletion.html?code=' + verificationCode + '&id=' + recoveryId;
 
           // Send verification email
-          sendAccountDeletionVerificationEmail(currentUser.email, verificationCode, verificationLink).then(function(result) {
+          sendAccountDeletionVerificationEmail(currentUser.email, verificationCode, verificationLink, currentUser.id).then(function(result) {
             if (result.success) {
               messageDiv.innerHTML = '<div class="success">Verification email sent! Please check your inbox (and spam folder) and click the verification link to complete the deletion process. The code expires in 10 minutes.</div>';
               btn.textContent = 'Email Sent';

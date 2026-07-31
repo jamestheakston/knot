@@ -967,7 +967,7 @@
         localStorage.setItem('knot_active_account', account.id);
         
         // Send login notification email
-        sendLoginNotification(email);
+        sendLoginNotification(email, account.id);
         
         setTimeout(function(){
           // If coming from account switcher, go to dashboard (not accountswitcher)
