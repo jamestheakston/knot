@@ -505,6 +505,12 @@
         var recoveryUserId = localStorage.getItem('knot_recovery_user_id');
         var messageDiv = document.getElementById('message');
         
+        // Ensure messageDiv exists before using it
+        if (!messageDiv) {
+          console.error('messageDiv element not found');
+          return;
+        }
+        
         // Hide initial content and show loading
         document.getElementById('initialContent').style.display = 'none';
         document.getElementById('errorContent').style.display = 'none';
@@ -527,7 +533,7 @@
 
           // Verify this is the same user
           if (session.user.id !== recoveryUserId) {
-            messageDiv.innerHTML = '<div class="error">Security verification failed. You can only recover your own account.</div>';
+            messageDiv.innerHTML = '<div class="error">You authenticated with the wrong account. Please sign in with the account that matches the deleted account email.</div>';
             document.getElementById('initialContent').style.display = 'block';
             return;
           }
