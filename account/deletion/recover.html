@@ -174,6 +174,36 @@
     .oauth-btn:hover {
       background: #f5f5f5;
     }
+
+    .timer-section {
+      margin: 15px 0;
+      padding: 10px;
+      background: #fff3cd;
+      border: 1px solid #ffc107;
+      border-radius: 6px;
+      text-align: center;
+    }
+
+    .timer {
+      font-weight: bold;
+      color: #856404;
+    }
+
+    .help-section {
+      margin-top: 20px;
+      text-align: center;
+    }
+
+    .help-section a {
+      color: #666;
+      text-decoration: none;
+      font-size: 14px;
+    }
+
+    .help-section a:hover {
+      color: #333;
+      text-decoration: underline;
+    }
   </style>
 </head>
 <body>
@@ -188,6 +218,10 @@
 
       <div class="warning">
         Note: Recovery links expire after 24 hours for security reasons.
+      </div>
+
+      <div class="timer-section">
+        <p>Recovery link expires in: <span id="expiryTimer" class="timer">Loading...</span></p>
       </div>
 
       <div class="form-group">
@@ -211,6 +245,10 @@
       <button class="secondary" onclick="window.location.href='index.html'">Cancel</button>
 
       <div id="message"></div>
+
+      <div class="help-section">
+        <a href="mailto:jamestheakston2@gmail.com?subject=Account Recovery Help">Need help with account recovery?</a>
+      </div>
     </div>
 
     <div id="successContent" style="display: none;">
@@ -500,6 +538,52 @@
 
     // Check for OAuth callback on page load
     handleOAuthCallback();
+
+    // Fetch expiry time and start timer
+    function startExpiryTimer() {
+      if (!recoveryId) {
+        document.getElementById('expiryTimer').textContent = 'Invalid recovery link';
+        return;
+      }
+
+      supabase.from('account_deletion_requests')
+        .select('expires_at')
+        .eq('recovery_id', recoveryId)
+        .eq('status', 'deleted')
+        .maybeSingle()
+        .then(function({ data: deletionRequest, error }) {
+          if (error || !deletionRequest) {
+            document.getElementById('expiryTimer').textContent = 'Invalid or expired recovery link';
+            return;
+          }
+
+          var expiresAt = new Date(deletionRequest.expires_at);
+          updateTimer(expiresAt);
+          setInterval(function() {
+            updateTimer(expiresAt);
+          }, 1000);
+        });
+    }
+
+    function updateTimer(expiresAt) {
+      var now = new Date();
+      var timeLeft = expiresAt - now;
+
+      if (timeLeft <= 0) {
+        document.getElementById('expiryTimer').textContent = 'Expired';
+        return;
+      }
+
+      var hours = Math.floor(timeLeft / (1000 * 60 * 60));
+      var minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+      var seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
+
+      document.getElementById('expiryTimer').textContent = 
+        hours + 'h ' + minutes + 'm ' + seconds + 's';
+    }
+
+    // Start the timer on page load
+    startExpiryTimer();
 
     // Function to restore user data in Supabase
     async function restoreUserData(userId, deletionRequestId, recoveryId) {
