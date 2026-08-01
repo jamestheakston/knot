@@ -2509,9 +2509,151 @@
       margin-left: 0;
       padding: 20px;
       padding-top: 80px;
+      padding-bottom: 100px;
     }
     .content-header h1{
       font-size: 24px;
+    }
+
+    /* ---------- MOBILE BOTTOM NAV ---------- */
+    .mobile-bottom-nav{
+      display: flex !important;
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: var(--bg-2);
+      border-top: 1px solid var(--line-strong);
+      padding: 8px 16px 20px;
+      z-index: 100;
+      box-shadow: 0 -4px 20px rgba(0,0,0,0.1);
+    }
+    .mobile-nav-item{
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      padding: 8px;
+      border: none;
+      background: none;
+      cursor: pointer;
+      color: var(--muted);
+      transition: color 0.2s ease;
+      font-size: 11px;
+      font-weight: 500;
+    }
+    .mobile-nav-item i{
+      width: 24px;
+      height: 24px;
+    }
+    .mobile-nav-item:hover{
+      color: var(--ink);
+    }
+    .mobile-nav-item.is-active{
+      color: var(--blue);
+    }
+    .mobile-nav-item.is-active i{
+      color: var(--blue);
+    }
+
+    /* ---------- MORE MENU OVERLAY ---------- */
+    .more-menu-overlay{
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: var(--bg);
+      z-index: 95;
+      padding: 80px 20px 100px;
+      overflow-y: auto;
+    }
+    .more-menu-overlay.is-open{
+      display: block;
+      animation: slideUp 0.3s ease;
+    }
+    @keyframes slideUp{
+      from{
+        transform: translateY(100%);
+        opacity: 0;
+      }
+      to{
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+    .more-menu-header{
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 24px;
+    }
+    .more-menu-header h2{
+      font-size: 24px;
+      color: var(--ink);
+    }
+    .more-menu-close{
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      border: 1px solid var(--line-strong);
+      background: var(--bg-2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: var(--muted);
+    }
+    .more-menu-close:hover{
+      color: var(--ink);
+    }
+    .more-menu-close i{
+      width: 20px;
+      height: 20px;
+    }
+    .more-menu-section{
+      margin-bottom: 32px;
+    }
+    .more-menu-section-title{
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--muted-2);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 16px;
+    }
+    .more-menu-item{
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 16px;
+      background: var(--bg-2);
+      border: 1px solid var(--line-strong);
+      border-radius: 12px;
+      margin-bottom: 8px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .more-menu-item:hover{
+      border-color: var(--blue);
+      background: var(--blue-soft);
+    }
+    .more-menu-item i{
+      width: 20px;
+      height: 20px;
+      color: var(--muted);
+    }
+    .more-menu-item span{
+      font-size: 15px;
+      color: var(--ink);
+    }
+    .more-menu-item.admin-only{
+      display: none;
+    }
+    .more-menu-item.admin-only.is-visible{
+      display: flex;
     }
   }
   @media (max-width: 480px){
@@ -3141,6 +3283,76 @@
       <div class="loading">Loading...</div>
     </div>
   </main>
+
+  <!-- Mobile Bottom Navigation -->
+  <nav class="mobile-bottom-nav" style="display: none;">
+    <button class="mobile-nav-item is-active" data-nav="overview">
+      <i data-lucide="layout-dashboard"></i>
+      <span>Overview</span>
+    </button>
+    <button class="mobile-nav-item" data-nav="check-ins">
+      <i data-lucide="check-square"></i>
+      <span>Check-ins</span>
+    </button>
+    <button class="mobile-nav-item" data-nav="members">
+      <i data-lucide="users"></i>
+      <span>Members</span>
+    </button>
+    <button class="mobile-nav-item" id="moreMenuBtn">
+      <i data-lucide="more-horizontal"></i>
+      <span>More</span>
+    </button>
+  </nav>
+
+  <!-- More Menu Overlay -->
+  <div class="more-menu-overlay" id="moreMenuOverlay">
+    <div class="more-menu-header">
+      <h2>More</h2>
+      <button class="more-menu-close" id="moreMenuClose">
+        <i data-lucide="x"></i>
+      </button>
+    </div>
+
+    <div class="more-menu-section">
+      <div class="more-menu-section-title">Pod</div>
+      <div class="more-menu-item" data-nav="streak">
+        <i data-lucide="flame"></i>
+        <span>Streak</span>
+      </div>
+      <div class="more-menu-item admin-only" data-nav="pod-settings">
+        <i data-lucide="settings"></i>
+        <span>Pod Settings</span>
+      </div>
+      <div class="more-menu-item admin-only" data-nav="habits">
+        <i data-lucide="list-checks"></i>
+        <span>Habits</span>
+      </div>
+      <div class="more-menu-item admin-only" data-nav="invite">
+        <i data-lucide="user-plus"></i>
+        <span>Invite Members</span>
+      </div>
+    </div>
+
+    <div class="more-menu-section">
+      <div class="more-menu-section-title">Settings</div>
+      <div class="more-menu-item" data-nav="profile">
+        <i data-lucide="user"></i>
+        <span>Profile</span>
+      </div>
+      <div class="more-menu-item" data-nav="account">
+        <i data-lucide="cog"></i>
+        <span>Account Settings</span>
+      </div>
+      <div class="more-menu-item" data-action="switch-account">
+        <i data-lucide="users"></i>
+        <span>Switch Account</span>
+      </div>
+      <div class="more-menu-item" data-action="logout">
+        <i data-lucide="log-out"></i>
+        <span>Log Out</span>
+      </div>
+    </div>
+  </div>
 </div>
 
 <!-- Upgrade Modal -->
@@ -4304,12 +4516,19 @@
         video.currentTime = 0;
       }
       
-      // Update active nav item
+      // Update active nav item (sidebar)
       document.querySelectorAll('.nav-item').forEach(function(item){
         item.classList.remove('is-active');
       });
       var activeNav = document.querySelector('.nav-item[data-nav="' + section + '"]');
       if(activeNav) activeNav.classList.add('is-active');
+
+      // Update mobile bottom nav active state
+      document.querySelectorAll('.mobile-nav-item').forEach(function(item){
+        item.classList.remove('is-active');
+      });
+      var activeMobileNav = document.querySelector('.mobile-nav-item[data-nav="' + section + '"]');
+      if(activeMobileNav) activeMobileNav.classList.add('is-active');
 
       // Update page title
       var titles = {
@@ -6231,7 +6450,7 @@
             <div class="profile-info">
               <h3>${displayName}</h3>
               <p>${currentUser.email}</p>
-              <p class="profile-description">View and edit your profile - this is how other people in your knot see you</p>
+              <p class="profile-description">View and edit your profile - this is how other people in your pod see you</p>
             </div>
           </div>
           <div class="profile-edit-section">
@@ -7135,6 +7354,105 @@
         document.getElementById('sidebar').classList.toggle('is-open');
       });
     }
+
+    // Mobile bottom navigation
+    var moreMenuBtn = document.getElementById('moreMenuBtn');
+    var moreMenuOverlay = document.getElementById('moreMenuOverlay');
+    var moreMenuClose = document.getElementById('moreMenuClose');
+
+    if(moreMenuBtn){
+      moreMenuBtn.addEventListener('click', function(){
+        moreMenuOverlay.classList.add('is-open');
+      });
+    }
+
+    if(moreMenuClose){
+      moreMenuClose.addEventListener('click', function(){
+        moreMenuOverlay.classList.remove('is-open');
+      });
+    }
+
+    // Close more menu on overlay click
+    if(moreMenuOverlay){
+      moreMenuOverlay.addEventListener('click', function(e){
+        if(e.target === moreMenuOverlay){
+          moreMenuOverlay.classList.remove('is-open');
+        }
+      });
+    }
+
+    // Mobile nav item click handlers
+    document.querySelectorAll('.mobile-nav-item[data-nav]').forEach(function(item){
+      item.addEventListener('click', function(){
+        var nav = this.dataset.nav;
+        if(nav){
+          // Update active state
+          document.querySelectorAll('.mobile-nav-item').forEach(function(i){
+            i.classList.remove('is-active');
+          });
+          this.classList.add('is-active');
+          
+          // Navigate to section
+          navigateTo(nav);
+        }
+      });
+    });
+
+    // More menu item click handlers
+    document.querySelectorAll('.more-menu-item[data-nav]').forEach(function(item){
+      item.addEventListener('click', function(){
+        var nav = this.dataset.nav;
+        if(nav){
+          moreMenuOverlay.classList.remove('is-open');
+          navigateTo(nav);
+        }
+      });
+    });
+
+    // More menu action handlers
+    document.querySelectorAll('.more-menu-item[data-action]').forEach(function(item){
+      item.addEventListener('click', async function(){
+        var action = this.dataset.action;
+        moreMenuOverlay.classList.remove('is-open');
+        
+        if(action === 'logout'){
+          handleLogout();
+        }else if(action === 'switch-account'){
+          // Check if tight security is enabled
+          if(localStorage.getItem('knot_tight_security') === 'true'){
+            showToast('Tight Security Enabled', 'Account switching is disabled when Tight Security is enabled.', 'info');
+            return;
+          }
+          
+          var client = getSupabaseClient();
+          if(!client){
+            showToast('Error', 'Authentication service unavailable. Please try again later.', 'error');
+            return;
+          }
+          
+          // Check if current account has been soft-deleted
+          var { data: profile, error: profileError } = await client
+            .from('user_profiles')
+            .select('is_deleted')
+            .eq('user_id', currentUser.id)
+            .maybeSingle();
+
+          if(profile && profile.is_deleted){
+            var errorUrl = 'error.html?title=Account+Deleted&code=DELETED-001&errormsg=Your+account+has+been+deleted.+Please+use+the+recovery+link+sent+to+your+email+to+restore+your+account.&cta1title=Go+to+Login&cta1link=login.html';
+            window.location.href = errorUrl;
+            return;
+          }
+          
+          // Check if account switching is disabled
+          if(localStorage.getItem('knot_disable_account_switching') === 'true'){
+            showToast('Account Switching Disabled', 'Account switching is disabled. You can enable this in Account Settings.', 'error');
+            return;
+          }
+
+          window.location.href = 'accountswitcher.html';
+        }
+      });
+    });
 
     // Navigation
     document.querySelectorAll('.nav-item').forEach(function(item){
