@@ -2511,25 +2511,6 @@
     font-size: 24px;
     color: var(--ink);
   }
-  .more-page-back{
-    width: 40px;
-    height: 40px;
-    border-radius: 10px;
-    border: 1px solid var(--line-strong);
-    background: var(--bg-2);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    color: var(--muted);
-  }
-  .more-page-back:hover{
-    color: var(--ink);
-  }
-  .more-page-back i{
-    width: 20px;
-    height: 20px;
-  }
   .more-page-section{
     margin-bottom: 32px;
   }
@@ -3545,11 +3526,7 @@
   <!-- More Page -->
   <div class="more-page" id="morePage">
     <div class="more-page-header">
-      <button class="more-page-back" id="morePageBack">
-        <i data-lucide="arrow-left"></i>
-      </button>
       <h2>More</h2>
-      <div style="width: 40px;"></div>
     </div>
 
     <div class="more-page-section">
@@ -7641,20 +7618,14 @@
     // Mobile bottom navigation
     var moreMenuBtn = document.getElementById('moreMenuBtn');
     var morePage = document.getElementById('morePage');
-    var morePageBack = document.getElementById('morePageBack');
     var morePodSelector = document.getElementById('morePodSelector');
     var morePodDropdown = document.getElementById('morePodDropdown');
 
     if(moreMenuBtn){
       moreMenuBtn.addEventListener('click', function(){
         morePage.classList.add('is-open');
+        this.classList.add('is-active');
         updateMorePodSelector();
-      });
-    }
-
-    if(morePageBack){
-      morePageBack.addEventListener('click', function(){
-        morePage.classList.remove('is-open');
       });
     }
 
@@ -7738,6 +7709,10 @@
       item.addEventListener('click', function(){
         var nav = this.dataset.nav;
         if(nav){
+          // Close More page if open
+          morePage.classList.remove('is-open');
+          moreMenuBtn.classList.remove('is-active');
+          
           // Update active state
           document.querySelectorAll('.mobile-nav-item').forEach(function(i){
             i.classList.remove('is-active');
