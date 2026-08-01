@@ -3591,6 +3591,9 @@
       
       await loadUserData();
       
+      // Load notifications
+      loadNotifications();
+      
       // Check if this is user's first login (no welcome notification yet)
       var hasSeenWelcome = localStorage.getItem('knot_welcome_seen_' + currentUser.id);
       if(!hasSeenWelcome){
@@ -7735,9 +7738,6 @@
     // Run cleanup and check auth on load
     cleanupStaleLocalStorage();
     checkAuth();
-
-    // Load notifications
-    loadNotifications();
 
     // Notifications button toggle
     document.getElementById('notificationsBtn').addEventListener('click', function(){
