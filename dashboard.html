@@ -1905,7 +1905,7 @@
   /* Toast Notifications */
   .toast-container{
     position: fixed;
-    bottom: 24px;
+    top: 24px;
     right: 24px;
     z-index: 10000;
     display: flex;
@@ -1924,21 +1924,21 @@
   }
   @keyframes toastSlideIn{
     from{
-      transform: translateX(100%);
+      transform: translateY(-100%);
       opacity: 0;
     }
     to{
-      transform: translateX(0);
+      transform: translateY(0);
       opacity: 1;
     }
   }
   @keyframes toastSlideOut{
     from{
-      transform: translateX(0);
+      transform: translateY(0);
       opacity: 1;
     }
     to{
-      transform: translateX(100%);
+      transform: translateY(-100%);
       opacity: 0;
     }
   }
@@ -2483,6 +2483,117 @@
   /* ---------- MORE MENU OVERLAY (Hidden by default) ---------- */
   .more-menu-overlay{
     display: none;
+  }
+
+  /* ---------- MORE PAGE (Full page view) ---------- */
+  .more-page{
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: var(--bg);
+    z-index: 95;
+    padding: 80px 20px 100px;
+    overflow-y: auto;
+  }
+  .more-page.is-open{
+    display: block;
+  }
+  .more-page-header{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 24px;
+  }
+  .more-page-header h2{
+    font-size: 24px;
+    color: var(--ink);
+  }
+  .more-page-back{
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    border: 1px solid var(--line-strong);
+    background: var(--bg-2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: var(--muted);
+  }
+  .more-page-back:hover{
+    color: var(--ink);
+  }
+  .more-page-back i{
+    width: 20px;
+    height: 20px;
+  }
+  .more-page-section{
+    margin-bottom: 32px;
+  }
+  .more-page-section-title{
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--muted-2);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 16px;
+  }
+  .more-page-item{
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px;
+    background: var(--bg-2);
+    border: 1px solid var(--line-strong);
+    border-radius: 12px;
+    margin-bottom: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  .more-page-item:hover{
+    border-color: var(--blue);
+    background: var(--blue-soft);
+  }
+  .more-page-item i{
+    width: 20px;
+    height: 20px;
+    color: var(--muted);
+  }
+  .more-page-item span{
+    font-size: 15px;
+    color: var(--ink);
+  }
+  .more-page-item.admin-only{
+    display: none;
+  }
+  .more-page-item.admin-only.is-visible{
+    display: flex;
+  }
+  .more-pod-dropdown{
+    margin-top: 8px;
+    background: var(--bg-2);
+    border: 1px solid var(--line-strong);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .more-pod-option{
+    padding: 14px 16px;
+    cursor: pointer;
+    transition: background 0.15s ease;
+    border-bottom: 1px solid var(--line);
+  }
+  .more-pod-option:last-child{
+    border-bottom: none;
+  }
+  .more-pod-option:hover{
+    background: var(--bg-3);
+  }
+  .more-pod-option.is-active{
+    background: var(--blue-soft);
+    color: var(--blue);
   }
 
   /* ---------- ACCOUNT SWITCHER MODAL ---------- */
@@ -3431,18 +3542,19 @@
     </button>
   </nav>
 
-  <!-- More Menu Overlay -->
-  <div class="more-menu-overlay" id="moreMenuOverlay">
-    <div class="more-menu-header">
-      <h2>More</h2>
-      <button class="more-menu-close" id="moreMenuClose">
-        <i data-lucide="x"></i>
+  <!-- More Page -->
+  <div class="more-page" id="morePage">
+    <div class="more-page-header">
+      <button class="more-page-back" id="morePageBack">
+        <i data-lucide="arrow-left"></i>
       </button>
+      <h2>More</h2>
+      <div style="width: 40px;"></div>
     </div>
 
-    <div class="more-menu-section">
-      <div class="more-menu-section-title">Current Pod</div>
-      <div class="more-menu-item" id="morePodSelector">
+    <div class="more-page-section">
+      <div class="more-page-section-title">Current Pod</div>
+      <div class="more-page-item" id="morePodSelector">
         <i data-lucide="users"></i>
         <span id="moreCurrentPodName">Loading...</span>
         <i data-lucide="chevron-down" style="margin-left: auto; width: 16px; height: 16px;"></i>
@@ -3452,41 +3564,41 @@
       </div>
     </div>
 
-    <div class="more-menu-section">
-      <div class="more-menu-section-title">Pod</div>
-      <div class="more-menu-item" data-nav="streak">
+    <div class="more-page-section">
+      <div class="more-page-section-title">Pod</div>
+      <div class="more-page-item" data-nav="streak">
         <i data-lucide="flame"></i>
         <span>Streak</span>
       </div>
-      <div class="more-menu-item admin-only" data-nav="pod-settings">
+      <div class="more-page-item admin-only" data-nav="pod-settings">
         <i data-lucide="settings"></i>
         <span>Pod Settings</span>
       </div>
-      <div class="more-menu-item admin-only" data-nav="habits">
+      <div class="more-page-item admin-only" data-nav="habits">
         <i data-lucide="list-checks"></i>
         <span>Habits</span>
       </div>
-      <div class="more-menu-item admin-only" data-nav="invite">
+      <div class="more-page-item admin-only" data-nav="invite">
         <i data-lucide="user-plus"></i>
         <span>Invite Members</span>
       </div>
     </div>
 
-    <div class="more-menu-section">
-      <div class="more-menu-section-title">Settings</div>
-      <div class="more-menu-item" data-nav="profile">
+    <div class="more-page-section">
+      <div class="more-page-section-title">Settings</div>
+      <div class="more-page-item" data-nav="profile">
         <i data-lucide="user"></i>
         <span>Profile</span>
       </div>
-      <div class="more-menu-item" data-nav="account">
+      <div class="more-page-item" data-nav="account">
         <i data-lucide="cog"></i>
         <span>Account Settings</span>
       </div>
-      <div class="more-menu-item" data-action="switch-account">
+      <div class="more-page-item" data-action="switch-account">
         <i data-lucide="users"></i>
         <span>Switch Account</span>
       </div>
-      <div class="more-menu-item" data-action="logout">
+      <div class="more-page-item" data-action="logout">
         <i data-lucide="log-out"></i>
         <span>Log Out</span>
       </div>
@@ -7528,30 +7640,21 @@
 
     // Mobile bottom navigation
     var moreMenuBtn = document.getElementById('moreMenuBtn');
-    var moreMenuOverlay = document.getElementById('moreMenuOverlay');
-    var moreMenuClose = document.getElementById('moreMenuClose');
+    var morePage = document.getElementById('morePage');
+    var morePageBack = document.getElementById('morePageBack');
     var morePodSelector = document.getElementById('morePodSelector');
     var morePodDropdown = document.getElementById('morePodDropdown');
 
     if(moreMenuBtn){
       moreMenuBtn.addEventListener('click', function(){
-        moreMenuOverlay.classList.add('is-open');
+        morePage.classList.add('is-open');
         updateMorePodSelector();
       });
     }
 
-    if(moreMenuClose){
-      moreMenuClose.addEventListener('click', function(){
-        moreMenuOverlay.classList.remove('is-open');
-      });
-    }
-
-    // Close more menu on overlay click
-    if(moreMenuOverlay){
-      moreMenuOverlay.addEventListener('click', function(e){
-        if(e.target === moreMenuOverlay){
-          moreMenuOverlay.classList.remove('is-open');
-        }
+    if(morePageBack){
+      morePageBack.addEventListener('click', function(){
+        morePage.classList.remove('is-open');
       });
     }
 
@@ -7648,21 +7751,21 @@
     });
 
     // More menu item click handlers
-    document.querySelectorAll('.more-menu-item[data-nav]').forEach(function(item){
+    document.querySelectorAll('.more-page-item[data-nav]').forEach(function(item){
       item.addEventListener('click', function(){
         var nav = this.dataset.nav;
         if(nav){
-          moreMenuOverlay.classList.remove('is-open');
+          morePage.classList.remove('is-open');
           navigateTo(nav);
         }
       });
     });
 
     // More menu action handlers
-    document.querySelectorAll('.more-menu-item[data-action]').forEach(function(item){
+    document.querySelectorAll('.more-page-item[data-action]').forEach(function(item){
       item.addEventListener('click', async function(){
         var action = this.dataset.action;
-        moreMenuOverlay.classList.remove('is-open');
+        morePage.classList.remove('is-open');
         
         if(action === 'logout'){
           showConfirmModal('Log Out', 'Are you sure you want to log out?', function(){
