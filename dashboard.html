@@ -2568,6 +2568,47 @@
     display: flex;
   }
 
+  /* ---------- MORE CONTENT (Desktop) ---------- */
+  .more-content{
+    max-width: 800px;
+    margin: 0 auto;
+  }
+  .more-section{
+    margin-bottom: 32px;
+  }
+  .more-section-title{
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--muted-2);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 16px;
+  }
+  .more-item{
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px;
+    background: var(--bg-2);
+    border: 1px solid var(--line-strong);
+    border-radius: 12px;
+    margin-bottom: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    color: var(--ink);
+  }
+  .more-item:hover{
+    background: var(--bg-3);
+  }
+  .more-item i{
+    width: 20px;
+    height: 20px;
+    color: var(--muted);
+  }
+  .more-item.admin-only{
+    display: none;
+  }
+
   /* ---------- ACCOUNT SWITCHER MODAL ---------- */
   .account-switcher-overlay{
     display: none;
@@ -4868,7 +4909,8 @@
         'habits': 'Habits',
         'invite': 'Invite Members',
         'profile': 'Profile',
-        'account': 'Account Settings'
+        'account': 'Account Settings',
+        'more': 'More'
       };
       var subtitles = {
         'overview': 'View your pod\'s progress and activity',
@@ -4879,7 +4921,8 @@
         'habits': 'Manage pod habits',
         'invite': 'Invite new members to your pod',
         'profile': 'View and edit your profile',
-        'account': 'Manage your account settings'
+        'account': 'Manage your account settings',
+        'more': 'Additional options and settings'
       };
       var eyebrows = {
         'overview': 'DASHBOARD',
@@ -4890,7 +4933,8 @@
         'habits': 'HABIT MANAGEMENT',
         'invite': 'INVITE',
         'profile': 'YOUR PROFILE',
-        'account': 'ACCOUNT'
+        'account': 'ACCOUNT',
+        'more': 'MORE'
       };
       
       document.getElementById('pageTitle').textContent = titles[section] || 'Overview';
@@ -4971,6 +5015,9 @@
           case 'account':
             loadAccountSettings();
             break;
+          case 'more':
+            loadMore();
+            break;
           default:
             loadOverview();
         }
@@ -4989,6 +5036,142 @@
         </div>
       `;
       
+      if(typeof lucide !== 'undefined'){
+        lucide.createIcons();
+      }
+    }
+
+    function loadMore(){
+      var contentArea = document.getElementById('contentArea');
+      contentArea.innerHTML = `
+        <div class="more-content">
+          <div class="more-section">
+            <div class="more-section-title">Current Pod</div>
+            <div class="more-item">
+              <i data-lucide="users"></i>
+              <span id="contentCurrentPodName">Loading...</span>
+            </div>
+          </div>
+
+          <div class="more-section">
+            <div class="more-section-title">Pod</div>
+            <div class="more-item" data-nav="members">
+              <i data-lucide="users"></i>
+              <span>Members</span>
+            </div>
+            <div class="more-item admin-only" data-nav="pod-settings">
+              <i data-lucide="settings"></i>
+              <span>Pod Settings</span>
+            </div>
+            <div class="more-item admin-only" data-nav="habits">
+              <i data-lucide="list-checks"></i>
+              <span>Habits</span>
+            </div>
+            <div class="more-item admin-only" data-nav="invite">
+              <i data-lucide="user-plus"></i>
+              <span>Invite Members</span>
+            </div>
+          </div>
+
+          <div class="more-section">
+            <div class="more-section-title">Pod Actions</div>
+            <div class="more-item" id="contentCreatePod">
+              <i data-lucide="plus"></i>
+              <span>Create new Pod</span>
+            </div>
+            <div class="more-item" id="contentJoinPod">
+              <i data-lucide="log-in"></i>
+              <span>Join new Pod</span>
+            </div>
+          </div>
+
+          <div class="more-section">
+            <div class="more-section-title">Settings</div>
+            <div class="more-item" data-nav="profile">
+              <i data-lucide="user"></i>
+              <span>Profile</span>
+            </div>
+            <div class="more-item" data-nav="account">
+              <i data-lucide="cog"></i>
+              <span>Account Settings</span>
+            </div>
+            <div class="more-item" data-nav="notification-preferences">
+              <i data-lucide="bell"></i>
+              <span>Notification Preferences</span>
+            </div>
+            <div class="more-item" data-nav="about">
+              <i data-lucide="info"></i>
+              <span>About</span>
+            </div>
+            <div class="more-item" data-action="switch-account">
+              <i data-lucide="users"></i>
+              <span>Switch Account</span>
+            </div>
+            <div class="more-item" data-action="logout">
+              <i data-lucide="log-out"></i>
+              <span>Log Out</span>
+            </div>
+          </div>
+        </div>
+      `;
+
+      // Update current pod name
+      var podNameEl = document.getElementById('contentCurrentPodName');
+      if(podNameEl && currentPod){
+        podNameEl.textContent = currentPod.name;
+      }
+
+      // Show/hide admin-only items
+      if(isAdmin){
+        document.querySelectorAll('.more-item.admin-only').forEach(function(item){
+          item.style.display = 'flex';
+        });
+      }
+
+      // Add click handlers
+      document.querySelectorAll('.more-item[data-nav]').forEach(function(item){
+        item.addEventListener('click', function(){
+          var nav = this.dataset.nav;
+          if(nav === 'notification-preferences'){
+            notificationPreferencesPage.classList.add('is-open');
+          }else if(nav === 'about'){
+            aboutPage.classList.add('is-open');
+          }else{
+            navigateTo(nav);
+          }
+        });
+      });
+
+      document.querySelectorAll('.more-item[data-action]').forEach(function(item){
+        item.addEventListener('click', function(){
+          var action = this.dataset.action;
+          if(action === 'logout'){
+            handleLogout();
+          }else if(action === 'switch-account'){
+            showAccountSwitcher();
+          }
+        });
+      });
+
+      // Create/Join pod handlers
+      var contentCreatePod = document.getElementById('contentCreatePod');
+      var contentJoinPod = document.getElementById('contentJoinPod');
+
+      if(contentCreatePod){
+        contentCreatePod.addEventListener('click', function(){
+          var canCreate = canCreateMorePods();
+          if(canCreate){
+            window.location.href = 'index.html?openmodal=true';
+          }else{
+            showUpgradeModal();
+          }
+        });
+      }
+
+      if(contentJoinPod){
+        contentJoinPod.addEventListener('click', showJoinPodModal);
+      }
+
       if(typeof lucide !== 'undefined'){
         lucide.createIcons();
       }
@@ -7765,9 +7948,15 @@
 
     if(moreMenuBtn){
       moreMenuBtn.addEventListener('click', function(){
-        morePage.classList.add('is-open');
+        // Remove blue from all bottom nav items
+        document.querySelectorAll('.mobile-nav-item').forEach(function(i){
+          i.classList.remove('is-active');
+        });
+        // Add blue to More button
         this.classList.add('is-active');
-        updateMorePodSelector();
+        
+        // Navigate to more page with hash
+        navigateTo('more');
       });
     }
 
@@ -7839,7 +8028,8 @@
         if(nav){
           // Close More page if open
           morePage.classList.remove('is-open');
-          moreMenuBtn.classList.remove('is-active');
+          notificationPreferencesPage.classList.remove('is-open');
+          aboutPage.classList.remove('is-open');
           
           // Update active state
           document.querySelectorAll('.mobile-nav-item').forEach(function(i){
