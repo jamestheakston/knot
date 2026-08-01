@@ -2567,6 +2567,26 @@
   .more-page-item.admin-only.is-visible{
     display: flex;
   }
+  .more-pod-dropdown{
+    background: var(--bg-2);
+    border: 1px solid var(--line-strong);
+    border-radius: 12px;
+    margin-top: 8px;
+    overflow: hidden;
+  }
+  .more-pod-option{
+    padding: 12px 16px;
+    cursor: pointer;
+    transition: background 0.2s ease;
+    color: var(--ink);
+  }
+  .more-pod-option:hover{
+    background: var(--bg-3);
+  }
+  .more-pod-option.is-active{
+    color: var(--blue);
+    font-weight: 500;
+  }
 
   /* ---------- MORE CONTENT (Desktop) ---------- */
   .more-content{
@@ -3563,9 +3583,13 @@
 
     <div class="more-page-section">
       <div class="more-page-section-title">Current Pod</div>
-      <div class="more-page-item">
+      <div class="more-page-item" id="morePodSelector">
         <i data-lucide="users"></i>
         <span id="moreCurrentPodName">Loading...</span>
+        <i data-lucide="chevron-down" style="margin-left: auto; width: 16px; height: 16px;"></i>
+      </div>
+      <div class="more-pod-dropdown" id="morePodDropdown" style="display: none;">
+        <!-- Pod options will be populated by JS -->
       </div>
     </div>
 
@@ -3603,21 +3627,10 @@
 
     <div class="more-page-section">
       <div class="more-page-section-title">Settings</div>
-      <div class="more-page-item" data-nav="profile">
-        <i data-lucide="user"></i>
-        <span>Profile</span>
-      </div>
-      <div class="more-page-item" data-nav="account">
+      <div class="more-page-item" id="accountSettingsMenu">
         <i data-lucide="cog"></i>
         <span>Account Settings</span>
-      </div>
-      <div class="more-page-item" data-nav="notification-preferences">
-        <i data-lucide="bell"></i>
-        <span>Notification Preferences</span>
-      </div>
-      <div class="more-page-item" data-nav="about">
-        <i data-lucide="info"></i>
-        <span>About</span>
+        <i data-lucide="chevron-right" style="margin-left: auto; width: 16px; height: 16px;"></i>
       </div>
       <div class="more-page-item" data-action="switch-account">
         <i data-lucide="users"></i>
@@ -3626,6 +3639,36 @@
       <div class="more-page-item" data-action="logout">
         <i data-lucide="log-out"></i>
         <span>Log Out</span>
+      </div>
+      <div class="more-page-item" data-nav="about">
+        <i data-lucide="info"></i>
+        <span>About</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Account Settings Submenu -->
+  <div class="more-page" id="accountSettingsSubmenu">
+    <div class="more-page-header">
+      <button class="more-page-back" id="accountSettingsBack">
+        <i data-lucide="arrow-left"></i>
+      </button>
+      <h2>Account Settings</h2>
+      <div style="width: 40px;"></div>
+    </div>
+
+    <div class="more-page-section">
+      <div class="more-page-item" data-nav="profile">
+        <i data-lucide="user"></i>
+        <span>Profile</span>
+      </div>
+      <div class="more-page-item" data-nav="account">
+        <i data-lucide="cog"></i>
+        <span>Account</span>
+      </div>
+      <div class="more-page-item" data-nav="notification-preferences">
+        <i data-lucide="bell"></i>
+        <span>Notification Preferences</span>
       </div>
     </div>
   </div>
@@ -5090,21 +5133,10 @@
 
           <div class="more-section">
             <div class="more-section-title">Settings</div>
-            <div class="more-item" data-nav="profile">
-              <i data-lucide="user"></i>
-              <span>Profile</span>
-            </div>
-            <div class="more-item" data-nav="account">
+            <div class="more-item" id="contentAccountSettings">
               <i data-lucide="cog"></i>
               <span>Account Settings</span>
-            </div>
-            <div class="more-item" data-nav="notification-preferences">
-              <i data-lucide="bell"></i>
-              <span>Notification Preferences</span>
-            </div>
-            <div class="more-item" data-nav="about">
-              <i data-lucide="info"></i>
-              <span>About</span>
+              <i data-lucide="chevron-right" style="margin-left: auto; width: 16px; height: 16px;"></i>
             </div>
             <div class="more-item" data-action="switch-account">
               <i data-lucide="users"></i>
@@ -5113,6 +5145,10 @@
             <div class="more-item" data-action="logout">
               <i data-lucide="log-out"></i>
               <span>Log Out</span>
+            </div>
+            <div class="more-item" data-nav="about">
+              <i data-lucide="info"></i>
+              <span>About</span>
             </div>
           </div>
         </div>
@@ -5154,18 +5190,60 @@
         });
       });
 
+      // Account Settings submenu handler
+      var contentAccountSettings = document.getElementById('contentAccountSettings');
+      if(contentAccountSettings){
+        contentAccountSettings.addEventListener('click', function(){
+          var contentArea = document.getElementById('contentArea');
+          contentArea.innerHTML = `
+            <div class="more-content">
+              <div class="more-section">
+                <div class="more-item" data-nav="profile">
+                  <i data-lucide="user"></i>
+                  <span>Profile</span>
+                </div>
+                <div class="more-item" data-nav="account">
+                  <i data-lucide="cog"></i>
+                  <span>Account</span>
+                </div>
+                <div class="more-item" data-nav="notification-preferences">
+                  <i data-lucide="bell"></i>
+                  <span>Notification Preferences</span>
+                </div>
+                <div class="more-item" id="contentBackToMore">
+                  <i data-lucide="arrow-left"></i>
+                  <span>Back to More</span>
+                </div>
+              </div>
+            </div>
+          `;
+
+          // Add click handlers for submenu items
+          document.querySelectorAll('.more-item[data-nav]').forEach(function(item){
+            item.addEventListener('click', function(){
+              navigateTo(this.dataset.nav);
+            });
+          });
+
+          // Add back button handler
+          var contentBackToMore = document.getElementById('contentBackToMore');
+          if(contentBackToMore){
+            contentBackToMore.addEventListener('click', loadMore);
+          }
+
+          if(typeof lucide !== 'undefined'){
+            lucide.createIcons();
+          }
+        });
+      }
+
       // Create/Join pod handlers
       var contentCreatePod = document.getElementById('contentCreatePod');
       var contentJoinPod = document.getElementById('contentJoinPod');
 
       if(contentCreatePod){
         contentCreatePod.addEventListener('click', function(){
-          var canCreate = canCreateMorePods();
-          if(canCreate){
-            window.location.href = 'index.html?openmodal=true';
-          }else{
-            showUpgradeModal();
-          }
+          window.location.href = '/index.html?openmodal=true';
         });
       }
 
@@ -7971,7 +8049,9 @@
     // Mobile bottom navigation
     var moreMenuBtn = document.getElementById('moreMenuBtn');
     var morePage = document.getElementById('morePage');
+    var accountSettingsSubmenu = document.getElementById('accountSettingsSubmenu');
     var aboutPage = document.getElementById('aboutPage');
+    var accountSettingsBack = document.getElementById('accountSettingsBack');
     var aboutBack = document.getElementById('aboutBack');
     var morePodSelector = document.getElementById('morePodSelector');
     var morePodDropdown = document.getElementById('morePodDropdown');
@@ -7985,8 +8065,16 @@
         // Add blue to More button
         this.classList.add('is-active');
         
-        // Navigate to more page with hash
-        navigateTo('more');
+        // Show More page
+        morePage.classList.add('is-open');
+        updateMorePodSelector();
+      });
+    }
+
+    if(accountSettingsBack){
+      accountSettingsBack.addEventListener('click', function(){
+        accountSettingsSubmenu.classList.remove('is-open');
+        morePage.classList.add('is-open');
       });
     }
 
@@ -7997,18 +8085,22 @@
       });
     }
 
+    // Account Settings menu click
+    var accountSettingsMenu = document.getElementById('accountSettingsMenu');
+    if(accountSettingsMenu){
+      accountSettingsMenu.addEventListener('click', function(){
+        morePage.classList.remove('is-open');
+        accountSettingsSubmenu.classList.add('is-open');
+      });
+    }
+
     // Create/Join pod buttons
     var moreCreatePod = document.getElementById('moreCreatePod');
     var moreJoinPod = document.getElementById('moreJoinPod');
 
     if(moreCreatePod){
       moreCreatePod.addEventListener('click', function(){
-        var canCreate = canCreateMorePods();
-        if(canCreate){
-          window.location.href = 'index.html?openmodal=true';
-        }else{
-          showUpgradeModal();
-        }
+        window.location.href = '/index.html?openmodal=true';
       });
     }
 
@@ -8033,8 +8125,63 @@
 
     function updateMorePodSelector(){
       var podNameEl = document.getElementById('moreCurrentPodName');
+      var dropdown = document.getElementById('morePodDropdown');
+      
       if(podNameEl && currentPod){
         podNameEl.textContent = currentPod.name;
+      }
+      
+      if(!dropdown) return;
+      
+      // Clear existing options
+      dropdown.innerHTML = '';
+      
+      // Add pod options
+      userPods.forEach(function(pod){
+        var option = document.createElement('div');
+        option.className = 'more-pod-option' + (pod.id === currentPod.id ? ' is-active' : '');
+        option.textContent = pod.name;
+        option.addEventListener('click', function(){
+          switchPod(pod);
+          morePodDropdown.style.display = 'none';
+        });
+        dropdown.appendChild(option);
+      });
+
+      // Add "Create new Pod" button
+      var createOption = document.createElement('div');
+      createOption.className = 'more-pod-option';
+      
+      var canCreate = canCreateMorePods();
+      var createdPods = userPods.filter(function(pod){
+        return pod.role === 'admin';
+      }).length;
+      var isUpgraded = userProfile && (userProfile.user_upgraded === true || userProfile.user_upgraded === 'true');
+      var limit = isUpgraded ? 2 : 1;
+      
+      if(!canCreate){
+        createOption.innerHTML = '<i data-lucide="crown" style="color: #FFD700; width: 16px; height: 16px; display: inline-block; vertical-align: middle; margin-right: 8px;"></i> Create new Pod';
+      }else{
+        createOption.textContent = 'Create new Pod';
+      }
+      
+      createOption.addEventListener('click', function(){
+        window.location.href = '/index.html?openmodal=true';
+      });
+      
+      dropdown.appendChild(createOption);
+
+      // Add "Join new Pod" button
+      var joinOption = document.createElement('div');
+      joinOption.className = 'more-pod-option';
+      joinOption.innerHTML = '<i data-lucide="plus" style="width: 16px; height: 16px; display: inline-block; vertical-align: middle; margin-right: 8px;"></i> Join new Pod';
+      joinOption.addEventListener('click', showJoinPodModal);
+      
+      dropdown.appendChild(joinOption);
+      
+      // Re-initialize Lucide icons
+      if(typeof lucide !== 'undefined'){
+        lucide.createIcons();
       }
     }
 
@@ -8043,9 +8190,11 @@
       item.addEventListener('click', function(){
         var nav = this.dataset.nav;
         if(nav){
-          // Close More page if open
+          // Close More page and submenus if open
           morePage.classList.remove('is-open');
+          accountSettingsSubmenu.classList.remove('is-open');
           aboutPage.classList.remove('is-open');
+          moreMenuBtn.classList.remove('is-active');
           
           // Update active state
           document.querySelectorAll('.mobile-nav-item').forEach(function(i){
@@ -8064,23 +8213,33 @@
       item.addEventListener('click', function(){
         var nav = this.dataset.nav;
         if(nav){
-          if(nav === 'about'){
-            morePage.classList.remove('is-open');
-            aboutPage.classList.add('is-open');
-          }else{
-            morePage.classList.remove('is-open');
-            moreMenuBtn.classList.remove('is-active');
-            
-            // Update bottom nav active state
-            document.querySelectorAll('.mobile-nav-item').forEach(function(i){
-              i.classList.remove('is-active');
-              if(i.dataset.nav === nav){
-                i.classList.add('is-active');
-              }
-            });
-            
-            navigateTo(nav);
-          }
+          morePage.classList.remove('is-open');
+          moreMenuBtn.classList.remove('is-active');
+          
+          // Update bottom nav active state
+          document.querySelectorAll('.mobile-nav-item').forEach(function(i){
+            i.classList.remove('is-active');
+          });
+          
+          navigateTo(nav);
+        }
+      });
+    });
+
+    // Account Settings submenu item click handlers
+    accountSettingsSubmenu.querySelectorAll('.more-page-item[data-nav]').forEach(function(item){
+      item.addEventListener('click', function(){
+        var nav = this.dataset.nav;
+        if(nav){
+          accountSettingsSubmenu.classList.remove('is-open');
+          moreMenuBtn.classList.remove('is-active');
+          
+          // Update bottom nav active state
+          document.querySelectorAll('.mobile-nav-item').forEach(function(i){
+            i.classList.remove('is-active');
+          });
+          
+          navigateTo(nav);
         }
       });
     });
