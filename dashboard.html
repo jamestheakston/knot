@@ -3630,31 +3630,6 @@
     </div>
   </div>
 
-  <!-- Notification Preferences Page -->
-  <div class="more-page" id="notificationPreferencesPage">
-    <div class="more-page-header">
-      <button class="more-page-back" id="notificationPreferencesBack">
-        <i data-lucide="arrow-left"></i>
-      </button>
-      <h2>Notification Preferences</h2>
-      <div style="width: 40px;"></div>
-    </div>
-
-    <div class="more-page-section">
-      <div class="more-page-section-title">Communication Preferences</div>
-      <div class="more-page-item">
-        <div style="flex: 1;">
-          <div style="font-size: 15px; color: var(--ink); margin-bottom: 4px;">Marketing Communications</div>
-          <div style="font-size: 13px; color: var(--muted);">Receive non-essential marketing communications from Knot (noreply.jamestheakston@gmail.com)</div>
-        </div>
-        <label class="toggle-switch">
-          <input type="checkbox" id="mobileMarketingToggle" ${currentUser.user_metadata?.marketing_opt_out !== true ? 'checked' : ''}>
-          <span class="toggle-slider"></span>
-        </label>
-      </div>
-    </div>
-  </div>
-
   <!-- About Page -->
   <div class="more-page" id="aboutPage">
     <div class="more-page-header">
@@ -4932,7 +4907,8 @@
         'invite': 'Invite Members',
         'profile': 'Profile',
         'account': 'Account Settings',
-        'more': 'More'
+        'more': 'More',
+        'notification-preferences': 'Notification Preferences'
       };
       var subtitles = {
         'overview': 'View your pod\'s progress and activity',
@@ -4944,7 +4920,8 @@
         'invite': 'Invite new members to your pod',
         'profile': 'View and edit your profile',
         'account': 'Manage your account settings',
-        'more': 'Additional options and settings'
+        'more': 'Additional options and settings',
+        'notification-preferences': 'Manage your communication preferences'
       };
       var eyebrows = {
         'overview': 'DASHBOARD',
@@ -4956,7 +4933,8 @@
         'invite': 'INVITE',
         'profile': 'YOUR PROFILE',
         'account': 'ACCOUNT',
-        'more': 'MORE'
+        'more': 'MORE',
+        'notification-preferences': 'SETTINGS'
       };
       
       document.getElementById('pageTitle').textContent = titles[section] || 'Overview';
@@ -5039,6 +5017,9 @@
             break;
           case 'more':
             loadMore();
+            break;
+          case 'notification-preferences':
+            loadNotificationPreferences();
             break;
           default:
             loadOverview();
@@ -5154,9 +5135,7 @@
       document.querySelectorAll('.more-item[data-nav]').forEach(function(item){
         item.addEventListener('click', function(){
           var nav = this.dataset.nav;
-          if(nav === 'notification-preferences'){
-            notificationPreferencesPage.classList.add('is-open');
-          }else if(nav === 'about'){
+          if(nav === 'about'){
             aboutPage.classList.add('is-open');
           }else{
             navigateTo(nav);
@@ -5196,6 +5175,37 @@
 
       if(typeof lucide !== 'undefined'){
         lucide.createIcons();
+      }
+    }
+
+    function loadNotificationPreferences(){
+      var contentArea = document.getElementById('contentArea');
+      contentArea.innerHTML = `
+        <div class="notification-preferences-content">
+          <div class="settings-card">
+            <h3>Communication Preferences</h3>
+            <div class="settings-item">
+              <div class="settings-item-label">
+                <div>
+                  <div>Marketing Communications</div>
+                  <div class="settings-item-description">Receive non-essential marketing communications from Knot (noreply.jamestheakston@gmail.com)</div>
+                </div>
+              </div>
+              <div class="settings-item-value">
+                <label class="toggle-switch">
+                  <input type="checkbox" id="contentMarketingToggle" ${currentUser.user_metadata?.marketing_opt_out !== true ? 'checked' : ''}>
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+
+      // Add event listener for marketing toggle
+      var contentMarketingToggle = document.getElementById('contentMarketingToggle');
+      if(contentMarketingToggle){
+        contentMarketingToggle.addEventListener('change', handleMarketingToggle);
       }
     }
 
@@ -7961,9 +7971,7 @@
     // Mobile bottom navigation
     var moreMenuBtn = document.getElementById('moreMenuBtn');
     var morePage = document.getElementById('morePage');
-    var notificationPreferencesPage = document.getElementById('notificationPreferencesPage');
     var aboutPage = document.getElementById('aboutPage');
-    var notificationPreferencesBack = document.getElementById('notificationPreferencesBack');
     var aboutBack = document.getElementById('aboutBack');
     var morePodSelector = document.getElementById('morePodSelector');
     var morePodDropdown = document.getElementById('morePodDropdown');
@@ -7979,13 +7987,6 @@
         
         // Navigate to more page with hash
         navigateTo('more');
-      });
-    }
-
-    if(notificationPreferencesBack){
-      notificationPreferencesBack.addEventListener('click', function(){
-        notificationPreferencesPage.classList.remove('is-open');
-        morePage.classList.add('is-open');
       });
     }
 
@@ -8013,12 +8014,6 @@
 
     if(moreJoinPod){
       moreJoinPod.addEventListener('click', showJoinPodModal);
-    }
-
-    // Mobile marketing toggle handler
-    var mobileMarketingToggle = document.getElementById('mobileMarketingToggle');
-    if(mobileMarketingToggle){
-      mobileMarketingToggle.addEventListener('change', handleMarketingToggle);
     }
 
     // More pod selector toggle
@@ -8050,7 +8045,6 @@
         if(nav){
           // Close More page if open
           morePage.classList.remove('is-open');
-          notificationPreferencesPage.classList.remove('is-open');
           aboutPage.classList.remove('is-open');
           
           // Update active state
@@ -8070,10 +8064,7 @@
       item.addEventListener('click', function(){
         var nav = this.dataset.nav;
         if(nav){
-          if(nav === 'notification-preferences'){
-            morePage.classList.remove('is-open');
-            notificationPreferencesPage.classList.add('is-open');
-          }else if(nav === 'about'){
+          if(nav === 'about'){
             morePage.classList.remove('is-open');
             aboutPage.classList.add('is-open');
           }else{
@@ -8272,6 +8263,8 @@
           navigateTo('profile');
         }else if(action === 'account'){
           navigateTo('account');
+        }else if(action === 'notification-preferences'){
+          navigateTo('notification-preferences');
         }else if(action === 'switch-account'){
           // Check if tight security is enabled
           if(localStorage.getItem('knot_tight_security') === 'true'){
