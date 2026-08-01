@@ -582,7 +582,6 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    min-height: 200px;
     color: var(--muted);
     gap: 16px;
   }
@@ -590,6 +589,11 @@
     width: 48px;
     height: 48px;
     animation: spin 1s linear infinite;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+  .loading-icon.is-visible{
+    opacity: 1;
   }
   @keyframes spin{
     from{ transform: rotate(0deg); }
@@ -2479,31 +2483,10 @@
   /* ---------- RESPONSIVE ---------- */
   @media (max-width: 768px){
     .mobile-menu-toggle{
-      display: flex !important;
-      position: fixed;
-      top: 16px;
-      left: 16px;
-      z-index: 200;
-      width: 40px;
-      height: 40px;
-      border-radius: 10px;
-      border: 1px solid var(--line-strong);
-      background: var(--bg-2);
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-    }
-    .mobile-menu-toggle i{
-      width: 20px;
-      height: 20px;
+      display: none !important;
     }
     .sidebar{
-      transform: translateX(-100%);
-      transition: transform 0.3s ease;
-      z-index: 150;
-    }
-    .sidebar.is-open{
-      transform: translateX(0);
+      display: none;
     }
     .main-content{
       margin-left: 0;
@@ -2572,15 +2555,13 @@
     }
     .more-menu-overlay.is-open{
       display: block;
-      animation: slideUp 0.3s ease;
+      animation: fadeIn 0.2s ease;
     }
-    @keyframes slideUp{
+    @keyframes fadeIn{
       from{
-        transform: translateY(100%);
         opacity: 0;
       }
       to{
-        transform: translateY(0);
         opacity: 1;
       }
     }
@@ -2654,6 +2635,29 @@
     }
     .more-menu-item.admin-only.is-visible{
       display: flex;
+    }
+    .more-pod-dropdown{
+      margin-top: 8px;
+      background: var(--bg-2);
+      border: 1px solid var(--line-strong);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    .more-pod-option{
+      padding: 14px 16px;
+      cursor: pointer;
+      transition: background 0.15s ease;
+      border-bottom: 1px solid var(--line);
+    }
+    .more-pod-option:last-child{
+      border-bottom: none;
+    }
+    .more-pod-option:hover{
+      background: var(--bg-3);
+    }
+    .more-pod-option.is-active{
+      background: var(--blue-soft);
+      color: var(--blue);
     }
   }
   @media (max-width: 480px){
@@ -3311,6 +3315,18 @@
       <button class="more-menu-close" id="moreMenuClose">
         <i data-lucide="x"></i>
       </button>
+    </div>
+
+    <div class="more-menu-section">
+      <div class="more-menu-section-title">Current Pod</div>
+      <div class="more-menu-item" id="morePodSelector">
+        <i data-lucide="users"></i>
+        <span id="moreCurrentPodName">Loading...</span>
+        <i data-lucide="chevron-down" style="margin-left: auto; width: 16px; height: 16px;"></i>
+      </div>
+      <div class="more-pod-dropdown" id="morePodDropdown" style="display: none;">
+        <!-- Pod options will be populated by JS -->
+      </div>
     </div>
 
     <div class="more-menu-section">
@@ -4588,18 +4604,27 @@
         lucide.createIcons();
       }
 
-      // Show slow loading message after 4 seconds
+      // Show loading spinner after 1 second
+      var loadingIcon = document.querySelector('.loading-icon');
+      var spinnerTimeout = setTimeout(function(){
+        if(loadingIcon){
+          loadingIcon.classList.add('is-visible');
+        }
+      }, 1000);
+
+      // Show slow loading message after 5 seconds
       var loadingTimeout = setTimeout(function(){
         var loadingText = document.getElementById('loadingText');
         if(loadingText){
-          loadingText.textContent = "This is taking longer than usual. We appreciate your patience while we fetch your data!";
+          loadingText.textContent = "This is taking longer than usual, thanks for your patience.";
           loadingText.classList.add('slow');
         }
-      }, 4000);
+      }, 5000);
 
       // Use a timeout to ensure the loading state is set before async operations
       setTimeout(function(){
-        // Clear loading timeout when content starts loading
+        // Clear loading timeouts when content starts loading
+        clearTimeout(spinnerTimeout);
         clearTimeout(loadingTimeout);
         
         // Check if section requires admin access
@@ -7362,10 +7387,13 @@
     var moreMenuBtn = document.getElementById('moreMenuBtn');
     var moreMenuOverlay = document.getElementById('moreMenuOverlay');
     var moreMenuClose = document.getElementById('moreMenuClose');
+    var morePodSelector = document.getElementById('morePodSelector');
+    var morePodDropdown = document.getElementById('morePodDropdown');
 
     if(moreMenuBtn){
       moreMenuBtn.addEventListener('click', function(){
         moreMenuOverlay.classList.add('is-open');
+        updateMorePodSelector();
       });
     }
 
@@ -7382,6 +7410,81 @@
           moreMenuOverlay.classList.remove('is-open');
         }
       });
+    }
+
+    // More pod selector toggle
+    if(morePodSelector){
+      morePodSelector.addEventListener('click', function(e){
+        e.stopPropagation();
+        morePodDropdown.style.display = morePodDropdown.style.display === 'none' ? 'block' : 'none';
+      });
+    }
+
+    // Close more pod dropdown on outside click
+    document.addEventListener('click', function(){
+      if(morePodDropdown){
+        morePodDropdown.style.display = 'none';
+      }
+    });
+
+    function updateMorePodSelector(){
+      if(currentPod){
+        document.getElementById('moreCurrentPodName').textContent = currentPod.name;
+      }
+      
+      var dropdown = document.getElementById('morePodDropdown');
+      dropdown.innerHTML = '';
+
+      userPods.forEach(function(pod){
+        var option = document.createElement('div');
+        option.className = 'more-pod-option' + (pod.id === currentPod.id ? ' is-active' : '');
+        option.textContent = pod.name;
+        option.addEventListener('click', function(){
+          switchPod(pod);
+          morePodDropdown.style.display = 'none';
+        });
+        dropdown.appendChild(option);
+      });
+
+      // Add "Create new Pod" button
+      var createOption = document.createElement('div');
+      createOption.className = 'more-pod-option';
+      
+      var canCreate = canCreateMorePods();
+      var createdPods = userPods.filter(function(pod){
+        return pod.role === 'admin';
+      }).length;
+      var isUpgraded = userProfile && (userProfile.user_upgraded === true || userProfile.user_upgraded === 'true');
+      var limit = isUpgraded ? 2 : 1;
+      
+      if(!canCreate){
+        createOption.innerHTML = '<i data-lucide="crown" style="color: #FFD700; width: 16px; height: 16px; display: inline-block; vertical-align: middle; margin-right: 8px;"></i> Create new Pod';
+      }else{
+        createOption.textContent = 'Create new Pod';
+      }
+      
+      createOption.addEventListener('click', function(){
+        if(canCreate){
+          window.location.href = 'index.html?openmodal=true';
+        }else{
+          showUpgradeModal();
+        }
+      });
+      
+      dropdown.appendChild(createOption);
+
+      // Add "Join new Pod" button
+      var joinOption = document.createElement('div');
+      joinOption.className = 'more-pod-option';
+      joinOption.innerHTML = '<i data-lucide="plus" style="width: 16px; height: 16px; display: inline-block; vertical-align: middle; margin-right: 8px;"></i> Join new Pod';
+      joinOption.addEventListener('click', showJoinPodModal);
+      
+      dropdown.appendChild(joinOption);
+      
+      // Re-initialize Lucide icons
+      if(typeof lucide !== 'undefined'){
+        lucide.createIcons();
+      }
     }
 
     // Mobile nav item click handlers
