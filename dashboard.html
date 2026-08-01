@@ -2480,6 +2480,130 @@
     justify-content: flex-end;
   }
 
+  /* ---------- MORE MENU OVERLAY (Hidden by default) ---------- */
+  .more-menu-overlay{
+    display: none;
+  }
+
+  /* ---------- ACCOUNT SWITCHER MODAL ---------- */
+  .account-switcher-overlay{
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 200;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  .account-switcher-overlay.is-open{
+    display: flex;
+  }
+  .account-switcher-modal{
+    background: var(--bg-2);
+    border-radius: 16px;
+    width: 100%;
+    max-width: 480px;
+    max-height: 80vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+  }
+  .account-switcher-header{
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--line);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .account-switcher-header h2{
+    font-size: 20px;
+    color: var(--ink);
+  }
+  .account-switcher-close{
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    border: 1px solid var(--line-strong);
+    background: var(--bg-3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: var(--muted);
+    transition: all 0.2s ease;
+  }
+  .account-switcher-close:hover{
+    color: var(--ink);
+    background: var(--line);
+  }
+  .account-switcher-close i{
+    width: 18px;
+    height: 18px;
+  }
+  .account-switcher-body{
+    flex: 1;
+    padding: 24px;
+    overflow-y: auto;
+  }
+  .account-switcher-list{
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+  .account-switcher-item{
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px;
+    background: var(--bg-3);
+    border: 1px solid var(--line-strong);
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  .account-switcher-item:hover{
+    border-color: var(--blue);
+    background: var(--blue-soft);
+  }
+  .account-switcher-item.is-active{
+    border-color: var(--blue);
+    background: var(--blue-soft);
+  }
+  .account-switcher-avatar{
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: var(--blue);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    font-weight: 600;
+  }
+  .account-switcher-info{
+    flex: 1;
+  }
+  .account-switcher-name{
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--ink);
+    margin-bottom: 4px;
+  }
+  .account-switcher-email{
+    font-size: 13px;
+    color: var(--muted);
+  }
+  .account-switcher-actions{
+    display: flex;
+    gap: 12px;
+  }
+
   /* ---------- RESPONSIVE ---------- */
   @media (max-width: 768px){
     .mobile-menu-toggle{
@@ -2542,7 +2666,6 @@
 
     /* ---------- MORE MENU OVERLAY ---------- */
     .more-menu-overlay{
-      display: none;
       position: fixed;
       top: 0;
       left: 0;
@@ -3366,6 +3489,26 @@
       <div class="more-menu-item" data-action="logout">
         <i data-lucide="log-out"></i>
         <span>Log Out</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Account Switcher Modal -->
+  <div class="account-switcher-overlay" id="accountSwitcherOverlay">
+    <div class="account-switcher-modal">
+      <div class="account-switcher-header">
+        <h2>Switch Account</h2>
+        <button class="account-switcher-close" id="accountSwitcherClose">
+          <i data-lucide="x"></i>
+        </button>
+      </div>
+      <div class="account-switcher-body">
+        <div class="account-switcher-list" id="accountSwitcherList">
+          <div class="loading">Loading accounts...</div>
+        </div>
+        <div class="account-switcher-actions">
+          <button class="btn btn-primary" id="addAccountBtn">Add Account</button>
+        </div>
       </div>
     </div>
   </div>
@@ -7522,7 +7665,9 @@
         moreMenuOverlay.classList.remove('is-open');
         
         if(action === 'logout'){
-          handleLogout();
+          showConfirmModal('Log Out', 'Are you sure you want to log out?', function(){
+            handleLogout();
+          }, function(){});
         }else if(action === 'switch-account'){
           // Check if tight security is enabled
           if(localStorage.getItem('knot_tight_security') === 'true'){
@@ -7555,10 +7700,119 @@
             return;
           }
 
-          window.location.href = 'accountswitcher.html';
+          // Show account switcher modal instead of redirecting
+          showAccountSwitcher();
         }
       });
     });
+
+    // Account switcher modal
+    var accountSwitcherOverlay = document.getElementById('accountSwitcherOverlay');
+    var accountSwitcherClose = document.getElementById('accountSwitcherClose');
+    var addAccountBtn = document.getElementById('addAccountBtn');
+
+    if(accountSwitcherClose){
+      accountSwitcherClose.addEventListener('click', function(){
+        accountSwitcherOverlay.classList.remove('is-open');
+      });
+    }
+
+    if(accountSwitcherOverlay){
+      accountSwitcherOverlay.addEventListener('click', function(e){
+        if(e.target === accountSwitcherOverlay){
+          accountSwitcherOverlay.classList.remove('is-open');
+        }
+      });
+    }
+
+    if(addAccountBtn){
+      addAccountBtn.addEventListener('click', function(){
+        window.location.href = 'login.html?add_account=true';
+      });
+    }
+
+    function showAccountSwitcher(){
+      accountSwitcherOverlay.classList.add('is-open');
+      loadAccountSwitcherList();
+    }
+
+    function loadAccountSwitcherList(){
+      var accountsList = document.getElementById('accountSwitcherList');
+      try{
+        var accounts = JSON.parse(localStorage.getItem('knot_accounts') || '[]');
+        var activeAccountId = localStorage.getItem('knot_active_account');
+        
+        if(accounts.length === 0){
+          accountsList.innerHTML = '<div class="no-accounts">No accounts found. Add an account to get started.</div>';
+          return;
+        }
+
+        accountsList.innerHTML = accounts.map(function(account){
+          var isActive = account.id === activeAccountId || account.id === currentUser.id;
+          var initial = account.name ? account.name.charAt(0).toUpperCase() : account.email.charAt(0).toUpperCase();
+          return `
+            <div class="account-switcher-item ${isActive ? 'is-active' : ''}" data-account-id="${account.id}">
+              <div class="account-switcher-avatar">${initial}</div>
+              <div class="account-switcher-info">
+                <div class="account-switcher-name">${account.name || 'Unknown'}</div>
+                <div class="account-switcher-email">${account.email}</div>
+              </div>
+              ${isActive ? '<i data-lucide="check" style="color: var(--blue); width: 16px; height: 16px;"></i>' : ''}
+            </div>
+          `;
+        }).join('');
+
+        if(typeof lucide !== 'undefined'){
+          lucide.createIcons();
+        }
+
+        // Add click handlers for account items
+        accountsList.querySelectorAll('.account-switcher-item').forEach(function(item){
+          item.addEventListener('click', function(){
+            var accountId = this.dataset.accountId;
+            if(accountId !== currentUser.id){
+              switchToAccount(accountId);
+            }
+          });
+        });
+      }catch(e){
+        console.error('Error loading accounts:', e);
+        accountsList.innerHTML = '<div class="error">Error loading accounts</div>';
+      }
+    }
+
+    async function switchToAccount(accountId){
+      try{
+        var accounts = JSON.parse(localStorage.getItem('knot_accounts') || '[]');
+        var account = accounts.find(function(acc){ return acc.id === accountId; });
+        
+        if(!account){
+          showToast('Error', 'Account not found', 'error');
+          return;
+        }
+
+        // Sign out current session
+        var client = getSupabaseClient();
+        await client.auth.signOut();
+
+        // Set new session with the account's tokens
+        if(account.access_token && account.refresh_token){
+          await client.auth.setSession({
+            access_token: account.access_token,
+            refresh_token: account.refresh_token
+          });
+        }
+
+        // Set as active account
+        localStorage.setItem('knot_active_account', accountId);
+
+        // Reload page to refresh with new account
+        window.location.reload();
+      }catch(e){
+        console.error('Error switching account:', e);
+        showToast('Error', 'Failed to switch account. Please try again.', 'error');
+      }
+    }
 
     // Navigation
     document.querySelectorAll('.nav-item').forEach(function(item){
