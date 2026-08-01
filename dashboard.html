@@ -7585,6 +7585,7 @@
       localStorage.setItem('currentPodId', pod.id);
       
       updatePodSelector();
+      updateMorePodSelector();
       updateAdminVisibility();
       document.getElementById('podDropdown').classList.remove('is-open');
       // Update streak display for new pod
@@ -7735,6 +7736,16 @@
         var nav = this.dataset.nav;
         if(nav){
           morePage.classList.remove('is-open');
+          moreMenuBtn.classList.remove('is-active');
+          
+          // Update bottom nav active state
+          document.querySelectorAll('.mobile-nav-item').forEach(function(i){
+            i.classList.remove('is-active');
+            if(i.dataset.nav === nav){
+              i.classList.add('is-active');
+            }
+          });
+          
           navigateTo(nav);
         }
       });
