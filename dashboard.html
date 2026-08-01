@@ -2511,6 +2511,25 @@
     font-size: 24px;
     color: var(--ink);
   }
+  .more-page-back{
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    border: 1px solid var(--line-strong);
+    background: var(--bg-2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: var(--muted);
+  }
+  .more-page-back:hover{
+    color: var(--ink);
+  }
+  .more-page-back i{
+    width: 20px;
+    height: 20px;
+  }
   .more-page-section{
     margin-bottom: 32px;
   }
@@ -2535,46 +2554,18 @@
     transition: all 0.2s ease;
   }
   .more-page-item:hover{
-    border-color: var(--blue);
-    background: var(--blue-soft);
+    background: var(--bg-3);
   }
   .more-page-item i{
     width: 20px;
     height: 20px;
     color: var(--muted);
   }
-  .more-page-item span{
-    font-size: 15px;
-    color: var(--ink);
-  }
   .more-page-item.admin-only{
     display: none;
   }
   .more-page-item.admin-only.is-visible{
     display: flex;
-  }
-  .more-pod-dropdown{
-    margin-top: 8px;
-    background: var(--bg-2);
-    border: 1px solid var(--line-strong);
-    border-radius: 12px;
-    overflow: hidden;
-  }
-  .more-pod-option{
-    padding: 14px 16px;
-    cursor: pointer;
-    transition: background 0.15s ease;
-    border-bottom: 1px solid var(--line);
-  }
-  .more-pod-option:last-child{
-    border-bottom: none;
-  }
-  .more-pod-option:hover{
-    background: var(--bg-3);
-  }
-  .more-pod-option.is-active{
-    background: var(--blue-soft);
-    color: var(--blue);
   }
 
   /* ---------- ACCOUNT SWITCHER MODAL ---------- */
@@ -3531,13 +3522,9 @@
 
     <div class="more-page-section">
       <div class="more-page-section-title">Current Pod</div>
-      <div class="more-page-item" id="morePodSelector">
+      <div class="more-page-item">
         <i data-lucide="users"></i>
         <span id="moreCurrentPodName">Loading...</span>
-        <i data-lucide="chevron-down" style="margin-left: auto; width: 16px; height: 16px;"></i>
-      </div>
-      <div class="more-pod-dropdown" id="morePodDropdown" style="display: none;">
-        <!-- Pod options will be populated by JS -->
       </div>
     </div>
 
@@ -3546,10 +3533,6 @@
       <div class="more-page-item" data-nav="members">
         <i data-lucide="users"></i>
         <span>Members</span>
-      </div>
-      <div class="more-page-item" data-nav="streak">
-        <i data-lucide="flame"></i>
-        <span>Streak</span>
       </div>
       <div class="more-page-item admin-only" data-nav="pod-settings">
         <i data-lucide="settings"></i>
@@ -3566,6 +3549,18 @@
     </div>
 
     <div class="more-page-section">
+      <div class="more-page-section-title">Pod Actions</div>
+      <div class="more-page-item" id="moreCreatePod">
+        <i data-lucide="plus"></i>
+        <span>Create new Pod</span>
+      </div>
+      <div class="more-page-item" id="moreJoinPod">
+        <i data-lucide="log-in"></i>
+        <span>Join new Pod</span>
+      </div>
+    </div>
+
+    <div class="more-page-section">
       <div class="more-page-section-title">Settings</div>
       <div class="more-page-item" data-nav="profile">
         <i data-lucide="user"></i>
@@ -3575,6 +3570,14 @@
         <i data-lucide="cog"></i>
         <span>Account Settings</span>
       </div>
+      <div class="more-page-item" data-nav="notification-preferences">
+        <i data-lucide="bell"></i>
+        <span>Notification Preferences</span>
+      </div>
+      <div class="more-page-item" data-nav="about">
+        <i data-lucide="info"></i>
+        <span>About</span>
+      </div>
       <div class="more-page-item" data-action="switch-account">
         <i data-lucide="users"></i>
         <span>Switch Account</span>
@@ -3582,6 +3585,76 @@
       <div class="more-page-item" data-action="logout">
         <i data-lucide="log-out"></i>
         <span>Log Out</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Notification Preferences Page -->
+  <div class="more-page" id="notificationPreferencesPage">
+    <div class="more-page-header">
+      <button class="more-page-back" id="notificationPreferencesBack">
+        <i data-lucide="arrow-left"></i>
+      </button>
+      <h2>Notification Preferences</h2>
+      <div style="width: 40px;"></div>
+    </div>
+
+    <div class="more-page-section">
+      <div class="more-page-section-title">Communication Preferences</div>
+      <div class="more-page-item">
+        <div style="flex: 1;">
+          <div style="font-size: 15px; color: var(--ink); margin-bottom: 4px;">Marketing Communications</div>
+          <div style="font-size: 13px; color: var(--muted);">Receive non-essential marketing communications from Knot (noreply.jamestheakston@gmail.com)</div>
+        </div>
+        <label class="toggle-switch">
+          <input type="checkbox" id="mobileMarketingToggle" ${currentUser.user_metadata?.marketing_opt_out !== true ? 'checked' : ''}>
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+    </div>
+  </div>
+
+  <!-- About Page -->
+  <div class="more-page" id="aboutPage">
+    <div class="more-page-header">
+      <button class="more-page-back" id="aboutBack">
+        <i data-lucide="arrow-left"></i>
+      </button>
+      <h2>About</h2>
+      <div style="width: 40px;"></div>
+    </div>
+
+    <div class="more-page-section">
+      <div class="more-page-section-title">About Knot</div>
+      <div style="background: var(--bg-2); border: 1px solid var(--line-strong); border-radius: 12px; padding: 20px;">
+        <h3 style="font-family: 'Instrument Serif', serif; font-size: 20px; margin-bottom: 12px;">Knot</h3>
+        <p style="color: var(--muted); line-height: 1.6; margin-bottom: 16px;">
+          A habit, held by your pod. Knot helps you build better habits together with accountability partners. Track daily check-ins, maintain streaks, and support each other in achieving your goals.
+        </p>
+        <p style="color: var(--muted); line-height: 1.6;">
+          Version 1.0.0
+        </p>
+      </div>
+    </div>
+
+    <div class="more-page-section">
+      <div class="more-page-section-title">Open Source Libraries</div>
+      <div style="background: var(--bg-2); border: 1px solid var(--line-strong); border-radius: 12px; padding: 20px;">
+        <div style="margin-bottom: 16px;">
+          <div style="font-weight: 500; color: var(--ink); margin-bottom: 4px;">Supabase</div>
+          <div style="font-size: 13px; color: var(--muted);">Backend-as-a-Service for authentication and database</div>
+          <a href="https://supabase.com" target="_blank" style="color: var(--blue); font-size: 13px;">supabase.com</a>
+        </div>
+        <div style="margin-bottom: 16px;">
+          <div style="font-weight: 500; color: var(--ink); margin-bottom: 4px;">Lucide</div>
+          <div style="font-size: 13px; color: var(--muted);">Beautiful & consistent icon toolkit</div>
+          <a href="https://lucide.dev" target="_blank" style="color: var(--blue); font-size: 13px;">lucide.dev</a>
+        </div>
+        <div style="margin-bottom: 16px;">
+          <div style="font-weight: 500; color: var(--ink); margin-bottom: 4px;">Google Fonts</div>
+          <div style="font-size: 13px; color: var(--muted);">Instrument Serif, Work Sans, IBM Plex Mono</div>
+          <a href="https://fonts.google.com" target="_blank" style="color: var(--blue); font-size: 13px;">fonts.google.com</a>
+        </div>
       </div>
     </div>
   </div>
@@ -6858,6 +6931,24 @@
           </div>
 
           <div class="settings-card">
+            <h3>Communication Preferences</h3>
+            <div class="settings-item">
+              <div class="settings-item-label">
+                <div>
+                  <div>Marketing Communications</div>
+                  <div class="settings-item-description">Receive non-essential marketing communications from Knot (noreply.jamestheakston@gmail.com)</div>
+                </div>
+              </div>
+              <div class="settings-item-value">
+                <label class="toggle-switch">
+                  <input type="checkbox" id="marketingToggle" ${currentUser.user_metadata?.marketing_opt_out !== true ? 'checked' : ''}>
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <div class="settings-card">
             <h3>Connected Accounts</h3>
             <div class="social-connections">
               <div class="social-connection ${hasGitHub ? 'is-connected' : ''}">
@@ -6960,6 +7051,9 @@
 
       // Account switching toggle handler
       document.getElementById('accountSwitchingToggle').addEventListener('change', handleAccountSwitchingToggle);
+
+      // Marketing toggle handler
+      document.getElementById('marketingToggle').addEventListener('change', handleMarketingToggle);
 
       // Password modal handlers
       document.getElementById('cancelPasswordBtn').addEventListener('click', hidePasswordModal);
@@ -7343,6 +7437,45 @@
       }
     }
 
+    async function handleMarketingToggle(e){
+      var isEnabled = e.target.checked;
+      var message = isEnabled
+        ? 'Enable marketing communications?<br><br>You will receive non-essential marketing communications from Knot (noreply.jamestheakston@gmail.com).'
+        : 'Disable marketing communications?<br><br>You will no longer receive non-essential marketing communications from Knot.';
+
+      showConfirmModal('Marketing Communications', message, async function(){
+        await toggleMarketingCommunications(isEnabled);
+      }, function(){
+        // Revert checkbox if cancelled
+        e.target.checked = !isEnabled;
+      });
+    }
+
+    async function toggleMarketingCommunications(isEnabled){
+      try{
+        var client = getSupabaseClient();
+        
+        // Update user metadata
+        var { error: updateError } = await client.auth.updateUser({
+          data: {
+            marketing_opt_out: !isEnabled
+          }
+        });
+
+        if(updateError) throw updateError;
+
+        // Update current user object
+        if(currentUser.user_metadata){
+          currentUser.user_metadata.marketing_opt_out = !isEnabled;
+        }
+
+        showToast('Preferences Updated', isEnabled ? 'Marketing communications enabled.' : 'Marketing communications disabled.', 'success');
+      }catch(error){
+        console.error('Error updating marketing preferences:', error);
+        showToast('Error', 'Failed to update preferences. Please try again.', 'error');
+      }
+    }
+
     async function handleLogout(){
       var client = getSupabaseClient();
       await client.auth.signOut();
@@ -7623,6 +7756,10 @@
     // Mobile bottom navigation
     var moreMenuBtn = document.getElementById('moreMenuBtn');
     var morePage = document.getElementById('morePage');
+    var notificationPreferencesPage = document.getElementById('notificationPreferencesPage');
+    var aboutPage = document.getElementById('aboutPage');
+    var notificationPreferencesBack = document.getElementById('notificationPreferencesBack');
+    var aboutBack = document.getElementById('aboutBack');
     var morePodSelector = document.getElementById('morePodSelector');
     var morePodDropdown = document.getElementById('morePodDropdown');
 
@@ -7632,6 +7769,45 @@
         this.classList.add('is-active');
         updateMorePodSelector();
       });
+    }
+
+    if(notificationPreferencesBack){
+      notificationPreferencesBack.addEventListener('click', function(){
+        notificationPreferencesPage.classList.remove('is-open');
+        morePage.classList.add('is-open');
+      });
+    }
+
+    if(aboutBack){
+      aboutBack.addEventListener('click', function(){
+        aboutPage.classList.remove('is-open');
+        morePage.classList.add('is-open');
+      });
+    }
+
+    // Create/Join pod buttons
+    var moreCreatePod = document.getElementById('moreCreatePod');
+    var moreJoinPod = document.getElementById('moreJoinPod');
+
+    if(moreCreatePod){
+      moreCreatePod.addEventListener('click', function(){
+        var canCreate = canCreateMorePods();
+        if(canCreate){
+          window.location.href = 'index.html?openmodal=true';
+        }else{
+          showUpgradeModal();
+        }
+      });
+    }
+
+    if(moreJoinPod){
+      moreJoinPod.addEventListener('click', showJoinPodModal);
+    }
+
+    // Mobile marketing toggle handler
+    var mobileMarketingToggle = document.getElementById('mobileMarketingToggle');
+    if(mobileMarketingToggle){
+      mobileMarketingToggle.addEventListener('change', handleMarketingToggle);
     }
 
     // More pod selector toggle
@@ -7650,62 +7826,9 @@
     });
 
     function updateMorePodSelector(){
-      if(currentPod){
-        document.getElementById('moreCurrentPodName').textContent = currentPod.name;
-      }
-      
-      var dropdown = document.getElementById('morePodDropdown');
-      dropdown.innerHTML = '';
-
-      userPods.forEach(function(pod){
-        var option = document.createElement('div');
-        option.className = 'more-pod-option' + (pod.id === currentPod.id ? ' is-active' : '');
-        option.textContent = pod.name;
-        option.addEventListener('click', function(){
-          switchPod(pod);
-          morePodDropdown.style.display = 'none';
-        });
-        dropdown.appendChild(option);
-      });
-
-      // Add "Create new Pod" button
-      var createOption = document.createElement('div');
-      createOption.className = 'more-pod-option';
-      
-      var canCreate = canCreateMorePods();
-      var createdPods = userPods.filter(function(pod){
-        return pod.role === 'admin';
-      }).length;
-      var isUpgraded = userProfile && (userProfile.user_upgraded === true || userProfile.user_upgraded === 'true');
-      var limit = isUpgraded ? 2 : 1;
-      
-      if(!canCreate){
-        createOption.innerHTML = '<i data-lucide="crown" style="color: #FFD700; width: 16px; height: 16px; display: inline-block; vertical-align: middle; margin-right: 8px;"></i> Create new Pod';
-      }else{
-        createOption.textContent = 'Create new Pod';
-      }
-      
-      createOption.addEventListener('click', function(){
-        if(canCreate){
-          window.location.href = 'index.html?openmodal=true';
-        }else{
-          showUpgradeModal();
-        }
-      });
-      
-      dropdown.appendChild(createOption);
-
-      // Add "Join new Pod" button
-      var joinOption = document.createElement('div');
-      joinOption.className = 'more-pod-option';
-      joinOption.innerHTML = '<i data-lucide="plus" style="width: 16px; height: 16px; display: inline-block; vertical-align: middle; margin-right: 8px;"></i> Join new Pod';
-      joinOption.addEventListener('click', showJoinPodModal);
-      
-      dropdown.appendChild(joinOption);
-      
-      // Re-initialize Lucide icons
-      if(typeof lucide !== 'undefined'){
-        lucide.createIcons();
+      var podNameEl = document.getElementById('moreCurrentPodName');
+      if(podNameEl && currentPod){
+        podNameEl.textContent = currentPod.name;
       }
     }
 
@@ -7735,18 +7858,26 @@
       item.addEventListener('click', function(){
         var nav = this.dataset.nav;
         if(nav){
-          morePage.classList.remove('is-open');
-          moreMenuBtn.classList.remove('is-active');
-          
-          // Update bottom nav active state
-          document.querySelectorAll('.mobile-nav-item').forEach(function(i){
-            i.classList.remove('is-active');
-            if(i.dataset.nav === nav){
-              i.classList.add('is-active');
-            }
-          });
-          
-          navigateTo(nav);
+          if(nav === 'notification-preferences'){
+            morePage.classList.remove('is-open');
+            notificationPreferencesPage.classList.add('is-open');
+          }else if(nav === 'about'){
+            morePage.classList.remove('is-open');
+            aboutPage.classList.add('is-open');
+          }else{
+            morePage.classList.remove('is-open');
+            moreMenuBtn.classList.remove('is-active');
+            
+            // Update bottom nav active state
+            document.querySelectorAll('.mobile-nav-item').forEach(function(i){
+              i.classList.remove('is-active');
+              if(i.dataset.nav === nav){
+                i.classList.add('is-active');
+              }
+            });
+            
+            navigateTo(nav);
+          }
         }
       });
     });
