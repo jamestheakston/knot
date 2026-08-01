@@ -1459,6 +1459,17 @@
           <i data-lucide="mail" style="width: 20px; height: 20px; color: var(--ink);"></i>
           Continue with email
         </button>
+
+        <div class="form-group">
+          <label class="checkbox-label">
+            <input type="checkbox" id="joinSocialMarketingOptOut">
+            <span>I wish to opt-out of non-essential marketing communications from Knot (noreply.jamestheakston@gmail.com)</span>
+          </label>
+        </div>
+
+        <div class="terms-text">
+          By continuing, you agree to our <a href="terms.html">Terms of Service</a> and <a href="privacy.html">Privacy Policy</a>
+        </div>
       </div>
       
       <div class="email-form" id="join-email-form">
@@ -1481,11 +1492,8 @@
           </label>
         </div>
         <div class="form-actions">
-          <button class="btn btn-ghost" data-back="join-code">Back</button>
+          <button class="btn btn-ghost" data-back="join-signup">Back</button>
           <button class="btn btn-primary" data-submit="join">Join pod</button>
-        </div>
-        <div class="terms-text">
-          By continuing, you agree to our <a href="terms.html">Terms of Service</a> and <a href="privacy.html">Privacy Policy</a>
         </div>
       </div>
     </div>
@@ -1604,6 +1612,17 @@
           <i data-lucide="mail" style="width: 20px; height: 20px; color: var(--ink);"></i>
           Continue with email
         </button>
+
+        <div class="form-group">
+          <label class="checkbox-label">
+            <input type="checkbox" id="startSocialMarketingOptOut">
+            <span>I wish to opt-out of non-essential marketing communications from Knot (noreply.jamestheakston@gmail.com)</span>
+          </label>
+        </div>
+
+        <div class="terms-text">
+          By continuing, you agree to our <a href="terms.html">Terms of Service</a> and <a href="privacy.html">Privacy Policy</a>
+        </div>
       </div>
       
       <div class="email-form" id="start-email-form">
@@ -1626,11 +1645,8 @@
           </label>
         </div>
         <div class="form-actions">
-          <button class="btn btn-ghost" data-back="start-frequency">Back</button>
+          <button class="btn btn-ghost" data-back="start-signup">Back</button>
           <button class="btn btn-primary" data-submit="start">Create pod</button>
-        </div>
-        <div class="terms-text">
-          By continuing, you agree to our <a href="terms.html">Terms of Service</a> and <a href="privacy.html">Privacy Policy</a>
         </div>
       </div>
     </div>
@@ -1995,9 +2011,19 @@
         return;
       }
 
+      var marketingOptOut = false;
+      if(flow === 'join'){
+        marketingOptOut = document.getElementById('joinSocialMarketingOptOut')?.checked || false;
+      }else if(flow === 'start'){
+        marketingOptOut = document.getElementById('startSocialMarketingOptOut')?.checked || false;
+      }
+
+      // Store marketing preference for after OAuth
+      localStorage.setItem('pendingMarketingOptOut', marketingOptOut.toString());
+
       try{
         // Remove hash from redirect URL to avoid double hashes
-        var redirectUrl = window.location.origin + window.location.pathname;
+        var redirectUrl = window.location.origin + '/dashboard.html';
         
         // Store pod data if in start flow for post-auth redirect
         if(flow === 'start'){
@@ -2047,6 +2073,16 @@
         showToast('Authentication service unavailable. Please try again later.');
         return;
       }
+
+      var marketingOptOut = false;
+      if(flow === 'join'){
+        marketingOptOut = document.getElementById('joinSocialMarketingOptOut')?.checked || false;
+      }else if(flow === 'start'){
+        marketingOptOut = document.getElementById('startSocialMarketingOptOut')?.checked || false;
+      }
+
+      // Store marketing preference for after OAuth
+      localStorage.setItem('pendingMarketingOptOut', marketingOptOut.toString());
 
       try{
         // Remove hash from redirect URL to avoid double hashes
@@ -2202,15 +2238,19 @@
       if(btn.dataset.back){
         var backStep = btn.dataset.back;
         // Reset email form when going back
-        if(backStep === 'join-code'){
+        if(backStep === 'join-code' || backStep === 'join-signup'){
           document.getElementById('join-social-only').classList.remove('is-hidden');
           document.getElementById('join-email-form').classList.remove('is-visible');
+          goToStep('join-signup');
         }
-        if(backStep === 'start-frequency'){
+        if(backStep === 'start-frequency' || backStep === 'start-signup'){
           document.getElementById('start-social-only').classList.remove('is-hidden');
           document.getElementById('start-email-form').classList.remove('is-visible');
+          goToStep('start-signup');
         }
-        goToStep(backStep);
+        if(backStep !== 'join-signup' && backStep !== 'start-signup'){
+          goToStep(backStep);
+        }
       }
 
       if(btn.dataset.submit){

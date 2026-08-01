@@ -4460,6 +4460,28 @@
       var authFlow = localStorage.getItem('authFlow');
       console.log('authFlow from localStorage:', authFlow);
       
+      // Check for pending marketing opt-out preference from OAuth
+      var pendingMarketingOptOut = localStorage.getItem('pendingMarketingOptOut');
+      if(pendingMarketingOptOut){
+        try{
+          var marketingOptOutValue = pendingMarketingOptOut === 'true';
+          var client = getSupabaseClient();
+          if(client && currentUser){
+            var { error: updateError } = await client.auth.updateUser({
+              data: {
+                marketing_opt_out: marketingOptOutValue
+              }
+            });
+            if(!updateError){
+              console.log('Updated marketing opt-out preference from OAuth:', marketingOptOutValue);
+            }
+          }
+        }catch(err){
+          console.error('Error updating marketing opt-out from OAuth:', err);
+        }
+        localStorage.removeItem('pendingMarketingOptOut');
+      }
+      
       if(authFlow){
         try{
           var flowData = JSON.parse(authFlow);
@@ -8340,7 +8362,7 @@
     }
 
     function cleanupStaleLocalStorage(){
-      var keys = ['pendingPodJoin', 'pendingPodCreation', 'authFlow'];
+      var keys = ['pendingPodJoin', 'pendingPodCreation', 'authFlow', 'pendingMarketingOptOut'];
       var tenMinutesAgo = Date.now() - (10 * 60 * 1000);
       
       keys.forEach(function(key){
