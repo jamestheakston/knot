@@ -292,7 +292,10 @@
           }
 
           // Create verification link
-          var verificationLink = window.location.origin + '/account/deletion/verifydeletion.html?code=' + verificationCode + '&id=' + recoveryId;
+          var verificationLink = window.location.origin + '/account/deletion/verifydeletion.html?id=' + recoveryId;
+
+          // Store verification code in sessionStorage for security (not in URL)
+          sessionStorage.setItem('verificationCode', verificationCode);
 
           // Send verification email
           sendAccountDeletionVerificationEmail(currentUser.email, currentUser.user_metadata?.display_name || currentUser.email?.split('@')[0] || 'there', verificationCode, currentUser.id).then(function(result) {

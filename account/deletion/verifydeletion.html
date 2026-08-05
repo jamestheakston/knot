@@ -182,19 +182,17 @@
     var supabaseKey = 'sb_publishable_SPhsUI31nYbrrLjPBAaRBw_OkWQ2_Xn';
     var supabase = supabase.createClient(supabaseUrl, supabaseKey);
 
-    // Get URL parameters
-    var urlParams = new URLSearchParams(window.location.search);
-    var expectedCode = urlParams.get('code');
-    var recoveryId = urlParams.get('id');
+    // Get verification code from sessionStorage (set by deleteaccount.html)
+    var expectedCode = sessionStorage.getItem('verificationCode');
+    var recoveryId = new URLSearchParams(window.location.search).get('id');
 
     console.log('Verification page loaded');
     console.log('Full URL:', window.location.href);
-    console.log('Search string:', window.location.search);
     console.log('Expected code:', expectedCode);
     console.log('Recovery ID:', recoveryId);
 
     if (!expectedCode || !recoveryId) {
-      console.error('Missing URL parameters');
+      console.error('Missing verification data');
       document.getElementById('message').innerHTML = '<div class="error">Invalid verification link. Please request a new deletion verification email. Verification codes expire in 10 minutes.</div>';
       document.getElementById('verifyBtn').disabled = true;
     }

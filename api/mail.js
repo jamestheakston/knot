@@ -1453,12 +1453,12 @@ async function sendEveryoneMissedEmail(toEmail, podName, podDayMissCount, userId
 // Create notification in database
 async function createNotification(userId, type, title, message, metadata, fromName){
   try{
-    var supabase = window.supabase.createClient(
+    var supabaseClient = supabase.createClient(
       'https://mfjtdrqvmuwtoarkiezi.supabase.co',
       'sb_publishable_SPhsUI31nYbrrLjPBAaRBw_OkWQ2_Xn'
     );
     
-    var { error } = await supabase
+    var { error } = await supabaseClient
       .from('notifications')
       .insert({
         user_id: userId,
