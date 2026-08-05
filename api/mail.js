@@ -244,6 +244,9 @@ function generateInviteEmailHTML(podName, inviteCode, inviterName){
               <p style="font-size: 13px; color: #8890A0; margin: 0;">
                 © 2026 Knot. A habit is easier to keep than a promise, when both are shared.
               </p>
+              <p style="font-size: 12px; color: #8890A0; margin: 16px 0 0 0;">
+                Don't like these emails? <a href="https://knotapp.pages.dev/account/notification/notificationsettings.html" style="color: #2A4BD7; text-decoration: underline;">Unsubscribe from them</a>
+              </p>
             </td>
           </tr>
 
@@ -1108,6 +1111,7 @@ function generateStreakBrokenEmailHTML(podName, podDayMissCount){
           <div class="footer">
             <p>You received this email because you're part of a pod on Knot.</p>
             <p style="margin-top: 8px;">© 2026 Knot.</p>
+            <p style="margin-top: 8px; font-size: 12px;">Don't like these emails? <a href="https://knotapp.pages.dev/account/notification/notificationsettings.html" style="color: #2A4BD7; text-decoration: underline;">Unsubscribe from them</a></p>
           </div>
 
         </div>
@@ -1279,6 +1283,7 @@ function generateEveryoneMissedEmailHTML(podName, podDayMissCount){
           <div class="footer">
             <p>You received this email because you're part of a pod on Knot.</p>
             <p style="margin-top: 8px;">© 2026 Knot.</p>
+            <p style="margin-top: 8px; font-size: 12px;">Don't like these emails? <a href="https://knotapp.pages.dev/account/notification/notificationsettings.html" style="color: #2A4BD7; text-decoration: underline;">Unsubscribe from them</a></p>
           </div>
 
         </div>
@@ -1453,10 +1458,22 @@ async function sendEveryoneMissedEmail(toEmail, podName, podDayMissCount, userId
 // Create notification in database
 async function createNotification(userId, type, title, message, metadata, fromName){
   try{
-    var supabaseClient = supabase.createClient(
-      'https://mfjtdrqvmuwtoarkiezi.supabase.co',
-      'sb_publishable_SPhsUI31nYbrrLjPBAaRBw_OkWQ2_Xn'
-    );
+    // Use window.supabase if available, otherwise create client directly
+    var supabaseClient;
+    if(typeof window !== 'undefined' && window.supabase){
+      supabaseClient = window.supabase.createClient(
+        'https://mfjtdrqvmuwtoarkiezi.supabase.co',
+        'sb_publishable_SPhsUI31nYbrrLjPBAaRBw_OkWQ2_Xn'
+      );
+    } else if(typeof supabase !== 'undefined'){
+      supabaseClient = supabase.createClient(
+        'https://mfjtdrqvmuwtoarkiezi.supabase.co',
+        'sb_publishable_SPhsUI31nYbrrLjPBAaRBw_OkWQ2_Xn'
+      );
+    } else {
+      console.error('Supabase client not available');
+      return;
+    }
     
     var { error } = await supabaseClient
       .from('notifications')

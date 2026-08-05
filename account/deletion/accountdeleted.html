@@ -181,6 +181,9 @@
     var supabaseUrl = 'https://mfjtdrqvmuwtoarkiezi.supabase.co';
     var supabaseKey = 'sb_publishable_SPhsUI31nYbrrLjPBAaRBw_OkWQ2_Xn';
     var supabase = supabase.createClient(supabaseUrl, supabaseKey);
+    
+    // Make supabase available globally for mail.js
+    window.supabase = supabase;
 
     // Get the recovery ID from URL parameter
     var urlParams = new URLSearchParams(window.location.search);
