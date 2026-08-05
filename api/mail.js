@@ -789,59 +789,518 @@ async function sendLoginNotification(email, userId){
   }
 }
 
-// Generate account deletion verification email (plain text)
-function generateAccountDeletionVerificationHTML(email, verificationCode, verificationLink){
+// Generate account deletion verification email
+function generateAccountDeletionVerificationHTML(name, code, email){
   return `
-Hi there,
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Knot Account Deletion</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #ffffff;
+            color: #1c1e21;
+            margin: 0;
+            padding: 20px;
+        }
+        .email-container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .logo-container {
+            margin-bottom: 24px;
+        }
+        .logo-text {
+            font-size: 28px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            color: #000000;
+        }
+        hr {
+            border: none;
+            border-top: 1px solid #e4e6eb;
+            margin: 20px 0;
+        }
+        p {
+            font-size: 16px;
+            line-height: 1.5;
+            margin: 16px 0;
+            color: #1c1e21;
+        }
+        .code-label {
+            font-size: 16px;
+            color: #1c1e21;
+            margin-top: 24px;
+            margin-bottom: 8px;
+        }
+        .code-box {
+            background-color: #f0f2f5;
+            border: 1px solid #ced0d4;
+            border-radius: 6px;
+            padding: 14px 16px;
+            font-size: 26px;
+            font-weight: 400;
+            letter-spacing: 6px;
+            color: #1c1e21;
+            display: inline-block;
+            margin-bottom: 16px;
+        }
+        .footer-text {
+            font-size: 12px;
+            color: #65676b;
+            line-height: 1.4;
+            margin-top: 32px;
+        }
+        .footer-text a {
+            color: #0064e0;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="email-container">
+        <div class="logo-container">
+            <span class="logo-text">Knot</span>
+        </div>
+        
+        <hr>
 
-You requested to delete your Knot account. To complete this action, please verify your identity using the code below. 
+        <p>Hi ${name},</p>
 
-Visit ${verificationLink}
-and enter your code: ${verificationCode} 
+        <p>We're sorry to see you go.</p>
 
-This verification code will expire in 10 minutes for security reasons.
+        <p>You can delete your Knot account by entering the following code.</p>
 
-Please check your spam folder if you don't see this email in your inbox.
+        <div class="code-label">Deletion code</div>
+        <div class="code-box">${code}</div>
 
-Best wishes,
+        <p>This code expires in 10 minutes. Once your account is deleted, it is recoverable for up to 24 hours, and you will receive an email with a unique recovery link.</p>
 
-The Knot team.
+        <p>If you did not request to delete your account, you can disregard this message.</p>
+
+        <hr>
+
+        <div class="footer-text">
+            This message was sent to <a href="mailto:${email}">${email}</a> at your request.
+        </div>
+    </div>
+</body>
+</html>
   `;
 }
 
-// Generate account recovery email (plain text)
+// Generate account recovery email
 function generateAccountRecoveryEmail(email, recoveryLink, expiryDate){
   return `
 Hi there,
 
-Your Knot account has been successfully deleted. All your data has been permanently removed from our servers.
+Your Knot account has been deleted. If you change your mind, you can recover it until ${expiryDate}.
 
-Changed your mind? Your account can be still be recovered until ${expiryDate}.
+Here's your recovery link: ${recoveryLink}
 
-We have generated a unique recovery link for you that will allow you to restore your account and all your data.
+This link expires in 24 hours.
 
-Visit the recovery page below to restore your account. This link will expire in 24 hours.
-${recoveryLink}
+Knot
+  `;
+}
 
-Please check your spam folder if you don't see this email in your inbox.
+// Generate streak broken email (when user breaks the group streak)
+function generateStreakBrokenEmailHTML(podName, podDayMissCount){
+  return `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Knot — Pod Check-In Reminder</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Work+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  body {
+    margin: 0;
+    padding: 0;
+    background-color: #F7F8FB;
+    color: #151922;
+    font-family: 'Work Sans', sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  table {
+    border-collapse: collapse;
+    width: 100%;
+  }
+  .email-wrapper {
+    max-width: 600px;
+    margin: 40px auto;
+    background-color: #FFFFFF;
+    border: 1px solid rgba(21, 25, 34, 0.10);
+    border-radius: 20px;
+    overflow: hidden;
+  }
+  .header {
+    padding: 28px 36px;
+    text-align: left;
+    border-bottom: 1px solid rgba(21, 25, 34, 0.10);
+  }
+  .logo {
+    font-family: 'Instrument Serif', serif;
+    font-size: 24px;
+    color: #151922;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    font-weight: 400;
+  }
+  .content {
+    padding: 44px 36px;
+  }
+  .eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12.5px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #C4432A;
+    background: rgba(196, 67, 42, 0.08);
+    border: 1px solid rgba(196, 67, 42, 0.2);
+    padding: 6px 14px;
+    border-radius: 100px;
+    margin-bottom: 24px;
+  }
+  .dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #C4432A;
+    display: inline-block;
+  }
+  h1 {
+    font-family: 'Instrument Serif', serif;
+    font-size: clamp(36px, 5vw, 44px);
+    line-height: 1.1;
+    margin: 0 0 16px 0;
+    font-weight: 400;
+    letter-spacing: -0.01em;
+  }
+  h1 em {
+    font-style: italic;
+    color: #C4432A;
+  }
+  p {
+    color: #5B6472;
+    font-size: 16px;
+    line-height: 1.6;
+    margin: 0 0 28px 0;
+  }
+  .pod-card {
+    background: #EEF1F6;
+    border: 1px solid rgba(21, 25, 34, 0.10);
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 32px;
+  }
+  .member-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: #FFFFFF;
+    border: 1px solid rgba(21, 25, 34, 0.10);
+    border-radius: 10px;
+    padding: 12px 14px;
+  }
+  .avatar {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    font-weight: 500;
+    flex-shrink: 0;
+  }
+  .name {
+    font-size: 14px;
+    flex: 1;
+    font-weight: 500;
+    color: #151922;
+  }
+  .status {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11.5px;
+    padding: 3px 9px;
+    border-radius: 100px;
+  }
+  .status.missed {
+    background: rgba(196, 67, 42, 0.12);
+    color: #C4432A;
+  }
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: #2A4BD7;
+    color: #FFFFFF;
+    padding: 13px 24px;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 500;
+    text-decoration: none;
+    font-family: 'Work Sans', sans-serif;
+  }
+  .footer {
+    border-top: 1px solid rgba(21, 25, 34, 0.10);
+    padding: 28px 36px;
+    background-color: #F7F8FB;
+    text-align: left;
+  }
+  .footer p {
+    color: #8890A0;
+    font-size: 13px;
+    margin: 0;
+  }
+  .footer a {
+    color: #5B6472;
+    text-decoration: none;
+  }
+  .footer a:hover {
+    color: #2A4BD7;
+  }
+</style>
+</head>
+<body>
+  <table role="presentation" cellpadding="0" cellspacing="0">
+    <tr>
+      <td align="center">
+        <div class="email-wrapper">
+          
+          <div class="header">
+            <a href="https://knotapp.pages.dev" class="logo">
+              Knot
+            </a>
+          </div>
 
-Best wishes,
+          <div class="content">
+            <span class="eyebrow"><span class="dot"></span>Streak destroyed</span>
+            <h1>You broke the <em>streak</em>.</h1>
+            <p>Everyone else in "${podName}" showed up and did their part. You are the sole reason the pod's hard-earned record is shattered. They are looking at the board right now, waiting on your silence.</p>
+            
+            <div class="pod-card">
+              <div class="member-row">
+                <div class="avatar" style="background:#C4432A;color:#fff;">Y</div>
+                <div class="name">You</div>
+                <div class="status missed">missed ${podDayMissCount} days</div>
+              </div>
+            </div>
 
-Knot.
+            <div style="text-align: center;">
+              <a href="https://knotapp.pages.dev/dashboard.html" class="btn-primary">Face your pod</a>
+            </div>
+          </div>
+
+          <div class="footer">
+            <p>You received this email because you're part of a pod on Knot.</p>
+            <p style="margin-top: 8px;">© 2026 Knot.</p>
+          </div>
+
+        </div>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
+  `;
+}
+
+// Generate everyone missed email (when entire pod misses)
+function generateEveryoneMissedEmailHTML(podName, podDayMissCount){
+  return `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Knot — Pod Inactivity Notice</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Work+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  body {
+    margin: 0;
+    padding: 0;
+    background-color: #F7F8FB;
+    color: #151922;
+    font-family: 'Work Sans', sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  table {
+    border-collapse: collapse;
+    width: 100%;
+  }
+  .email-wrapper {
+    max-width: 600px;
+    margin: 40px auto;
+    background-color: #FFFFFF;
+    border: 1px solid rgba(21, 25, 34, 0.10);
+    border-radius: 20px;
+    overflow: hidden;
+  }
+  .header {
+    padding: 28px 36px;
+    text-align: left;
+    border-bottom: 1px solid rgba(21, 25, 34, 0.10);
+  }
+  .logo {
+    font-family: 'Instrument Serif', serif;
+    font-size: 24px;
+    color: #151922;
+    font-weight: 400;
+  }
+  .content {
+    padding: 44px 36px;
+  }
+  .eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12.5px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #8890A0;
+    background: rgba(21, 25, 34, 0.06);
+    border: 1px solid rgba(21, 25, 34, 0.12);
+    padding: 6px 14px;
+    border-radius: 100px;
+    margin-bottom: 24px;
+  }
+  .dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #8890A0;
+    display: inline-block;
+  }
+  h1 {
+    font-family: 'Instrument Serif', serif;
+    font-size: clamp(36px, 5vw, 44px);
+    line-height: 1.1;
+    margin: 0 0 16px 0;
+    font-weight: 400;
+    letter-spacing: -0.01em;
+  }
+  h1 em {
+    font-style: italic;
+    color: #5B6472;
+  }
+  p {
+    color: #5B6472;
+    font-size: 16px;
+    line-height: 1.6;
+    margin: 0 0 28px 0;
+  }
+  .pod-card {
+    background: #EEF1F6;
+    border: 1px solid rgba(21, 25, 34, 0.10);
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 32px;
+  }
+  .member-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: #FFFFFF;
+    border: 1px solid rgba(21, 25, 34, 0.10);
+    border-radius: 10px;
+    padding: 12px 14px;
+  }
+  .name {
+    font-size: 14px;
+    flex: 1;
+    font-weight: 500;
+    color: #151922;
+  }
+  .status {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11.5px;
+    padding: 3px 9px;
+    border-radius: 100px;
+    background: rgba(21, 25, 34, 0.06);
+    color: #5B6472;
+  }
+  .footer {
+    border-top: 1px solid rgba(21, 25, 34, 0.10);
+    padding: 28px 36px;
+    background-color: #F7F8FB;
+    text-align: left;
+  }
+  .footer p {
+    color: #8890A0;
+    font-size: 13px;
+    margin: 0;
+  }
+</style>
+</head>
+<body>
+  <table role="presentation" cellpadding="0" cellspacing="0">
+    <tr>
+      <td align="center">
+        <div class="email-wrapper">
+          
+          <div class="header">
+            <div class="logo">
+              Knot
+            </div>
+          </div>
+
+          <div class="content">
+            <span class="eyebrow"><span class="dot"></span>Silence across the board</span>
+            <h1>Everybody gave up <em>together</em>.</h1>
+            <p>Not a single person in "${podName}" has checked in for ${podDayMissCount} days. The entire pod went completely dark. Is anyone actually going to break the silence, or are you all just waiting for someone else to care?</p>
+            
+            <div class="pod-card">
+              <div class="member-row">
+                <div class="name">Entire Pod</div>
+                <div class="status">silent for ${podDayMissCount} days</div>
+              </div>
+            </div>
+
+            <p style="font-weight: 500; color: #151922; margin-top: 12px;">You need to log back into Knot to check on your pod.</p>
+          </div>
+
+          <div class="footer">
+            <p>You received this email because you're part of a pod on Knot.</p>
+            <p style="margin-top: 8px;">© 2026 Knot.</p>
+          </div>
+
+        </div>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
   `;
 }
 
 // Send account deletion verification email
-async function sendAccountDeletionVerificationEmail(toEmail, verificationCode, verificationLink, userId){
+async function sendAccountDeletionVerificationEmail(toEmail, name, verificationCode, userId){
   try{
     initEmailJS();
     
-    var emailContent = generateAccountDeletionVerificationHTML(toEmail, verificationCode, verificationLink);
+    var emailContent = generateAccountDeletionVerificationHTML(name, verificationCode, toEmail);
     
     var templateParams = {
       toemail: toEmail,
-      fromname: 'Knot Security',
-      subject: 'Verify your account deletion',
+      fromname: 'Knot',
+      subject: 'Delete your Knot account',
       email_content: emailContent
     };
     
@@ -849,7 +1308,7 @@ async function sendAccountDeletionVerificationEmail(toEmail, verificationCode, v
     
     // Create notification
     if(userId){
-      await createNotification(userId, 'account', 'Account Deletion Requested', 'You have requested to delete your account. Please verify your identity to complete the deletion.', { verificationCode: verificationCode }, 'Knot');
+      await createNotification(userId, 'account', 'Account Deletion Requested', 'You requested to delete your Knot account. Please enter the verification code sent to your email.', { email: toEmail }, 'Knot');
     }
     
     return { success: true };
@@ -931,6 +1390,62 @@ async function sendAccountRecoveryConfirmationEmail(toEmail, userId){
     return { success: true };
   }catch(err){
     console.error('Error sending account recovery confirmation email:', err);
+    return { success: false, error: err.message };
+  }
+}
+
+// Send streak broken email (when user breaks the group streak)
+async function sendStreakBrokenEmail(toEmail, podName, podDayMissCount, userId){
+  try{
+    initEmailJS();
+    
+    var emailContent = generateStreakBrokenEmailHTML(podName, podDayMissCount);
+    
+    var templateParams = {
+      toemail: toEmail,
+      fromname: 'Knot',
+      subject: 'You broke the streak',
+      email_content: emailContent
+    };
+    
+    await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, templateParams);
+    
+    // Create notification
+    if(userId){
+      await createNotification(userId, 'streak', 'Streak Broken', 'You broke the pod streak in "' + podName + '"', { podName: podName, podDayMissCount: podDayMissCount }, 'Knot');
+    }
+    
+    return { success: true };
+  }catch(err){
+    console.error('Error sending streak broken email:', err);
+    return { success: false, error: err.message };
+  }
+}
+
+// Send everyone missed email (when entire pod misses)
+async function sendEveryoneMissedEmail(toEmail, podName, podDayMissCount, userId){
+  try{
+    initEmailJS();
+    
+    var emailContent = generateEveryoneMissedEmailHTML(podName, podDayMissCount);
+    
+    var templateParams = {
+      toemail: toEmail,
+      fromname: 'Knot',
+      subject: 'Pod inactivity notice',
+      email_content: emailContent
+    };
+    
+    await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, templateParams);
+    
+    // Create notification
+    if(userId){
+      await createNotification(userId, 'streak', 'Pod Inactivity', 'No one in "' + podName + '" has checked in for ' + podDayMissCount + ' days', { podName: podName, podDayMissCount: podDayMissCount }, 'Knot');
+    }
+    
+    return { success: true };
+  }catch(err){
+    console.error('Error sending everyone missed email:', err);
     return { success: false, error: err.message };
   }
 }
