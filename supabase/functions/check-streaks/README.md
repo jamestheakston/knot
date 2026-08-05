@@ -33,21 +33,31 @@ This Edge Function automatically checks for broken streaks and pod inactivity, s
 - Click "Invoke" button to test the function manually
 - Check logs to see execution results
 
-### 7. Set Up Automatic Scheduling
-**Note**: Supabase web dashboard doesn't have built-in cron scheduling. Use one of these alternatives:
+### 7. Set Up Automatic Scheduling with GitHub Actions (Recommended)
+**Note**: Supabase web dashboard doesn't have built-in cron scheduling. Use GitHub Actions for first-party scheduling.
 
-**Option A: External Cron Service (Recommended)**
+**Setup Steps:**
+1. Go to your GitHub repository
+2. Navigate to Settings > Secrets and variables > Actions
+3. Add a new secret named `SUPABASE_ANON_KEY`
+4. Paste your Supabase anon key (from Settings > API in Supabase dashboard)
+5. The workflow file is already included at `.github/workflows/check-streaks.yml`
+6. The workflow runs daily at midnight UTC and can be triggered manually
+
+**To trigger manually:**
+- Go to Actions tab in GitHub
+- Select "Check Streaks" workflow
+- Click "Run workflow" button
+
+**Alternative Options:**
+
+**Option B: External Cron Service**
 - Use a free service like cron-job.org or EasyCron
 - Set URL to: `https://mfjtdrqvmuwtoarkiezi.supabase.co/functions/v1/check-streaks`
 - Set schedule to run daily at your preferred time
-- No authentication needed for public functions
-
-**Option B: GitHub Actions**
-- Create a GitHub workflow that calls the function daily
-- Example workflow in `.github/workflows/check-streaks.yml`
 
 **Option C: Manual Invocation**
-- Run the function manually from the dashboard when needed
+- Run the function manually from the Supabase dashboard when needed
 - Or call the URL directly: `https://mfjtdrqvmuwtoarkiezi.supabase.co/functions/v1/check-streaks`
 
 ## Alternative: CLI Deployment
