@@ -44,7 +44,7 @@ serve(async (req) => {
 
       const userIds = members.map(m => m.user_id)
 
-      // Get user emails
+      // Get user emails and their auth metadata
       const { data: users, error: usersError } = await supabase
         .from('user_profiles')
         .select('user_id, email, display_name')
@@ -52,6 +52,22 @@ serve(async (req) => {
 
       if (usersError) continue
       if (!users || users.length === 0) continue
+
+      // Get user auth metadata to check email preferences
+      const { data: authUsers, error: authUsersError } = await supabase.auth.admin.listUsers()
+      
+      if (authUsersError) {
+        console.error('Error fetching auth users:', authUsersError)
+        continue
+      }
+
+      // Create a map of user_id to their auth metadata
+      const userMetadataMap = new Map()
+      if (authUsers && authUsers.users) {
+        for (const authUser of authUsers.users) {
+          userMetadataMap.set(authUser.id, authUser.user_metadata || {})
+        }
+      }
 
       // Calculate the date range to check based on habit frequency
       const today = new Date()
@@ -81,6 +97,13 @@ serve(async (req) => {
       if (usersWhoMissed.length > 0 && usersWhoMissed.length < users.length) {
         // Some users missed, but not all - send streak broken email to those who missed
         for (const user of usersWhoMissed) {
+          // Check if user has opted out of pod activity emails
+          const userMetadata = userMetadataMap.get(user.user_id) || {}
+          if (userMetadata.pod_activity_opt_out === true) {
+            console.log(`Skipping email to ${user.email} - user opted out of pod activity emails`)
+            continue
+          }
+          
           await sendStreakBrokenEmail(user.email, podName, podDayMissCount)
           results.push({
             type: 'streak_broken',
@@ -92,6 +115,13 @@ serve(async (req) => {
       } else if (usersWhoMissed.length === users.length && usersWhoMissed.length > 0) {
         // Everyone missed - send everyone missed email to all users
         for (const user of users) {
+          // Check if user has opted out of pod activity emails
+          const userMetadata = userMetadataMap.get(user.user_id) || {}
+          if (userMetadata.pod_activity_opt_out === true) {
+            console.log(`Skipping email to ${user.email} - user opted out of pod activity emails`)
+            continue
+          }
+          
           await sendEveryoneMissedEmail(user.email, podName, podDayMissCount)
           results.push({
             type: 'everyone_missed',

@@ -203,6 +203,16 @@
             <span class="toggle-slider"></span>
           </label>
         </div>
+        <div class="settings-item" style="margin-top: 16px;">
+          <div class="settings-item-label">
+            <div class="label">Pod Activity</div>
+            <div class="description">Streak notifications, check-in reminders, and pod updates</div>
+          </div>
+          <label class="toggle-switch">
+            <input type="checkbox" id="podToggle">
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
       </div>
 
       <div class="settings-card">
@@ -218,18 +228,6 @@
           </label>
         </div>
         <div class="disabled-message">You cannot disable security emails as they are essential for account protection</div>
-
-        <div class="settings-item" style="margin-top: 16px;">
-          <div class="settings-item-label">
-            <div class="label">Pod Activity</div>
-            <div class="description">Streak notifications, check-in reminders, and pod updates</div>
-          </div>
-          <label class="toggle-switch">
-            <input type="checkbox" id="podToggle" disabled checked>
-            <span class="toggle-slider"></span>
-          </label>
-        </div>
-        <div class="disabled-message">You cannot disable pod activity emails as they are essential for pod participation</div>
 
         <div class="settings-item" style="margin-top: 16px;">
           <div class="settings-item-label">
@@ -275,13 +273,20 @@
       settings.style.display = 'block';
 
       var marketingToggle = document.getElementById('marketingToggle');
+      var podToggle = document.getElementById('podToggle');
       
       // Set initial state based on user metadata
       marketingToggle.checked = user.user_metadata?.marketing_opt_out !== true;
+      podToggle.checked = user.user_metadata?.pod_activity_opt_out !== true;
 
       // Add event listener for marketing toggle
       marketingToggle.addEventListener('change', function() {
         updateMarketingPreference(this.checked);
+      });
+
+      // Add event listener for pod toggle
+      podToggle.addEventListener('change', function() {
+        updatePodPreference(this.checked);
       });
     }
 
@@ -294,6 +299,19 @@
           alert('Failed to update preference. Please try again.');
           // Revert toggle
           document.getElementById('marketingToggle').checked = !enabled;
+        }
+      });
+    }
+
+    function updatePodPreference(enabled) {
+      supabase.auth.updateUser({
+        data: { pod_activity_opt_out: !enabled }
+      }).then(function({ data, error }) {
+        if (error) {
+          console.error('Error updating preference:', error);
+          alert('Failed to update preference. Please try again.');
+          // Revert toggle
+          document.getElementById('podToggle').checked = !enabled;
         }
       });
     }

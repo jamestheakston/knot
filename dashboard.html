@@ -3955,6 +3955,16 @@
       if(isOAuthLogin){
         sendLoginNotification(currentUser.email, currentUser.id);
         
+        // Check if this is a new user (no display_name in metadata)
+        var isNewUser = !currentUser.user_metadata?.display_name;
+        
+        // If new user, set pod_activity_opt_out to true by default
+        if(isNewUser){
+          await client.auth.updateUser({
+            data: { pod_activity_opt_out: true }
+          });
+        }
+        
         // Get current session to retrieve tokens
         var { data: { session } } = await client.auth.getSession();
         
