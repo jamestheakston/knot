@@ -13,5 +13,4 @@ jobs:
       - name: Check inactive users
         run: |
           curl -X POST https://mfjtdrqvmuwtoarkiezi.supabase.co/functions/v1/check-inactive-users \
-            -H "Authorization: Bearer ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" \
             -H "Content-Type: application/json"
