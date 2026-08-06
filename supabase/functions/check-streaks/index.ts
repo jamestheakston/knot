@@ -14,24 +14,30 @@ serve(async (req) => {
     // Initialize Supabase client with service role key for admin access
     const supabase = createClient(supabaseUrl, supabaseServiceKey)
 
-    // Get all pods
-    const { data: pods, error: podsError } = await supabase
-      .from('pods')
-      .select('id, name, habit_frequency')
+    // Get all habits with their pod information
+    const { data: habits, error: habitsError } = await supabase
+      .from('habits')
+      .select('id, pod_id, frequency, pods(id, name)')
 
-    if (podsError) throw podsError
-    if (!pods || pods.length === 0) {
-      return new Response(JSON.stringify({ message: 'No pods found' }), { status: 200 })
+    if (habitsError) throw habitsError
+    if (!habits || habits.length === 0) {
+      return new Response(JSON.stringify({ message: 'No habits found' }), { status: 200 })
     }
 
     const results = []
 
-    for (const pod of pods) {
+    for (const habit of habits) {
+      const pod = habit.pods
+      if (!pod) continue
+      
+      const podId = pod.id
+      const podName = pod.name
+      const frequency = habit.frequency
       // Get all members of this pod
       const { data: members, error: membersError } = await supabase
         .from('pod_members')
         .select('user_id, role')
-        .eq('pod_id', pod.id)
+        .eq('pod_id', podId)
 
       if (membersError) continue
       if (!members || members.length === 0) continue
@@ -49,7 +55,7 @@ serve(async (req) => {
 
       // Calculate the date range to check based on habit frequency
       const today = new Date()
-      const daysToCheck = getDaysToCheck(pod.habit_frequency)
+      const daysToCheck = getDaysToCheck(frequency)
       const checkDate = new Date(today)
       checkDate.setDate(checkDate.getDate() - daysToCheck)
 
@@ -57,7 +63,7 @@ serve(async (req) => {
       const { data: checkIns, error: checkInsError } = await supabase
         .from('check_ins')
         .select('user_id, date')
-        .eq('pod_id', pod.id)
+        .eq('pod_id', podId)
         .gte('date', checkDate.toISOString().split('T')[0])
 
       if (checkInsError) continue
@@ -69,16 +75,16 @@ serve(async (req) => {
       const usersWhoMissed = users.filter(u => !usersWhoCheckedIn.has(u.user_id))
 
       // Calculate how many days the pod has been missing
-      const podDayMissCount = await calculatePodMissCount(supabase, pod.id, pod.habit_frequency)
+      const podDayMissCount = await calculatePodMissCount(supabase, podId, frequency)
 
       // Send emails based on conditions
       if (usersWhoMissed.length > 0 && usersWhoMissed.length < users.length) {
         // Some users missed, but not all - send streak broken email to those who missed
         for (const user of usersWhoMissed) {
-          await sendStreakBrokenEmail(user.email, pod.name, podDayMissCount)
+          await sendStreakBrokenEmail(user.email, podName, podDayMissCount)
           results.push({
             type: 'streak_broken',
-            pod: pod.name,
+            pod: podName,
             user: user.email,
             daysMissed: podDayMissCount
           })
@@ -86,10 +92,10 @@ serve(async (req) => {
       } else if (usersWhoMissed.length === users.length && usersWhoMissed.length > 0) {
         // Everyone missed - send everyone missed email to all users
         for (const user of users) {
-          await sendEveryoneMissedEmail(user.email, pod.name, podDayMissCount)
+          await sendEveryoneMissedEmail(user.email, podName, podDayMissCount)
           results.push({
             type: 'everyone_missed',
-            pod: pod.name,
+            pod: podName,
             user: user.email,
             daysMissed: podDayMissCount
           })
