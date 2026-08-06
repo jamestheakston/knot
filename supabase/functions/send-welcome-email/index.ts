@@ -9,11 +9,6 @@ const EMAILJS_PUBLIC_KEY = 'uF5gBRgWvS-o3wTjZ'
 const EMAILJS_SERVICE_ID = 'service_3e0s0ad'
 const EMAILJS_TEMPLATE_ID = 'template_7xm80oj'
 
-// Delay function to respect EmailJS rate limit (1 request per second)
-function delay(ms: number) {
-  return new Promise(resolve => setTimeout(resolve, ms))
-}
-
 serve(async (req) => {
   try {
     // Initialize Supabase client with service role key for admin access
@@ -30,6 +25,7 @@ serve(async (req) => {
     const results = []
     let sentCount = 0
     let skippedCount = 0
+    const bccEmails: string[] = []
 
     for (const user of authUsers.users) {
       // Check if user has opted out of marketing
@@ -46,7 +42,11 @@ serve(async (req) => {
         continue
       }
 
-      // Send welcome email
+      bccEmails.push(email)
+    }
+
+    // Send single welcome email with BCC list
+    if (bccEmails.length > 0) {
       const emailContent = generateWelcomeEmailHTML()
       
       const response = await fetch('https://api.emailjs.com/api/v1.0/email/send', {
@@ -59,7 +59,8 @@ serve(async (req) => {
           template_id: EMAILJS_TEMPLATE_ID,
           user_id: EMAILJS_PUBLIC_KEY,
           template_params: {
-            toemail: email,
+            toemail: 'noreply.jamestheakston@gmail.com',
+            bcc: bccEmails.join(','),
             fromname: 'Knot',
             subject: 'Welcome to Knot',
             email_content: emailContent
@@ -68,21 +69,22 @@ serve(async (req) => {
       })
 
       if (response.ok) {
-        sentCount++
-        results.push({
-          email: email,
-          status: 'sent'
+        sentCount = bccEmails.length
+        bccEmails.forEach(email => {
+          results.push({
+            email: email,
+            status: 'sent'
+          })
         })
       } else {
-        results.push({
-          email: email,
-          status: 'failed',
-          error: response.statusText
+        bccEmails.forEach(email => {
+          results.push({
+            email: email,
+            status: 'failed',
+            error: response.statusText
+          })
         })
       }
-
-      // Wait 2 seconds to respect EmailJS rate limit (1 request per second)
-      await delay(2000)
     }
 
     return new Response(JSON.stringify({ 

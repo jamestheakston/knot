@@ -9,11 +9,6 @@ const EMAILJS_PUBLIC_KEY = 'uF5gBRgWvS-o3wTjZ'
 const EMAILJS_SERVICE_ID = 'service_3e0s0ad'
 const EMAILJS_TEMPLATE_ID = 'template_7xm80oj'
 
-// Delay function to respect EmailJS rate limit (1 request per second)
-function delay(ms: number) {
-  return new Promise(resolve => setTimeout(resolve, ms))
-}
-
 serve(async (req) => {
   try {
     // Initialize Supabase client with service role key for admin access
@@ -30,6 +25,7 @@ serve(async (req) => {
     const results = []
     let sentCount = 0
     let skippedCount = 0
+    const bccEmails: string[] = []
 
     // Calculate the date 7 days ago
     const sevenDaysAgo = new Date()
@@ -82,7 +78,11 @@ serve(async (req) => {
         continue
       }
 
-      // Send "this isn't working" email
+      bccEmails.push(email)
+    }
+
+    // Send single "this isn't working" email with BCC list
+    if (bccEmails.length > 0) {
       const emailContent = generateNotWorkingEmailHTML()
       
       const response = await fetch('https://api.emailjs.com/api/v1.0/email/send', {
@@ -95,7 +95,8 @@ serve(async (req) => {
           template_id: EMAILJS_TEMPLATE_ID,
           user_id: EMAILJS_PUBLIC_KEY,
           template_params: {
-            toemail: email,
+            toemail: 'noreply.jamestheakston@gmail.com',
+            bcc: bccEmails.join(','),
             fromname: 'Knot',
             subject: 'Is Knot working for you?',
             email_content: emailContent
@@ -104,30 +105,35 @@ serve(async (req) => {
       })
 
       if (response.ok) {
-        sentCount++
+        sentCount = bccEmails.length
         
-        // Track that we sent this email
-        await supabase
-          .from('email_tracking')
-          .insert({
-            user_id: user.id,
-            email_type: 'not_working'
+        // Track all users who received the email
+        for (const user of authUsers.users) {
+          if (bccEmails.includes(user.email || '')) {
+            await supabase
+              .from('email_tracking')
+              .insert({
+                user_id: user.id,
+                email_type: 'not_working'
+              })
+          }
+        }
+        
+        bccEmails.forEach(email => {
+          results.push({
+            email: email,
+            status: 'sent'
           })
-        
-        results.push({
-          email: email,
-          status: 'sent'
         })
       } else {
-        results.push({
-          email: email,
-          status: 'failed',
-          error: response.statusText
+        bccEmails.forEach(email => {
+          results.push({
+            email: email,
+            status: 'failed',
+            error: response.statusText
+          })
         })
       }
-
-      // Wait 2 seconds to respect EmailJS rate limit (1 request per second)
-      await delay(2000)
     }
 
     return new Response(JSON.stringify({ 
