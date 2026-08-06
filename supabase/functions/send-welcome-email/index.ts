@@ -11,6 +11,25 @@ const EMAILJS_TEMPLATE_ID = 'template_7xm80oj'
 
 serve(async (req) => {
   try {
+    // Check for authorization header
+    const authHeader = req.headers.get('Authorization')
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+        headers: { 'Content-Type': 'application/json' },
+        status: 401
+      })
+    }
+
+    const token = authHeader.replace('Bearer ', '')
+    
+    // Verify the token is the service role key
+    if (token !== supabaseServiceKey) {
+      return new Response(JSON.stringify({ error: 'Forbidden' }), {
+        headers: { 'Content-Type': 'application/json' },
+        status: 403
+      })
+    }
+
     // Initialize Supabase client with service role key for admin access
     const supabase = createClient(supabaseUrl, supabaseServiceKey)
 
@@ -135,7 +154,6 @@ function generateWelcomeEmailHTML(): string {
             <a href="https://knotapp.pages.dev" class="logo">Knot</a>
           </div>
           <div class="content">
-            <span class="eyebrow"><span class="dot"></span>Welcome</span>
             <h1>Welcome to <em>Knot</em>.</h1>
             <p>A habit is easier to keep than a promise, when both are shared. Thank you for joining Knot — we're excited to have you as part of our community.</p>
             <p>Whether you're starting a new pod or joining an existing one, you're now part of a network of people committed to showing up for each other, every single day.</p>
