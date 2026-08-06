@@ -330,8 +330,8 @@
   <main>
     <div class="auth-container">
       <div class="auth-header">
-        <h1>Sign in to continue</h1>
-        <p>You need to be logged in to access this page</p>
+        <h1 id="headerTitle">Sign in to continue</h1>
+        <p id="headerSubtitle">You need to be logged in to access this page</p>
       </div>
 
       <form id="loginForm">
@@ -390,6 +390,13 @@
     // Get redirect URL from query parameter
     var urlParams = new URLSearchParams(window.location.search);
     var redirectUrl = urlParams.get('redirect') || 'https://knotapp.pages.dev/dashboard.html';
+    var service = urlParams.get('service');
+
+    // Update header based on service parameter
+    if (service === 'notificationpref') {
+      document.getElementById('headerTitle').textContent = 'Sign in to continue';
+      document.getElementById('headerSubtitle').textContent = 'Sign in to continue to notification preferences';
+    }
 
     // Check if user is already logged in
     supabase.auth.getUser().then(function({ data: { user }, error }) {

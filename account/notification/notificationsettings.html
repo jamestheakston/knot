@@ -261,8 +261,8 @@
       loading.style.display = 'none';
 
       if (error || !user) {
-        // Not logged in, redirect to continue page
-        window.location.href = 'https://knotapp.pages.dev/account/continue.html?redirect=' + encodeURIComponent(window.location.href);
+        // Not logged in, redirect to continue page with service parameter
+        window.location.href = 'https://knotapp.pages.dev/account/continue.html?redirect=' + encodeURIComponent(window.location.href) + '&service=notificationpref';
         return;
       }
 
