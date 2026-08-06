@@ -104,7 +104,31 @@ serve(async (req) => {
             continue
           }
           
+          // Check if we've already sent a streak broken email for this user in this pod
+          const { data: existingEmail } = await supabase
+            .from('email_tracking')
+            .select('*')
+            .eq('user_id', user.user_id)
+            .eq('email_type', 'streak_broken')
+            .eq('pod_id', podId)
+            .maybeSingle()
+          
+          if (existingEmail) {
+            console.log(`Skipping streak broken email to ${user.email} - already sent for this pod`)
+            continue
+          }
+          
           await sendStreakBrokenEmail(user.email, podName, podDayMissCount)
+          
+          // Track that we sent this email
+          await supabase
+            .from('email_tracking')
+            .insert({
+              user_id: user.user_id,
+              email_type: 'streak_broken',
+              pod_id: podId
+            })
+          
           results.push({
             type: 'streak_broken',
             pod: podName,
@@ -122,7 +146,31 @@ serve(async (req) => {
             continue
           }
           
+          // Check if we've already sent an everyone missed email for this user in this pod
+          const { data: existingEmail } = await supabase
+            .from('email_tracking')
+            .select('*')
+            .eq('user_id', user.user_id)
+            .eq('email_type', 'everyone_missed')
+            .eq('pod_id', podId)
+            .maybeSingle()
+          
+          if (existingEmail) {
+            console.log(`Skipping everyone missed email to ${user.email} - already sent for this pod`)
+            continue
+          }
+          
           await sendEveryoneMissedEmail(user.email, podName, podDayMissCount)
+          
+          // Track that we sent this email
+          await supabase
+            .from('email_tracking')
+            .insert({
+              user_id: user.user_id,
+              email_type: 'everyone_missed',
+              pod_id: podId
+            })
+          
           results.push({
             type: 'everyone_missed',
             pod: podName,
