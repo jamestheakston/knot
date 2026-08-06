@@ -244,9 +244,6 @@ function generateInviteEmailHTML(podName, inviteCode, inviterName){
               <p style="font-size: 13px; color: #8890A0; margin: 0;">
                 © 2026 Knot. A habit is easier to keep than a promise, when both are shared.
               </p>
-              <p style="font-size: 12px; color: #8890A0; margin: 16px 0 0 0;">
-                Don't like these emails? <a href="https://knotapp.pages.dev/account/email/manage.html" style="color: #2A4BD7; text-decoration: underline;">Unsubscribe from them</a>
-              </p>
             </td>
           </tr>
 
@@ -1111,7 +1108,6 @@ function generateStreakBrokenEmailHTML(podName, podDayMissCount){
           <div class="footer">
             <p>You received this email because you're part of a pod on Knot.</p>
             <p style="margin-top: 8px;">© 2026 Knot.</p>
-            <p style="margin-top: 8px; font-size: 12px;">Don't like these emails? <a href="https://knotapp.pages.dev/account/notification/notificationsettings.html" style="color: #2A4BD7; text-decoration: underline;">Unsubscribe from them</a></p>
           </div>
 
         </div>
@@ -1283,7 +1279,6 @@ function generateEveryoneMissedEmailHTML(podName, podDayMissCount){
           <div class="footer">
             <p>You received this email because you're part of a pod on Knot.</p>
             <p style="margin-top: 8px;">© 2026 Knot.</p>
-            <p style="margin-top: 8px; font-size: 12px;">Don't like these emails? <a href="https://knotapp.pages.dev/account/notification/notificationsettings.html" style="color: #2A4BD7; text-decoration: underline;">Unsubscribe from them</a></p>
           </div>
 
         </div>
