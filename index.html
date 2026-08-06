@@ -911,17 +911,18 @@
   .checkbox-label{
     display: flex;
     align-items: flex-start;
-    gap: 10px;
+    gap: 12px;
     font-size: 13px;
     color: var(--muted);
     line-height: 1.5;
     cursor: pointer;
   }
   .checkbox-label input[type="checkbox"]{
-    margin-top: 2px;
+    margin-top: 3px;
     width: 16px;
     height: 16px;
     cursor: pointer;
+    flex-shrink: 0;
   }
   .form-input.code-input{
     font-family: 'IBM Plex Mono', monospace;
@@ -1544,41 +1545,13 @@
       </div>
       <div class="form-actions">
         <button class="btn btn-ghost" data-back="start-name">Back</button>
-        <button class="btn btn-primary" data-next="start-frequency">Continue</button>
-      </div>
-    </div>
-
-    <!-- Start Flow: Step 3 - Frequency -->
-    <div class="modal-step" data-step="start-frequency">
-      <div class="step-indicator">
-        <div class="step-dot is-complete"></div>
-        <div class="step-dot is-complete"></div>
-        <div class="step-dot is-active"></div>
-        <div class="step-dot"></div>
-      </div>
-      <div class="modal-head">
-        <span class="modal-eyebrow">Start a pod</span>
-        <h2>How often?</h2>
-        <p>Daily check-ins, or something more flexible?</p>
-      </div>
-      <div class="form-group">
-        <label class="form-label" for="frequency">Check-in frequency</label>
-        <select id="frequency" class="form-input">
-          <option value="daily">Every day</option>
-          <option value="weekdays">Weekdays only</option>
-          <option value="custom">Custom schedule</option>
-        </select>
-      </div>
-      <div class="form-actions">
-        <button class="btn btn-ghost" data-back="start-habit">Back</button>
         <button class="btn btn-primary" data-next="start-signup">Continue</button>
       </div>
     </div>
 
-    <!-- Start Flow: Step 4 - Signup -->
+    <!-- Start Flow: Step 3 - Signup -->
     <div class="modal-step" data-step="start-signup">
       <div class="step-indicator">
-        <div class="step-dot is-complete"></div>
         <div class="step-dot is-complete"></div>
         <div class="step-dot is-complete"></div>
         <div class="step-dot is-active"></div>
@@ -1674,7 +1647,7 @@
     // Store form data across steps
     var formData = {
       join: { code: '', name: '', email: '', password: '' },
-      start: { podName: '', habitName: '', habitDescription: '', frequency: '', name: '', email: '', password: '' }
+      start: { podName: '', habitName: '', habitDescription: '', name: '', email: '', password: '' }
     };
 
     // Lazy initialize Supabase client
@@ -1779,7 +1752,7 @@
       });
       formData = {
         join: { code: '', name: '', email: '', password: '' },
-        start: { podName: '', habitName: '', habitDescription: '', frequency: '', name: '', email: '', password: '' }
+        start: { podName: '', habitName: '', habitDescription: '', name: '', email: '', password: '' }
       };
     }
 
@@ -1849,7 +1822,7 @@
             data: {
               display_name: name,
               marketing_opt_out: marketingOptOut,
-              pod_activity_opt_out: true // Opt out of pod activity emails by default
+              pod_activity_opt_out: marketingOptOut // Only opt out if marketing opt-out is checked
             }
           }
         });
@@ -1921,7 +1894,6 @@
       var podName = document.getElementById('podName').value;
       var habitName = document.getElementById('habitName').value;
       var habitDescription = document.getElementById('habitDescription').value;
-      var frequency = document.getElementById('frequency').value;
       var name = document.getElementById('startName').value;
       var email = document.getElementById('startEmail').value;
       var password = document.getElementById('startPassword').value;
@@ -1949,7 +1921,7 @@
             data: {
               display_name: name,
               marketing_opt_out: marketingOptOut,
-              pod_activity_opt_out: true // Opt out of pod activity emails by default
+              pod_activity_opt_out: marketingOptOut // Only opt out if marketing opt-out is checked
             }
           }
         });
@@ -1963,8 +1935,7 @@
         var podDataToStore = {
           podName: podName,
           habitName: habitName,
-          habitDescription: habitDescription,
-          frequency: frequency
+          habitDescription: habitDescription
         };
 
         if(authData.session){
@@ -2032,13 +2003,11 @@
           var podName = document.getElementById('podName').value;
           var habitName = document.getElementById('habitName').value;
           var habitDescription = document.getElementById('habitDescription').value;
-          var frequency = document.getElementById('frequency').value;
           
           var podDataToStore = {
             podName: podName,
             habitName: habitName,
-            habitDescription: habitDescription,
-            frequency: frequency
+            habitDescription: habitDescription
           };
           localStorage.setItem('authFlow', JSON.stringify({
             flow: 'start',
@@ -2095,13 +2064,11 @@
           var podName = document.getElementById('podName').value;
           var habitName = document.getElementById('habitName').value;
           var habitDescription = document.getElementById('habitDescription').value;
-          var frequency = document.getElementById('frequency').value;
           
           var podDataToStore = {
             podName: podName,
             habitName: habitName,
-            habitDescription: habitDescription,
-            frequency: frequency
+            habitDescription: habitDescription
           };
           localStorage.setItem('authFlow', JSON.stringify({
             flow: 'start',
@@ -2213,8 +2180,8 @@
           formData.start.podName = podName;
         }
         
-        // Validate habit name if going from start-habit to start-frequency
-        if(nextStep === 'start-frequency'){
+        // Validate habit name if going from start-habit to start-signup
+        if(nextStep === 'start-signup'){
           var habitNameInput = document.getElementById('habitName');
           var habitName = habitNameInput.value.trim();
           if(!habitName){
@@ -2228,7 +2195,6 @@
         }
         
         if(nextStep === 'start-signup'){
-          formData.start.frequency = document.getElementById('frequency').value;
           // Reset email form visibility
           document.getElementById('start-social-only').classList.remove('is-hidden');
           document.getElementById('start-email-form').classList.remove('is-visible');
@@ -2245,7 +2211,7 @@
           document.getElementById('join-email-form').classList.remove('is-visible');
           goToStep('join-signup');
         }
-        if(backStep === 'start-frequency' || backStep === 'start-signup'){
+        if(backStep === 'start-signup'){
           document.getElementById('start-social-only').classList.remove('is-hidden');
           document.getElementById('start-email-form').classList.remove('is-visible');
           goToStep('start-signup');

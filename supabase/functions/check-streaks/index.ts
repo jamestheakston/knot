@@ -294,7 +294,7 @@ function generateStreakBrokenEmailHTML(podName: string, podDayMissCount: number)
           <div class="footer">
             <p>You received this email because you're part of a pod on Knot.</p>
             <p style="margin-top: 8px;">© 2026 Knot.</p>
-            <p style="margin-top: 8px; font-size: 12px;">Don't like these emails? <a href="https://knotapp.pages.dev/account/notification/notificationsettings.html" style="color: #2A4BD7; text-decoration: underline;">Unsubscribe from them</a></p>
+            <p style="margin-top: 8px; font-size: 12px;">Don't like these emails? <a href="https://knotapp.pages.dev/account/email/manage.html" style="color: #2A4BD7; text-decoration: underline;">Unsubscribe from them</a></p>
           </div>
         </div>
       </td>
@@ -359,7 +359,7 @@ function generateEveryoneMissedEmailHTML(podName: string, podDayMissCount: numbe
           <div class="footer">
             <p>You received this email because you're part of a pod on Knot.</p>
             <p style="margin-top: 8px;">© 2026 Knot.</p>
-            <p style="margin-top: 8px; font-size: 12px;">Don't like these emails? <a href="https://knotapp.pages.dev/account/notification/notificationsettings.html" style="color: #2A4BD7; text-decoration: underline;">Unsubscribe from them</a></p>
+            <p style="margin-top: 8px; font-size: 12px;">Don't like these emails? <a href="https://knotapp.pages.dev/account/email/manage.html" style="color: #2A4BD7; text-decoration: underline;">Unsubscribe from them</a></p>
           </div>
         </div>
       </td>
