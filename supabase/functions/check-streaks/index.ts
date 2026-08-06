@@ -259,8 +259,8 @@ async function sendStreakBrokenEmail(email: string, podName: string, podDayMissC
     console.error('Failed to send streak broken email to', email)
   }
 
-  // Wait 1 second to respect EmailJS rate limit (1 request per second)
-  await delay(1000)
+  // Wait 2 seconds to respect EmailJS rate limit (1 request per second)
+  await delay(2000)
 }
 
 async function sendEveryoneMissedEmail(email: string, podName: string, podDayMissCount: number): Promise<void> {
@@ -288,8 +288,8 @@ async function sendEveryoneMissedEmail(email: string, podName: string, podDayMis
     console.error('Failed to send everyone missed email to', email)
   }
 
-  // Wait 1 second to respect EmailJS rate limit (1 request per second)
-  await delay(1000)
+  // Wait 2 seconds to respect EmailJS rate limit (1 request per second)
+  await delay(2000)
 }
 
 function generateStreakBrokenEmailHTML(podName: string, podDayMissCount: number): string {

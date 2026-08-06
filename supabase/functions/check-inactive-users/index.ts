@@ -126,8 +126,8 @@ serve(async (req) => {
         })
       }
 
-      // Wait 1 second to respect EmailJS rate limit (1 request per second)
-      await delay(1000)
+      // Wait 2 seconds to respect EmailJS rate limit (1 request per second)
+      await delay(2000)
     }
 
     return new Response(JSON.stringify({ 
