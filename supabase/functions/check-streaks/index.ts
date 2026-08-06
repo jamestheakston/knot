@@ -9,6 +9,11 @@ const EMAILJS_PUBLIC_KEY = 'uF5gBRgWvS-o3wTjZ'
 const EMAILJS_SERVICE_ID = 'service_3e0s0ad'
 const EMAILJS_TEMPLATE_ID = 'template_7xm80oj'
 
+// Delay function to respect EmailJS rate limit (1 request per second)
+function delay(ms: number) {
+  return new Promise(resolve => setTimeout(resolve, ms))
+}
+
 serve(async (req) => {
   try {
     // Initialize Supabase client with service role key for admin access
@@ -253,6 +258,9 @@ async function sendStreakBrokenEmail(email: string, podName: string, podDayMissC
   if (!response.ok) {
     console.error('Failed to send streak broken email to', email)
   }
+
+  // Wait 1 second to respect EmailJS rate limit (1 request per second)
+  await delay(1000)
 }
 
 async function sendEveryoneMissedEmail(email: string, podName: string, podDayMissCount: number): Promise<void> {
@@ -279,6 +287,9 @@ async function sendEveryoneMissedEmail(email: string, podName: string, podDayMis
   if (!response.ok) {
     console.error('Failed to send everyone missed email to', email)
   }
+
+  // Wait 1 second to respect EmailJS rate limit (1 request per second)
+  await delay(1000)
 }
 
 function generateStreakBrokenEmailHTML(podName: string, podDayMissCount: number): string {

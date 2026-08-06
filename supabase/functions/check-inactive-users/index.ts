@@ -9,6 +9,11 @@ const EMAILJS_PUBLIC_KEY = 'uF5gBRgWvS-o3wTjZ'
 const EMAILJS_SERVICE_ID = 'service_3e0s0ad'
 const EMAILJS_TEMPLATE_ID = 'template_7xm80oj'
 
+// Delay function to respect EmailJS rate limit (1 request per second)
+function delay(ms: number) {
+  return new Promise(resolve => setTimeout(resolve, ms))
+}
+
 serve(async (req) => {
   try {
     // Initialize Supabase client with service role key for admin access
@@ -120,6 +125,9 @@ serve(async (req) => {
           error: response.statusText
         })
       }
+
+      // Wait 1 second to respect EmailJS rate limit (1 request per second)
+      await delay(1000)
     }
 
     return new Response(JSON.stringify({ 
