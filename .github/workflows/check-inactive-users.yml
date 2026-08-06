@@ -1,0 +1,17 @@
+name: Check Inactive Users
+
+on:
+  schedule:
+    # Run every Monday at 9:00 AM UTC
+    - cron: '0 9 * * 1'
+  workflow_dispatch:
+
+jobs:
+  check-inactive-users:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check inactive users
+        run: |
+          curl -X POST https://mfjtdrqvmuwtoarkiezi.supabase.co/functions/v1/check-inactive-users \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" \
+            -H "Content-Type: application/json"
