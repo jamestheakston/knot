@@ -384,7 +384,7 @@
   </div>
 
   <div class="content-section">
-    <h2>1. Information We Collect</h2>
+    <h2>1. Information We Collect and Our Use</h2>
     <h3>1.1 Account Information</h3>
     <p>When you create an account, we collect:</p>
     <ul>
@@ -428,18 +428,7 @@
     </ul>
     <p>You have control over your email preferences through our Email Preferences settings. By default, marketing communications are enabled, but you may opt out at any time. Pod activity notifications (including streak notifications and inactive user reminders) are controlled by the Marketing Communications toggle, as these are considered promotional in nature. Essential account emails (verification, security, password reset) cannot be disabled.</p>
 
-    <h3>1.5 Cookies and Tracking Technologies</h3>
-    <p>We use cookies and similar technologies to:</p>
-    <ul>
-      <li>Authenticate users and maintain sessions</li>
-      <li>Remember user preferences and settings</li>
-      <li>Analyze service usage patterns</li>
-      <li>Improve service performance and user experience</li>
-    </ul>
-  </div>
-
-  <div class="content-section">
-    <h2>2. How We Use Your Information</h2>
+    <h3>1.5 How We Use Your Information</h3>
     <p>We use your information to:</p>
     <ul>
       <li>Provide and maintain the Knot service</li>
@@ -454,18 +443,18 @@
       <li>Send inactive user reminders when you haven't checked in for 7+ days (if Marketing Communications enabled)</li>
     </ul>
     
-    <h3>2.1 Email Preferences Control</h3>
+    <h3>1.6 Email Preferences Control</h3>
     <p>You have full control over your email communication preferences through our Email Preferences settings page. By default, Marketing Communications are enabled, which includes pod activity notifications (streak notifications and inactive user reminders). You may opt out of Marketing Communications at any time by toggling the setting off in your Email Preferences page. This change will take effect immediately and will prevent future pod activity emails from being sent to you.</p>
     <p>Essential account emails (account verification, security alerts, password reset emails, account deletion confirmations) cannot be disabled as they are necessary for account security and operation. These emails will always be sent regardless of your Marketing Communications preference.</p>
     <p>Your email preference status is stored as part of your user metadata in Supabase Auth and is respected by our email sending functions to ensure your preferences are honored.</p>
   </div>
 
   <div class="content-section">
-    <h2>3. Information Sharing</h2>
-    <h3>3.1 Within Your Pod</h3>
+    <h2>2. How We Share Personal Information</h2>
+    <h3>2.1 Within Your Pod</h3>
     <p>Your check-in status, habit commitments, and display name are visible to other members of your pod. This is a core feature of the service for accountability purposes.</p>
 
-    <h3>3.2 Third-Party Services</h3>
+    <h3>2.2 Third-Party Services</h3>
     <p>We use the following third-party services to provide Knot:</p>
     
     <h4>Supabase</h4>
@@ -503,7 +492,7 @@
     
     <p>We share only the minimum necessary data with these services to provide their functionality. Each service has its own privacy policy which governs their use of your data.</p>
 
-    <h3>3.3 Legal Requirements</h3>
+    <h3>2.3 Legal Requirements</h3>
     <p>We may disclose your information if required by law or to protect our rights, property, or safety, or that of our users or others.</p>
 
     <div class="highlight-box">
@@ -512,21 +501,37 @@
   </div>
 
   <div class="content-section">
-    <h2>4. Data Security</h2>
-    <p>We implement appropriate technical and organizational measures to protect your information, including:</p>
+    <h2>3. Control Over Your Information</h2>
+    <p>Depending on your location, you may have the following rights under applicable data protection laws (such as GDPR, CCPA, etc.):</p>
     <ul>
-      <li>Encryption of data in transit using HTTPS/TLS</li>
-      <li>Encryption of data at rest through Supabase's security infrastructure</li>
-      <li>Secure authentication via Supabase Auth with password hashing</li>
-      <li>Row-level security (RLS) policies to control data access</li>
-      <li>Regular security reviews and updates</li>
-      <li>Access controls to limit who can view your data</li>
-      <li>Secure session management with token-based authentication</li>
-      <li>Input validation and sanitization to prevent injection attacks</li>
+      <li><strong>Right to Access:</strong> Request a copy of your personal information</li>
+      <li><strong>Right to Rectification:</strong> Correct inaccurate or incomplete information</li>
+      <li><strong>Right to Erasure:</strong> Request deletion of your account and data</li>
+      <li><strong>Right to Restrict Processing:</strong> Limit how we use your information</li>
+      <li><strong>Right to Data Portability:</strong> Receive your data in a structured, machine-readable format</li>
+      <li><strong>Right to Object:</strong> Object to certain types of data processing</li>
+      <li><strong>Right to Withdraw Consent:</strong> Withdraw consent for data processing where consent is the legal basis</li>
     </ul>
-    <p>However, no method of transmission over the internet is 100% secure. While we strive to protect your information, we cannot guarantee absolute security. We encourage users to use strong, unique passwords and enable two-factor authentication when available.</p>
+    <p>To exercise these rights, please contact us through our website or by email. We will respond to your request within 30 days of receipt, subject to applicable legal requirements.</p>
     
-    <h3>4.1 Account Switching and Session Management</h3>
+    <h3>3.1 Email Preferences</h3>
+    <p>You can control your email communication preferences through our Email Preferences settings page. You can enable or disable Marketing Communications at any time. This controls pod activity notifications (streak notifications and inactive user reminders). Essential account emails cannot be disabled.</p>
+    
+    <h3>3.2 Account Deletion</h3>
+    <p>You can request deletion of your account and associated data through our account deletion process. This involves a two-stage deletion process: soft deletion of your data (with 30-day recovery period) and immediate hard deletion of your authentication credentials. You can initiate account deletion through your account settings.</p>
+  </div>
+
+  <div class="content-section">
+    <h2>4. How We Use Cookies and Other Tracking Technology to Collect Information</h2>
+    <p>We use cookies and similar technologies to:</p>
+    <ul>
+      <li>Authenticate users and maintain sessions</li>
+      <li>Remember user preferences and settings</li>
+      <li>Analyze service usage patterns</li>
+      <li>Improve service performance and user experience</li>
+    </ul>
+    
+    <h3>4.1 Session Storage for Account Switching</h3>
     <p>Knot provides an account switching feature that allows you to manage multiple accounts. To enable instant switching between accounts without requiring repeated authentication, we store session tokens (access tokens and refresh tokens) in your browser's localStorage. This includes:</p>
     <ul>
       <li>Access tokens for immediate authentication</li>
@@ -538,13 +543,10 @@
       <p><strong>Security Notice:</strong> Storing authentication tokens in localStorage is vulnerable to cross-site scripting (XSS) attacks. If malicious code is executed on your device, these tokens could potentially be accessed. We implement this approach for user convenience, but you should be aware of this security trade-off. For enhanced security, consider using a dedicated browser profile or clearing your localStorage after each session if you share your device.</p>
     </div>
     <p>Session tokens are automatically refreshed by Supabase when they expire, and the updated tokens are stored in localStorage. When you remove an account from the account switcher, the associated session tokens are deleted from localStorage. When you log out of an account, the Supabase session is revoked and the tokens are removed.</p>
-    
-    <h3>4.2 Data Breach Notification</h3>
-    <p>In the event of a data breach that compromises your personal information, we will notify affected users within 72 hours of becoming aware of the breach, in accordance with applicable data protection laws. Notifications will include information about what happened, what data was affected, and steps you can take to protect yourself.</p>
   </div>
 
   <div class="content-section">
-    <h2>5. Data Retention</h2>
+    <h2>5. Data Retention and Security</h2>
     <h3>5.1 Account Data</h3>
     <p>We retain your account information for as long as your account is active. When you request account deletion, we implement a two-stage deletion process:</p>
     <ul>
@@ -564,30 +566,36 @@
     
     <h3>5.5 Email Preference Data</h3>
     <p>Your email communication preferences (marketing opt-out status) are stored as part of your user metadata in Supabase Auth. This data is retained for as long as your account exists and is deleted when your account is permanently deleted.</p>
+
+    <h3>5.6 Data Security Measures</h3>
+    <p>We implement appropriate technical and organizational measures to protect your information, including:</p>
+    <ul>
+      <li>Encryption of data in transit using HTTPS/TLS</li>
+      <li>Encryption of data at rest through Supabase's security infrastructure</li>
+      <li>Secure authentication via Supabase Auth with password hashing</li>
+      <li>Row-level security (RLS) policies to control data access</li>
+      <li>Regular security reviews and updates</li>
+      <li>Access controls to limit who can view your data</li>
+      <li>Secure session management with token-based authentication</li>
+      <li>Input validation and sanitization to prevent injection attacks</li>
+    </ul>
+    <p>However, no method of transmission over the internet is 100% secure. While we strive to protect your information, we cannot guarantee absolute security. We encourage users to use strong, unique passwords and enable two-factor authentication when available.</p>
+    
+    <h3>5.7 Data Breach Notification</h3>
+    <p>In the event of a data breach that compromises your personal information, we will notify affected users within 72 hours of becoming aware of the breach, in accordance with applicable data protection laws. Notifications will include information about what happened, what data was affected, and steps you can take to protect yourself.</p>
   </div>
 
   <div class="content-section">
-    <h2>6. Your Rights</h2>
-    <p>Depending on your location, you may have the following rights under applicable data protection laws (such as GDPR, CCPA, etc.):</p>
+    <h2>6. Links to Third-Party Websites and Services</h2>
+    <p>Our service may contain links to third-party websites and services, including:</p>
     <ul>
-      <li><strong>Right to Access:</strong> Request a copy of your personal information</li>
-      <li><strong>Right to Rectification:</strong> Correct inaccurate or incomplete information</li>
-      <li><strong>Right to Erasure:</strong> Request deletion of your account and data</li>
-      <li><strong>Right to Restrict Processing:</strong> Limit how we use your information</li>
-      <li><strong>Right to Data Portability:</strong> Receive your data in a structured, machine-readable format</li>
-      <li><strong>Right to Object:</strong> Object to certain types of data processing</li>
-      <li><strong>Right to Withdraw Consent:</strong> Withdraw consent for data processing where consent is the legal basis</li>
+      <li>Supabase (authentication and database services)</li>
+      <li>EmailJS (email delivery service)</li>
+      <li>GTranslate (translation service)</li>
+      <li>UNGH (version checking service)</li>
+      <li>GitHub (version control and repository hosting)</li>
     </ul>
-    <p>To exercise these rights, please contact us through our website or by email. We will respond to your request within 30 days of receipt, subject to applicable legal requirements.</p>
-    
-    <h3>6.1 California Residents (CCPA)</h3>
-    <p>If you are a resident of California, you have additional rights under the California Consumer Privacy Act (CCPA):</p>
-    <ul>
-      <li>Right to know what personal information we collect, use, and share</li>
-      <li>Right to delete your personal information (with certain exceptions)</li>
-      <li>Right to opt-out of the sale of your personal information (we do not sell your information)</li>
-      <li>Right to non-discrimination for exercising your privacy rights</li>
-    </ul>
+    <p>We are not responsible for the privacy practices or content of these third-party sites. We encourage you to read the privacy policies of any third-party services you visit. Our inclusion of links does not imply endorsement of those sites or their practices.</p>
   </div>
 
   <div class="content-section">
@@ -605,10 +613,26 @@
       <li>Other legally recognized transfer mechanisms</li>
     </ul>
     <p>Our third-party service providers (Supabase, EmailJS, GTranslate) may also process data in various jurisdictions. We only use providers that maintain adequate data protection standards and comply with GDPR and other applicable data protection regulations.</p>
+    
+    <h3>8.1 European Economic Area (EEA) Including United Kingdom</h3>
+    <p>If you are located in the European Economic Area (EEA) or the United Kingdom, your personal information will be processed in accordance with the General Data Protection Regulation (GDPR) and applicable UK data protection laws. We have implemented appropriate safeguards to ensure your data is protected when transferred outside the EEA/UK, including standard contractual clauses approved by the European Commission and recognized by UK authorities.</p>
+    <p>For more information about data protection in the EEA and UK, you can refer to the <a href="https://www.gov.uk/eu-eea" target="_blank" rel="noopener noreferrer">UK government guidance on EEA countries</a> and relevant data protection authority websites.</p>
+    
+    <h3>8.2 California Residents</h3>
+    <p>If you are a resident of California, you have additional rights under the California Consumer Privacy Act (CCPA) and California Privacy Rights Act (CPRA):</p>
+    <ul>
+      <li>Right to know what personal information we collect, use, and share</li>
+      <li>Right to delete your personal information (with certain exceptions)</li>
+      <li>Right to opt-out of the sale of your personal information (we do not sell your information)</li>
+      <li>Right to non-discrimination for exercising your privacy rights</li>
+      <li>Right to limit the use of sensitive personal information</li>
+      <li>Right to correct inaccurate personal information</li>
+    </ul>
+    <p>To exercise these rights, please contact us using the information provided in the Contact Us section below. We will verify your identity before processing your request and respond within the timeframe required by applicable law.</p>
   </div>
 
   <div class="content-section">
-    <h2>9. Changes to This Privacy Policy</h2>
+    <h2>9. Changes to This Privacy Notice</h2>
     <p>We may update this privacy policy from time to time to reflect changes in our practices, technology, legal requirements, or other factors. We will notify users of significant changes by:</p>
     <ul>
       <li>Posting the new policy on this page with an updated "Last updated" date</li>
@@ -619,13 +643,16 @@
   </div>
 
   <div class="content-section">
-    <h2>10. Contact Information</h2>
+    <h2>10. Contact Us</h2>
     <p>If you have any questions about this Privacy Policy, our data practices, or to exercise your rights, please contact us:</p>
     <ul>
       <li>Email: jamestheakston2@gmail.com</li>
       <li>Website: Through the contact form on our site</li>
     </ul>
     <p>We will respond to your inquiry within 30 days of receipt, subject to applicable legal requirements.</p>
+    
+    <h3>10.1 Data Protection Officer</h3>
+    <p>For inquiries related to data protection matters, particularly from users in the EEA/UK, you may contact our data protection representative at the same email address with the subject line "Data Protection Inquiry".</p>
   </div>
 </div>
 
