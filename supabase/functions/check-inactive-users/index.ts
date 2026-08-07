@@ -6,7 +6,7 @@ const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
 
 // EmailJS configuration
 const EMAILJS_PUBLIC_KEY = 'uF5gBRgWvS-o3wTjZ'
-const EMAILJS_SERVICE_ID = 'service_3e0s0ad'
+const EMAILJS_SERVICE_ID = 'service_yn3gq3m'
 const EMAILJS_TEMPLATE_ID = 'template_7xm80oj'
 const EMAILJS_PRIVATE_KEY = Deno.env.get('EMAILJS_PRIVATE_KEY') || ''
 

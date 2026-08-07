@@ -6,105 +6,70 @@ const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
 
 // EmailJS configuration
 const EMAILJS_PUBLIC_KEY = 'uF5gBRgWvS-o3wTjZ'
-const EMAILJS_SERVICE_ID = 'service_3e0s0ad'
+const EMAILJS_SERVICE_ID = 'service_yn3gq3m'
 const EMAILJS_TEMPLATE_ID = 'template_7xm80oj'
 const EMAILJS_PRIVATE_KEY = Deno.env.get('EMAILJS_PRIVATE_KEY') || ''
 
 serve(async (req) => {
   try {
-    // Initialize Supabase client with service role key for admin access
-    const supabase = createClient(supabaseUrl, supabaseServiceKey)
-
-    // Get all users
-    const { data: authUsers, error: authUsersError } = await supabase.auth.admin.listUsers()
+    // Get the user email from request body
+    const { email } = await req.json()
     
-    if (authUsersError) throw authUsersError
-    if (!authUsers || !authUsers.users) {
-      return new Response(JSON.stringify({ message: 'No users found' }), { status: 200 })
-    }
-
-    const results = []
-    let sentCount = 0
-    let skippedCount = 0
-    const bccEmails: string[] = []
-
-    for (const user of authUsers.users) {
-      // Check if user has opted out of marketing
-      const marketingOptOut = user.user_metadata?.marketing_opt_out === true
-      
-      if (marketingOptOut) {
-        skippedCount++
-        continue
-      }
-
-      const email = user.email
-      if (!email) {
-        skippedCount++
-        continue
-      }
-
-      bccEmails.push(email)
-    }
-
-    // Send single welcome email with BCC list
-    if (bccEmails.length > 0) {
-      const emailContent = generateWelcomeEmailHTML()
-      
-      const requestBody: any = {
-        service_id: EMAILJS_SERVICE_ID,
-        template_id: EMAILJS_TEMPLATE_ID,
-        user_id: EMAILJS_PUBLIC_KEY,
-        template_params: {
-          toemail: 'noreply.jamestheakston@gmail.com',
-          bcc: bccEmails.join(','),
-          fromname: 'Knot',
-          subject: 'Welcome to Knot',
-          email_content: emailContent
-        }
-      }
-
-      // Add private key if available for server-side authentication
-      if (EMAILJS_PRIVATE_KEY) {
-        requestBody.accessToken = EMAILJS_PRIVATE_KEY
-      }
-      
-      const response = await fetch('https://api.emailjs.com/api/v1.0/email/send', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(requestBody)
+    if (!email) {
+      return new Response(JSON.stringify({ error: 'Email is required' }), {
+        headers: { 'Content-Type': 'application/json' },
+        status: 400
       })
+    }
 
-      if (response.ok) {
-        sentCount = bccEmails.length
-        bccEmails.forEach(email => {
-          results.push({
-            email: email,
-            status: 'sent'
-          })
-        })
-      } else {
-        bccEmails.forEach(email => {
-          results.push({
-            email: email,
-            status: 'failed',
-            error: response.statusText
-          })
-        })
+    // Send welcome email to single user
+    const emailContent = generateWelcomeEmailHTML()
+    
+    const requestBody: any = {
+      service_id: EMAILJS_SERVICE_ID,
+      template_id: EMAILJS_TEMPLATE_ID,
+      user_id: EMAILJS_PUBLIC_KEY,
+      template_params: {
+        toemail: email,
+        fromname: 'Knot',
+        subject: 'Welcome to Knot',
+        email_content: emailContent
       }
     }
 
-    return new Response(JSON.stringify({ 
-      message: 'Welcome email campaign completed',
-      totalUsers: authUsers.users.length,
-      sent: sentCount,
-      skipped: skippedCount,
-      results: results 
-    }), {
-      headers: { 'Content-Type': 'application/json' },
-      status: 200
+    // Add private key if available for server-side authentication
+    if (EMAILJS_PRIVATE_KEY) {
+      requestBody.accessToken = EMAILJS_PRIVATE_KEY
+    }
+    
+    const response = await fetch('https://api.emailjs.com/api/v1.0/email/send', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(requestBody)
     })
+
+    if (response.ok) {
+      return new Response(JSON.stringify({ 
+        message: 'Welcome email sent successfully',
+        email: email,
+        status: 'sent'
+      }), {
+        headers: { 'Content-Type': 'application/json' },
+        status: 200
+      })
+    } else {
+      return new Response(JSON.stringify({ 
+        message: 'Failed to send welcome email',
+        email: email,
+        status: 'failed',
+        error: response.statusText
+      }), {
+        headers: { 'Content-Type': 'application/json' },
+        status: 500
+      })
+    }
 
   } catch (error) {
     console.error('Error in send-welcome-email function:', error)
