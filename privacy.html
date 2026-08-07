@@ -540,7 +540,7 @@
       <li>Account profile information (name, email, avatar)</li>
     </ul>
     <div class="highlight-box">
-      <p><strong>Security Notice:</strong> Storing authentication tokens in localStorage is vulnerable to cross-site scripting (XSS) attacks. If malicious code is executed on your device, these tokens could potentially be accessed. We implement this approach for user convenience, but you should be aware of this security trade-off. For enhanced security, consider using a dedicated browser profile or clearing your localStorage after each session if you share your device.</p>
+      <p><strong>Security Notice:</strong> Storing authentication tokens in localStorage is vulnerable to cross-site scripting (XSS) attacks. If malicious code is executed on your device, these tokens could potentially be accessed. We implement this approach for user convenience, but you should be aware of this security trade-off. For enhanced security, consider using our Tight Security feature, which provides additional protection against XSS attacks, or using a dedicated browser profile or clearing your localStorage after each session if you share your device.</p>
     </div>
     <p>Session tokens are automatically refreshed by Supabase when they expire, and the updated tokens are stored in localStorage. When you remove an account from the account switcher, the associated session tokens are deleted from localStorage. When you log out of an account, the Supabase session is revoked and the tokens are removed.</p>
   </div>
