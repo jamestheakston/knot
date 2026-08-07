@@ -1837,6 +1837,21 @@
           // User is automatically logged in, join the pod via RPC
           console.log('User has session, joining pod via RPC');
           showToast('Account created! Joining pod...');
+          
+          // Send welcome email
+          try{
+            await fetch('https://mfjtdrqvmuwtoarkiezi.supabase.co/functions/v1/send-welcome-email', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1manRkcnF2bXV3dG9hcmtpZXppIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4MzIwNTg2OCwiZXhwIjoyMDk4NzgxODY4fQ.k3Ufm_HHMdPraOeBqldlRp_AUeZvTef87faGj8YmoxY'
+              },
+              body: JSON.stringify({ email: email })
+            });
+          }catch(emailErr){
+            console.error('Failed to send welcome email:', emailErr);
+          }
+          
           var { data: joinResult, error: joinError } = await client.rpc('join_pod_via_invite_code', { invite_code_param: code });
           
           console.log('Join RPC result:', joinResult, joinError);
@@ -1940,6 +1955,21 @@
 
         if(authData.session){
           // User is automatically logged in, create pod immediately
+          
+          // Send welcome email
+          try{
+            await fetch('https://mfjtdrqvmuwtoarkiezi.supabase.co/functions/v1/send-welcome-email', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1manRkcnF2bXV3dG9hcmtpZXppIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4MzIwNTg2OCwiZXhwIjoyMDk4NzgxODY4fQ.k3Ufm_HHMdPraOeBqldlRp_AUeZvTef87faGj8YmoxY'
+              },
+              body: JSON.stringify({ email: email })
+            });
+          }catch(emailErr){
+            console.error('Failed to send welcome email:', emailErr);
+          }
+          
           localStorage.setItem('pendingPodCreation', JSON.stringify({
             ...podDataToStore,
             timestamp: Date.now()
