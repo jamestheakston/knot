@@ -154,12 +154,29 @@
       </ul>
     </div>
 
+    <div class="success-box">
+      <h3>Account Recovery Available</h3>
+      <p>We have also sent you a recovery link via email. You can use this link to restore your account even if you close this page.</p>
+      
+      <p><strong>Your Recovery Link:</strong></p>
+      <div class="recovery-link" id="recoveryLink">Loading...</div>
+      
+      <p><strong>Important:</strong></p>
+      <ul>
+        <li>This recovery link will expire in 24 hours</li>
+        <li>Only you can use this link to recover your account</li>
+        <li>Keep this link private and secure</li>
+        <li>After recovery, your account will be restored exactly as it was</li>
+      </ul>
+    </div>
+
     <div class="warning">
       <strong>Cancel Deletion:</strong> If you change your mind, click the button below to cancel the deletion request and restore your account access.
     </div>
 
     <div class="divider"></div>
 
+    <button onclick="copyRecoveryLink()">Copy Recovery Link</button>
     <button onclick="cancelDeletion()">Cancel Deletion Request</button>
     <button class="secondary" onclick="window.location.href='https://knotapp.pages.dev/index.html'">Go to Homepage</button>
 
@@ -185,6 +202,10 @@
     var isPending = urlParams.get('pending') === 'true';
 
     if (recoveryId && isPending) {
+      // Show recovery link
+      var recoveryLink = 'https://knotapp.pages.dev/account/deletion/recover.html?type=account&id=' + recoveryId;
+      document.getElementById('recoveryLink').textContent = recoveryLink;
+      
       // Get deletion timestamp from localStorage
       var deletionTimestamp = localStorage.getItem('account_deletion_timestamp_' + recoveryId);
       
@@ -198,6 +219,9 @@
         
         // Store recovery ID for cancel function
         window.currentRecoveryId = recoveryId;
+        
+        // Send recovery email
+        sendRecoveryEmail(recoveryId, expiryDate);
       } else {
         document.getElementById('countdown').textContent = 'Error: Deletion timestamp not found';
       }
@@ -314,6 +338,59 @@
               }
             });
         });
+    }
+
+    function sendRecoveryEmail(recoveryId, expiryDate) {
+      // Get deletion request details
+      supabase.from('account_deletion_requests')
+        .select('*')
+        .eq('recovery_id', recoveryId)
+        .eq('status', 'deleted')
+        .single()
+        .then(function({ data: deletionRequest, error }) {
+          if (!error && deletionRequest) {
+            var formattedExpiry = expiryDate.toLocaleString('en-US', { 
+              weekday: 'long',
+              year: 'numeric', 
+              month: 'long', 
+              day: 'numeric',
+              hour: '2-digit',
+              minute: '2-digit'
+            });
+            
+            // Send recovery email
+            if (typeof sendAccountRecoveryEmail === 'function') {
+              sendAccountRecoveryEmail(deletionRequest.email, recoveryId, formattedExpiry, deletionRequest.user_id);
+            }
+          }
+        });
+    }
+
+    function copyRecoveryLink() {
+      var recoveryLink = document.getElementById('recoveryLink').textContent;
+      if (recoveryLink && recoveryLink !== 'Loading...' && recoveryLink !== 'Error: No recovery ID provided') {
+        navigator.clipboard.writeText(recoveryLink).then(function() {
+          var messageDiv = document.getElementById('message');
+          messageDiv.innerHTML = '<div class="success-box" style="margin: 10px 0; padding: 10px;">Recovery link copied to clipboard!</div>';
+          setTimeout(function() {
+            messageDiv.innerHTML = '';
+          }, 3000);
+        }).catch(function(err) {
+          // Fallback for older browsers
+          var textArea = document.createElement('textarea');
+          textArea.value = recoveryLink;
+          document.body.appendChild(textArea);
+          textArea.select();
+          document.execCommand('copy');
+          document.body.removeChild(textArea);
+          
+          var messageDiv = document.getElementById('message');
+          messageDiv.innerHTML = '<div class="success-box" style="margin: 10px 0; padding: 10px;">Recovery link copied to clipboard!</div>';
+          setTimeout(function() {
+            messageDiv.innerHTML = '';
+          }, 3000);
+        });
+      }
     }
   </script>
 </body>
