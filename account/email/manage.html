@@ -68,6 +68,24 @@
       letter-spacing: -0.01em;
     }
 
+    .page-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 8px;
+    }
+
+    .beta-label {
+      background: var(--blue);
+      color: white;
+      padding: 4px 12px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
     .subtitle {
       font-size: 15px;
       color: var(--muted);
@@ -214,7 +232,10 @@
       Back to Dashboard
     </a>
 
-    <h1>Email Preferences</h1>
+    <div class="page-header">
+      <h1>Email Preferences</h1>
+      <span class="beta-label">Beta</span>
+    </div>
     <p class="subtitle">Manage your email communication preferences</p>
 
     <div id="loading" class="loading">Loading your preferences...</div>
@@ -271,6 +292,10 @@
         </div>
         <div class="disabled-message">You cannot disable account management emails as they are essential for account operations</div>
       </div>
+    </div>
+
+    <div style="text-align: center; margin-top: 40px; padding-top: 20px; border-top: 1px solid var(--line);">
+      <p style="font-size: 13px; color: var(--muted-2);">Powered by Knot Email</p>
     </div>
   </div>
 
