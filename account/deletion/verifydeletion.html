@@ -312,8 +312,26 @@
                 }
 
                 // Perform soft deletion of user data
-                performSoftDeletion(currentUser.id, deletionRequest.id).then(function(deletionResult) {
+                performSoftDeletion(currentUser.id, deletionRequest.id).then(async function(deletionResult) {
                   if (deletionResult.success) {
+                    // Delete user from Supabase auth
+                    try {
+                      var authDeleteResponse = await fetch('https://mfjtdrqvmuwtoarkiezi.supabase.co/functions/v1/delete-user-auth', {
+                        method: 'POST',
+                        headers: {
+                          'Content-Type': 'application/json',
+                          'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1manRkcnF2bXV3dG9hcmtpZXppIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4MzIwNTg2OCwiZXhwIjoyMDk4NzgxODY4fQ.k3Ufm_HHMdPraOeBqldlRp_AUeZvTef87faGj8YmoxY'
+                        },
+                        body: JSON.stringify({ userId: currentUser.id })
+                      });
+                      
+                      var authDeleteResult = await authDeleteResponse.json();
+                      console.log('Auth deletion result:', authDeleteResult);
+                    } catch (authErr) {
+                      console.error('Failed to delete from auth:', authErr);
+                      // Continue anyway - soft deletion succeeded
+                    }
+                    
                     // Redirect to account deleted page
                     window.location.href = 'https://knotapp.pages.dev/account/deletion/accountdeleted.html?id=' + recoveryId;
                   } else {
