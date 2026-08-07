@@ -33,10 +33,11 @@ serve(async (req) => {
     sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7)
 
     for (const user of authUsers.users) {
-      // Check if user has opted out of marketing
+      // Check if user has opted out of marketing or pod activity emails
       const marketingOptOut = user.user_metadata?.marketing_opt_out === true
+      const podActivityOptOut = user.user_metadata?.pod_activity_opt_out === true
       
-      if (marketingOptOut) {
+      if (marketingOptOut || podActivityOptOut) {
         skippedCount++
         continue
       }

@@ -103,10 +103,10 @@ serve(async (req) => {
       if (usersWhoMissed.length > 0 && usersWhoMissed.length < users.length) {
         // Some users missed, but not all - send streak broken email to those who missed
         for (const user of usersWhoMissed) {
-          // Check if user has opted out of pod activity emails
+          // Check if user has opted out of pod activity emails or marketing communications
           const userMetadata = userMetadataMap.get(user.user_id) || {}
-          if (userMetadata.pod_activity_opt_out === true) {
-            console.log(`Skipping email to ${user.email} - user opted out of pod activity emails`)
+          if (userMetadata.pod_activity_opt_out === true || userMetadata.marketing_opt_out === true) {
+            console.log(`Skipping email to ${user.email} - user opted out of pod activity or marketing emails`)
             continue
           }
           
@@ -145,10 +145,10 @@ serve(async (req) => {
       } else if (usersWhoMissed.length === users.length && usersWhoMissed.length > 0) {
         // Everyone missed - send everyone missed email to all users
         for (const user of users) {
-          // Check if user has opted out of pod activity emails
+          // Check if user has opted out of pod activity emails or marketing communications
           const userMetadata = userMetadataMap.get(user.user_id) || {}
-          if (userMetadata.pod_activity_opt_out === true) {
-            console.log(`Skipping email to ${user.email} - user opted out of pod activity emails`)
+          if (userMetadata.pod_activity_opt_out === true || userMetadata.marketing_opt_out === true) {
+            console.log(`Skipping email to ${user.email} - user opted out of pod activity or marketing emails`)
             continue
           }
           
