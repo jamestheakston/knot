@@ -380,7 +380,7 @@
   <div class="page-header">
     <h1>Privacy Policy</h1>
     <p>Your privacy is important to us. This policy explains how we collect, use, and protect your information.</p>
-    <p class="last-updated">Last updated: July 25, 2026</p>
+    <p class="last-updated">Last updated: August 7, 2026</p>
   </div>
 
   <div class="content-section">
@@ -421,8 +421,12 @@
       <li>Pod invitation notifications</li>
       <li>Login security alerts</li>
       <li>Pod deletion confirmations</li>
-      <li>Service updates and announcements (optional)</li>
+      <li>Password reset emails</li>
+      <li>Streak notifications (when pod members miss check-ins)</li>
+      <li>Inactive user reminders (when users haven't checked in for 7+ days)</li>
+      <li>Marketing communications (optional, user-controlled)</li>
     </ul>
+    <p>You have control over your email preferences through our Email Preferences settings. By default, marketing communications are enabled, but you may opt out at any time. Pod activity notifications (including streak notifications and inactive user reminders) are controlled by the Marketing Communications toggle, as these are considered promotional in nature. Essential account emails (verification, security, password reset) cannot be disabled.</p>
 
     <h3>1.5 Cookies and Tracking Technologies</h3>
     <p>We use cookies and similar technologies to:</p>
@@ -440,11 +444,20 @@
     <ul>
       <li>Provide and maintain the Knot service</li>
       <li>Process your check-ins and display them to your pod members</li>
-      <li>Send you notifications about pod activity (if enabled)</li>
+      <li>Send you notifications about pod activity (if enabled via Marketing Communications toggle)</li>
       <li>Authenticate your account and secure your data</li>
       <li>Improve our service and develop new features</li>
       <li>Communicate with you about service updates</li>
+      <li>Send welcome emails after account creation</li>
+      <li>Send password reset emails when requested</li>
+      <li>Send streak notifications when pod members miss check-ins (if Marketing Communications enabled)</li>
+      <li>Send inactive user reminders when you haven't checked in for 7+ days (if Marketing Communications enabled)</li>
     </ul>
+    
+    <h3>2.1 Email Preferences Control</h3>
+    <p>You have full control over your email communication preferences through our Email Preferences settings page. By default, Marketing Communications are enabled, which includes pod activity notifications (streak notifications and inactive user reminders). You may opt out of Marketing Communications at any time by toggling the setting off in your Email Preferences page. This change will take effect immediately and will prevent future pod activity emails from being sent to you.</p>
+    <p>Essential account emails (account verification, security alerts, password reset emails, account deletion confirmations) cannot be disabled as they are necessary for account security and operation. These emails will always be sent regardless of your Marketing Communications preference.</p>
+    <p>Your email preference status is stored as part of your user metadata in Supabase Auth and is respected by our email sending functions to ensure your preferences are honored.</p>
   </div>
 
   <div class="content-section">
@@ -466,16 +479,21 @@
     <p>Supabase processes your data in accordance with their own privacy policy. You can review the <a href="https://supabase.com/privacy" target="_blank" rel="noopener noreferrer">Supabase Privacy Policy</a> for more information about how they handle your data.</p>
     
     <h4>EmailJS</h4>
-    <p>We use EmailJS for sending transactional emails, including:</p>
+    <p>We use EmailJS for sending transactional and promotional emails, including:</p>
     <ul>
+      <li>Welcome emails after account creation</li>
       <li>Pod invitation emails</li>
       <li>Login security notifications</li>
       <li>Pod deletion confirmations</li>
+      <li>Password reset emails (via Supabase Auth)</li>
+      <li>Streak notifications (when pod members miss check-ins)</li>
+      <li>Inactive user reminders (when users haven't checked in for 7+ days)</li>
+      <li>Marketing communications (if enabled by user)</li>
     </ul>
-    <p>EmailJS processes email content and recipient information to deliver these emails. You can review the <a href="https://www.emailjs.com/legal/privacy-policy/" target="_blank" rel="noopener noreferrer">EmailJS Privacy Policy</a> for more information about their data practices.</p>
+    <p>EmailJS processes email content and recipient information to deliver these emails. We send emails through EmailJS using our service account credentials. You can review the <a href="https://www.emailjs.com/legal/privacy-policy/" target="_blank" rel="noopener noreferrer">EmailJS Privacy Policy</a> for more information about their data practices.</p>
     
-    <h4>Custom Captcha System</h4>
-    <p>We use a custom-built captcha system ("Knot Captcha") for bot prevention and security verification. This system operates entirely within your browser and does not send any personal information to external captcha services. The captcha challenge involves an interactive drag-to-verify task that is processed locally.</p>
+    <h4>Custom Knot Captcha System</h4>
+    <p>We use a custom-built captcha system ("Knot Captcha") for bot prevention and security verification. This system operates entirely within your browser and does not send any personal information to external captcha services. The captcha challenge involves an interactive drag-to-verify task that is processed locally. No captcha data is transmitted to third-party services or stored on our servers beyond the verification result (success/failure).</p>
     
     <h4>GTranslate (Translation Service)</h4>
     <p>We use GTranslate to provide website translation functionality, allowing users to translate our content into multiple languages for better accessibility. GTranslate processes page content to provide translated versions of our website. We use this service to make our platform accessible to users who prefer to read content in languages other than English. You can review the <a href="https://gtranslate.io/privacy-policy" target="_blank" rel="noopener noreferrer">GTranslate Privacy Policy</a> for more information about their data practices.</p>
@@ -528,16 +546,24 @@
   <div class="content-section">
     <h2>5. Data Retention</h2>
     <h3>5.1 Account Data</h3>
-    <p>We retain your account information for as long as your account is active. If you delete your account, we will delete your personal information within 30 days, except as required by law or for legitimate business purposes.</p>
+    <p>We retain your account information for as long as your account is active. When you request account deletion, we implement a two-stage deletion process:</p>
+    <ul>
+      <li><strong>Stage 1 - Soft Deletion:</strong> Your account data is marked as deleted in our database using soft deletion flags. This includes your user profile, pod memberships, check-ins, and associated data. This data remains in our database for a period of 30 days to allow for recovery if needed.</li>
+      <li><strong>Stage 2 - Hard Deletion:</strong> Simultaneously with soft deletion, we permanently delete your authentication credentials from Supabase Auth, rendering your account inaccessible. This hard deletion is irreversible.</li>
+    </ul>
+    <p>After the 30-day recovery period, soft-deleted data may be permanently removed from our systems, except as required by law or for legitimate business purposes such as security auditing and compliance.</p>
 
     <h3>5.2 Pod and Check-in Data</h3>
-    <p>Pod and check-in data is retained to maintain the accountability history of your pod. If you leave a pod, your historical check-in data remains visible to pod members for transparency and accountability purposes. You may request deletion of this data by contacting us, but this may affect the integrity of your pod's tracking history.</p>
+    <p>Pod and check-in data is retained to maintain the accountability history of your pod. If you leave a pod, your historical check-in data remains visible to pod members for transparency and accountability purposes. When you delete your account, your check-in data is soft-deleted as described above. You may request immediate deletion of this data by contacting us, but this may affect the integrity of your pod's tracking history.</p>
     
     <h3>5.3 Email Logs</h3>
-    <p>Email delivery logs are retained for up to 90 days for troubleshooting and security purposes. Email content is not stored beyond what is necessary for delivery.</p>
+    <p>Email delivery logs are retained for up to 90 days for troubleshooting and security purposes. Email content is not stored beyond what is necessary for delivery through EmailJS. We track which types of emails have been sent to prevent duplicate notifications, but this tracking data does not include email content.</p>
     
     <h3>5.4 Security Logs</h3>
-    <p>Security logs, including login attempts and authentication events, are retained for up to 180 days for security monitoring and incident response purposes.</p>
+    <p>Security logs, including login attempts, authentication events, and account switching activities, are retained for up to 180 days for security monitoring and incident response purposes.</p>
+    
+    <h3>5.5 Email Preference Data</h3>
+    <p>Your email communication preferences (marketing opt-out status) are stored as part of your user metadata in Supabase Auth. This data is retained for as long as your account exists and is deleted when your account is permanently deleted.</p>
   </div>
 
   <div class="content-section">
@@ -578,7 +604,7 @@
       <li>Adequacy decisions from relevant data protection authorities</li>
       <li>Other legally recognized transfer mechanisms</li>
     </ul>
-    <p>Our third-party service providers (Supabase, EmailJS, hCaptcha) may also process data in various jurisdictions. We only use providers that maintain adequate data protection standards.</p>
+    <p>Our third-party service providers (Supabase, EmailJS, GTranslate) may also process data in various jurisdictions. We only use providers that maintain adequate data protection standards and comply with GDPR and other applicable data protection regulations.</p>
   </div>
 
   <div class="content-section">
