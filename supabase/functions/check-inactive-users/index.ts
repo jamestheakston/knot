@@ -8,6 +8,7 @@ const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
 const EMAILJS_PUBLIC_KEY = 'uF5gBRgWvS-o3wTjZ'
 const EMAILJS_SERVICE_ID = 'service_3e0s0ad'
 const EMAILJS_TEMPLATE_ID = 'template_7xm80oj'
+const EMAILJS_PRIVATE_KEY = Deno.env.get('EMAILJS_PRIVATE_KEY') || ''
 
 serve(async (req) => {
   try {
@@ -85,23 +86,30 @@ serve(async (req) => {
     if (bccEmails.length > 0) {
       const emailContent = generateNotWorkingEmailHTML()
       
+      const requestBody: any = {
+        service_id: EMAILJS_SERVICE_ID,
+        template_id: EMAILJS_TEMPLATE_ID,
+        user_id: EMAILJS_PUBLIC_KEY,
+        template_params: {
+          toemail: 'noreply.jamestheakston@gmail.com',
+          bcc: bccEmails.join(','),
+          fromname: 'Knot',
+          subject: 'Is Knot working for you?',
+          email_content: emailContent
+        }
+      }
+
+      // Add private key if available for server-side authentication
+      if (EMAILJS_PRIVATE_KEY) {
+        requestBody.accessToken = EMAILJS_PRIVATE_KEY
+      }
+      
       const response = await fetch('https://api.emailjs.com/api/v1.0/email/send', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          service_id: EMAILJS_SERVICE_ID,
-          template_id: EMAILJS_TEMPLATE_ID,
-          user_id: EMAILJS_PUBLIC_KEY,
-          template_params: {
-            toemail: 'noreply.jamestheakston@gmail.com',
-            bcc: bccEmails.join(','),
-            fromname: 'Knot',
-            subject: 'Is Knot working for you?',
-            email_content: emailContent
-          }
-        })
+        body: JSON.stringify(requestBody)
       })
 
       if (response.ok) {

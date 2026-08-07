@@ -8,6 +8,7 @@ const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
 const EMAILJS_PUBLIC_KEY = 'uF5gBRgWvS-o3wTjZ'
 const EMAILJS_SERVICE_ID = 'service_3e0s0ad'
 const EMAILJS_TEMPLATE_ID = 'template_7xm80oj'
+const EMAILJS_PRIVATE_KEY = Deno.env.get('EMAILJS_PRIVATE_KEY') || ''
 
 // Delay function to respect EmailJS rate limit (1 request per second)
 function delay(ms: number) {
@@ -237,22 +238,29 @@ async function calculatePodMissCount(supabase: any, podId: string, frequency: st
 async function sendStreakBrokenEmail(email: string, podName: string, podDayMissCount: number): Promise<void> {
   const emailContent = generateStreakBrokenEmailHTML(podName, podDayMissCount)
   
+  const requestBody: any = {
+    service_id: EMAILJS_SERVICE_ID,
+    template_id: EMAILJS_TEMPLATE_ID,
+    user_id: EMAILJS_PUBLIC_KEY,
+    template_params: {
+      toemail: email,
+      fromname: 'Knot',
+      subject: 'You broke the streak',
+      email_content: emailContent
+    }
+  }
+
+  // Add private key if available for server-side authentication
+  if (EMAILJS_PRIVATE_KEY) {
+    requestBody.accessToken = EMAILJS_PRIVATE_KEY
+  }
+  
   const response = await fetch('https://api.emailjs.com/api/v1.0/email/send', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({
-      service_id: EMAILJS_SERVICE_ID,
-      template_id: EMAILJS_TEMPLATE_ID,
-      user_id: EMAILJS_PUBLIC_KEY,
-      template_params: {
-        toemail: email,
-        fromname: 'Knot',
-        subject: 'You broke the streak',
-        email_content: emailContent
-      }
-    })
+    body: JSON.stringify(requestBody)
   })
 
   if (!response.ok) {
@@ -266,22 +274,29 @@ async function sendStreakBrokenEmail(email: string, podName: string, podDayMissC
 async function sendEveryoneMissedEmail(email: string, podName: string, podDayMissCount: number): Promise<void> {
   const emailContent = generateEveryoneMissedEmailHTML(podName, podDayMissCount)
   
+  const requestBody: any = {
+    service_id: EMAILJS_SERVICE_ID,
+    template_id: EMAILJS_TEMPLATE_ID,
+    user_id: EMAILJS_PUBLIC_KEY,
+    template_params: {
+      toemail: email,
+      fromname: 'Knot',
+      subject: 'Pod inactivity notice',
+      email_content: emailContent
+    }
+  }
+
+  // Add private key if available for server-side authentication
+  if (EMAILJS_PRIVATE_KEY) {
+    requestBody.accessToken = EMAILJS_PRIVATE_KEY
+  }
+  
   const response = await fetch('https://api.emailjs.com/api/v1.0/email/send', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({
-      service_id: EMAILJS_SERVICE_ID,
-      template_id: EMAILJS_TEMPLATE_ID,
-      user_id: EMAILJS_PUBLIC_KEY,
-      template_params: {
-        toemail: email,
-        fromname: 'Knot',
-        subject: 'Pod inactivity notice',
-        email_content: emailContent
-      }
-    })
+    body: JSON.stringify(requestBody)
   })
 
   if (!response.ok) {
