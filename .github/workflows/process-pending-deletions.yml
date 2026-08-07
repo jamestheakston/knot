@@ -1,0 +1,21 @@
+name: Process Pending Account Deletions
+
+on:
+  schedule:
+    # Run every hour at minute 0
+    - cron: '0 * * * *'
+  workflow_dispatch: # Allow manual triggering
+
+jobs:
+  process-deletions:
+    name: Process Pending Deletions
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Call Supabase Function
+        run: |
+          curl -X POST \
+            'https://mfjtdrqvmuwtoarkiezi.supabase.co/functions/v1/process-pending-deletions' \
+            -H 'Content-Type: application/json' \
+            -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1manRkcnF2bXV3dG9hcmtpZXppIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4MzIwNTg2OCwiZXhwIjoyMDk4NzgxODY4fQ.k3Ufm_HHMdPraOeBqldlRp_AUeZvTef87faGj8YmoxY' \
+            -d '{}'
