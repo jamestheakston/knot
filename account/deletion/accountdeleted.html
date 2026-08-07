@@ -134,34 +134,33 @@
     <div style="text-align: center; margin-bottom: 20px;">
       <img src="https://upload.wikimedia.org/wikipedia/commons/2/2c/Oxygen480-actions-edit-delete.svg" alt="Delete Icon" style="width: 48px; height: 48px;">
     </div>
-    <h1>Account Deleted</h1>
+    <h1>Account Deletion Pending</h1>
 
-    <p>Your Knot account has been successfully deleted.</p>
+    <p>Your Knot account deletion request has been verified and is now pending.</p>
 
     <div class="success-box">
-      <h3>Account Recovery Available</h3>
-      <p>Good news! Your account can be reactivated. We have generated a unique recovery link for you. Save this link safely - it will allow you to restore your account and all your data.</p>
+      <h3>24-Hour Waiting Period</h3>
+      <p>For your security, we have implemented a 24-hour waiting period before permanently deleting your account. This gives you time to cancel the request if you change your mind.</p>
       
-      <p><strong>Your Recovery Link:</strong></p>
-      <div class="recovery-link" id="recoveryLink">Loading...</div>
+      <p><strong>Time Remaining:</strong></p>
+      <div style="font-size: 24px; font-weight: bold; color: #cc0000; margin: 15px 0;" id="countdown">Loading...</div>
       
-      <p><strong>Important:</strong></p>
+      <p><strong>What happens next:</strong></p>
       <ul>
-        <li>This recovery link will expire in 24 hours</li>
-        <li>Only you can use this link to recover your account</li>
-        <li>Keep this link private and secure</li>
-        <li>After recovery, your account will be restored exactly as it was</li>
-        <li>We have also sent this recovery link to your email - please check your spam folder if you don't see it</li>
+        <li>After 24 hours, your account will be permanently deleted from our authentication system</li>
+        <li>Your account will become inaccessible and cannot be recovered</li>
+        <li>Your data will be soft-deleted and retained for 30 days for compliance purposes</li>
+        <li>You can cancel this request at any time during the 24-hour period</li>
       </ul>
     </div>
 
     <div class="warning">
-      If you did not request to delete your account, please use the recovery link above immediately to restore your account.
+      <strong>Cancel Deletion:</strong> If you change your mind, click the button below to cancel the deletion request and restore your account access.
     </div>
 
     <div class="divider"></div>
 
-    <button onclick="copyRecoveryLink()">Copy Recovery Link</button>
+    <button onclick="cancelDeletion()">Cancel Deletion Request</button>
     <button class="secondary" onclick="window.location.href='https://knotapp.pages.dev/index.html'">Go to Homepage</button>
 
     <div id="message"></div>
@@ -174,22 +173,36 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
-  <script src="/api/mail.js"></script>
   <script>
-    // Supabase configuration (from dashboard.html)
+    // Supabase configuration
     var supabaseUrl = 'https://mfjtdrqvmuwtoarkiezi.supabase.co';
     var supabaseKey = 'sb_publishable_SPhsUI31nYbrrLjPBAaRBw_OkWQ2_Xn';
     var supabase = supabase.createClient(supabaseUrl, supabaseKey);
-    
-    // Make supabase available globally for mail.js
-    window.supabase = supabase;
 
-    // Get the recovery ID from URL parameter
+    // Get the recovery ID and pending status from URL parameters
     var urlParams = new URLSearchParams(window.location.search);
     var recoveryId = urlParams.get('id');
+    var isPending = urlParams.get('pending') === 'true';
 
-    if (recoveryId) {
+    if (recoveryId && isPending) {
+      // Get deletion timestamp from localStorage
+      var deletionTimestamp = localStorage.getItem('account_deletion_timestamp_' + recoveryId);
+      
+      if (deletionTimestamp) {
+        var deletionDate = new Date(deletionTimestamp);
+        var expiryDate = new Date(deletionDate.getTime() + 24 * 60 * 60 * 1000);
+        
+        // Start countdown
+        updateCountdown(expiryDate);
+        setInterval(function() { updateCountdown(expiryDate); }, 1000);
+        
+        // Store recovery ID for cancel function
+        window.currentRecoveryId = recoveryId;
+      } else {
+        document.getElementById('countdown').textContent = 'Error: Deletion timestamp not found';
+      }
+    } else if (recoveryId && !isPending) {
+      // Handle completed deletion (original recovery link functionality)
       var recoveryLink = 'https://knotapp.pages.dev/account/deletion/recover.html?type=account&id=' + recoveryId;
       document.getElementById('recoveryLink').textContent = recoveryLink;
 
@@ -223,42 +236,84 @@
                     minute: '2-digit'
                   });
                   
-                  // Send recovery email
-                  sendAccountRecoveryEmail(deletionRequest.email, recoveryId, formattedExpiry, deletionRequest.user_id);
+                  // Send recovery email (if mail.js is loaded)
+                  if (typeof sendAccountRecoveryEmail === 'function') {
+                    sendAccountRecoveryEmail(deletionRequest.email, recoveryId, formattedExpiry, deletionRequest.user_id);
+                  }
                 }
               });
           }
         });
     } else {
-      document.getElementById('recoveryLink').textContent = 'Error: No recovery ID provided';
-      document.getElementById('message').innerHTML = '<div class="error">Invalid recovery link. Please contact support if you believe this is an error.</div>';
+      document.getElementById('message').innerHTML = '<div class="error">Invalid deletion request. Please contact support if you believe this is an error.</div>';
     }
 
-    function copyRecoveryLink() {
-      var recoveryLink = document.getElementById('recoveryLink').textContent;
-      if (recoveryLink && recoveryLink !== 'Loading...' && recoveryLink !== 'Error: No recovery ID provided') {
-        navigator.clipboard.writeText(recoveryLink).then(function() {
-          var messageDiv = document.getElementById('message');
-          messageDiv.innerHTML = '<div class="success-box" style="margin: 10px 0; padding: 10px;">Recovery link copied to clipboard!</div>';
-          setTimeout(function() {
-            messageDiv.innerHTML = '';
-          }, 3000);
-        }).catch(function(err) {
-          // Fallback for older browsers
-          var textArea = document.createElement('textarea');
-          textArea.value = recoveryLink;
-          document.body.appendChild(textArea);
-          textArea.select();
-          document.execCommand('copy');
-          document.body.removeChild(textArea);
-          
-          var messageDiv = document.getElementById('message');
-          messageDiv.innerHTML = '<div class="success-box" style="margin: 10px 0; padding: 10px;">Recovery link copied to clipboard!</div>';
-          setTimeout(function() {
-            messageDiv.innerHTML = '';
-          }, 3000);
-        });
+    function updateCountdown(expiryDate) {
+      var now = new Date();
+      var timeLeft = expiryDate - now;
+      
+      if (timeLeft <= 0) {
+        document.getElementById('countdown').textContent = 'Deletion Complete';
+        document.getElementById('countdown').style.color = '#155724';
+        // Disable cancel button
+        var cancelBtn = document.querySelector('button');
+        if (cancelBtn) {
+          cancelBtn.disabled = true;
+          cancelBtn.textContent = 'Deletion Complete';
+          cancelBtn.onclick = null;
+        }
+        return;
       }
+      
+      var hours = Math.floor(timeLeft / (1000 * 60 * 60));
+      var minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+      var seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
+      
+      document.getElementById('countdown').textContent = 
+        hours + 'h ' + minutes + 'm ' + seconds + 's';
+    }
+
+    function cancelDeletion() {
+      if (!window.currentRecoveryId) {
+        document.getElementById('message').innerHTML = '<div class="error">Error: No deletion request found.</div>';
+        return;
+      }
+      
+      var messageDiv = document.getElementById('message');
+      messageDiv.innerHTML = '<div class="loading">Cancelling deletion request...</div>';
+      
+      // Cancel deletion by updating the deletion request status
+      supabase.from('account_deletion_requests')
+        .select('*')
+        .eq('recovery_id', window.currentRecoveryId)
+        .eq('status', 'deleted')
+        .single()
+        .then(function({ data: deletionRequest, error }) {
+          if (error || !deletionRequest) {
+            messageDiv.innerHTML = '<div class="error">Error finding deletion request. Please contact support.</div>';
+            return;
+          }
+          
+          // Update status to cancelled
+          supabase.from('account_deletion_requests')
+            .update({ status: 'cancelled' })
+            .eq('id', deletionRequest.id)
+            .then(function({ error }) {
+              if (error) {
+                messageDiv.innerHTML = '<div class="error">Error cancelling deletion. Please contact support.</div>';
+              } else {
+                // Remove deletion timestamp from localStorage
+                localStorage.removeItem('account_deletion_timestamp_' + window.currentRecoveryId);
+                
+                messageDiv.innerHTML = '<div class="success-box">Deletion request cancelled successfully! Your account is now active again.</div>';
+                
+                // Redirect to dashboard after 3 seconds
+                setTimeout(function() {
+                  window.location.href = 'https://knotapp.pages.dev/dashboard.html';
+                }, 3000);
+              }
+            });
+        });
     }
   </script>
 </body>

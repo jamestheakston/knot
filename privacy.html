@@ -551,9 +551,9 @@
     <p>We retain your account information for as long as your account is active. When you request account deletion, we implement a two-stage deletion process:</p>
     <ul>
       <li><strong>Stage 1 - Soft Deletion:</strong> Your account data is marked as deleted in our database using soft deletion flags. This includes your user profile, pod memberships, check-ins, and associated data. This data remains in our database for a period of 30 days to allow for recovery if needed.</li>
-      <li><strong>Stage 2 - Hard Deletion:</strong> Simultaneously with soft deletion, we permanently delete your authentication credentials from Supabase Auth, rendering your account inaccessible. This hard deletion is irreversible.</li>
+      <li><strong>Stage 2 - Hard Deletion:</strong> Once your account deletion request is verified, we permanently delete your authentication credentials from Supabase Auth after a 24-hour waiting period. This hard deletion is irreversible and renders your account inaccessible.</li>
     </ul>
-    <p>After the 30-day recovery period, soft-deleted data may be permanently removed from our systems, except as required by law or for legitimate business purposes such as security auditing and compliance.</p>
+    <p>The 24-hour waiting period allows you to cancel your deletion request if you change your mind. After the 24-hour period expires, the hard deletion is automatically processed. The soft-deleted data remains in our database for 30 days from the initial deletion request, after which it may be permanently removed from our systems, except as required by law or for legitimate business purposes such as security auditing and compliance.</p>
 
     <h3>5.2 Pod and Check-in Data</h3>
     <p>Pod and check-in data is retained to maintain the accountability history of your pod. If you leave a pod, your historical check-in data remains visible to pod members for transparency and accountability purposes. When you delete your account, your check-in data is soft-deleted as described above. You may request immediate deletion of this data by contacting us, but this may affect the integrity of your pod's tracking history.</p>
