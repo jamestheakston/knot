@@ -43,8 +43,7 @@ serve(async (req) => {
           {
             method: 'POST',
             headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${supabaseServiceKey}`
+              'Content-Type': 'application/json'
             },
             body: JSON.stringify({ userId: deletion.user_id })
           }
