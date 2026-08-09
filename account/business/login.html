@@ -101,6 +101,12 @@
   .text-link:hover{
     color: var(--ink);
   }
+  .text-link.blue-link{
+    color: var(--blue);
+  }
+  .text-link.blue-link:hover{
+    color: var(--blue-bright);
+  }
 
   .btn{
     display: inline-flex;
@@ -350,9 +356,6 @@
       <i data-lucide="link" class="logo-mark" style="color: #2A4BD7;"></i>
       Knot
     </div>
-    <div class="nav-links">
-      <a class="text-link" href="../../login.html">Back to login</a>
-    </div>
   </div>
 </nav>
 
@@ -369,6 +372,13 @@
       <div class="form-group">
         <label class="form-label" for="domain">Company Domain</label>
         <input type="text" id="domain" class="form-input" placeholder="company.knot.app" required>
+      </div>
+      <div class="form-group" id="emailGroup" style="display: none;">
+        <label class="form-label" for="email">Email</label>
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <input type="text" id="email" class="form-input" placeholder="yourname" required>
+          <span style="color: var(--muted); font-size: 15px; white-space: nowrap;">@<span id="domainSuffix">company.knot.app</span></span>
+        </div>
       </div>
       <div class="form-actions">
         <button type="submit" class="btn btn-primary" id="loginBtn">Continue</button>
@@ -396,43 +406,86 @@
     }
 
     var messageDiv = document.getElementById('message');
+    var domainInput = document.getElementById('domain');
+    var emailGroup = document.getElementById('emailGroup');
+    var emailInput = document.getElementById('email');
+    var domainSuffix = document.getElementById('domainSuffix');
+    var step = 1; // Step 1: domain, Step 2: email
+
+    domainInput.addEventListener('input', function(){
+      // Update domain suffix as user types
+      var domain = this.value.trim();
+      if(domain){
+        domainSuffix.textContent = domain;
+      } else {
+        domainSuffix.textContent = 'company.knot.app';
+      }
+    });
 
     document.getElementById('loginForm').addEventListener('submit', async function(e){
       e.preventDefault();
       
-      var domain = document.getElementById('domain').value.trim();
       var btn = document.getElementById('loginBtn');
 
-      if(!domain){
-        messageDiv.innerHTML = '<div class="error">Please enter your company domain.</div>';
-        return;
-      }
-
-      // Basic domain validation
-      if(domain.length < 3){
-        messageDiv.innerHTML = '<div class="error">Domain must be at least 3 characters.</div>';
-        return;
-      }
-
-      setButtonLoading(btn, true);
-      messageDiv.innerHTML = '';
-
-      try{
-        // Store domain in localStorage for next step
-        localStorage.setItem('business_domain', domain);
+      if(step === 1){
+        // Step 1: Validate domain and show email input
+        var domain = domainInput.value.trim();
         
-        // Show success message
-        messageDiv.innerHTML = '<div class="success">Domain verified. Redirecting to login...</div>';
+        if(!domain){
+          messageDiv.innerHTML = '<div class="error">Please enter your company domain.</div>';
+          return;
+        }
+
+        if(domain.length < 3){
+          messageDiv.innerHTML = '<div class="error">Domain must be at least 3 characters.</div>';
+          return;
+        }
+
+        // Show email input
+        domainSuffix.textContent = domain;
+        emailGroup.style.display = 'block';
+        domainInput.disabled = true;
+        btn.textContent = 'Log in';
+        step = 2;
+        messageDiv.innerHTML = '';
         
-        // Redirect to regular login page with business context
-        setTimeout(function(){
-          window.location.href = '../../login.html?business=' + encodeURIComponent(domain);
-        }, 1500);
-        
-      }catch(err){
-        console.error('Business login error:', err);
-        messageDiv.innerHTML = '<div class="error">Error: ' + err.message + '</div>';
-        setButtonLoading(btn, false);
+      } else {
+        // Step 2: Validate email and submit
+        var domain = domainInput.value.trim();
+        var email = emailInput.value.trim();
+        var fullEmail = email + '@' + domain;
+
+        if(!email){
+          messageDiv.innerHTML = '<div class="error">Please enter your email.</div>';
+          return;
+        }
+
+        if(email.length < 1){
+          messageDiv.innerHTML = '<div class="error">Email must be at least 1 character.</div>';
+          return;
+        }
+
+        setButtonLoading(btn, true);
+        messageDiv.innerHTML = '';
+
+        try{
+          // Store domain and full email in localStorage
+          localStorage.setItem('business_domain', domain);
+          localStorage.setItem('business_email', fullEmail);
+          
+          // Show success message
+          messageDiv.innerHTML = '<div class="success">Logging in...</div>';
+          
+          // Redirect to regular login page with business context
+          setTimeout(function(){
+            window.location.href = '../../login.html?business=' + encodeURIComponent(domain) + '&email=' + encodeURIComponent(fullEmail);
+          }, 1000);
+          
+        }catch(err){
+          console.error('Business login error:', err);
+          messageDiv.innerHTML = '<div class="error">Error: ' + err.message + '</div>';
+          setButtonLoading(btn, false);
+        }
       }
     });
 
