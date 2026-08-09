@@ -195,6 +195,38 @@
   .form-input::placeholder{
     color: var(--muted-2);
   }
+  .form-group{
+    transition: all 0.3s ease;
+  }
+  .form-group.hidden{
+    display: none;
+  }
+  .form-group.fade-in{
+    animation: fadeIn 0.3s ease forwards;
+  }
+  .form-group.fade-out{
+    animation: fadeOut 0.3s ease forwards;
+  }
+  @keyframes fadeIn{
+    from{
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    to{
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  @keyframes fadeOut{
+    from{
+      opacity: 1;
+      transform: translateY(0);
+    }
+    to{
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+  }
   .form-actions{
     margin-top: 24px;
   }
@@ -369,11 +401,11 @@
     <div id="message"></div>
 
     <form id="loginForm">
-      <div class="form-group">
+      <div class="form-group" id="domainGroup">
         <label class="form-label" for="domain">Company Domain</label>
         <input type="text" id="domain" class="form-input" placeholder="company.knot.app" required>
       </div>
-      <div class="form-group" id="emailGroup" style="display: none;">
+      <div class="form-group hidden" id="emailGroup">
         <label class="form-label" for="email">Email</label>
         <div style="display: flex; align-items: center; gap: 8px;">
           <input type="text" id="email" class="form-input" placeholder="yourname">
@@ -406,6 +438,7 @@
     }
 
     var messageDiv = document.getElementById('message');
+    var domainGroup = document.getElementById('domainGroup');
     var domainInput = document.getElementById('domain');
     var emailGroup = document.getElementById('emailGroup');
     var emailInput = document.getElementById('email');
@@ -441,13 +474,28 @@
           return;
         }
 
-        // Show email input
-        domainSuffix.textContent = domain;
-        emailGroup.style.display = 'block';
-        domainInput.disabled = true;
-        btn.textContent = 'Log in';
-        step = 2;
-        messageDiv.innerHTML = '';
+        // Animate out domain group
+        domainGroup.classList.add('fade-out');
+        
+        setTimeout(function(){
+          domainGroup.classList.add('hidden');
+          domainGroup.classList.remove('fade-out');
+          
+          // Show email input with animation
+          domainSuffix.textContent = domain;
+          emailGroup.classList.remove('hidden');
+          emailGroup.classList.add('fade-in');
+          
+          domainInput.disabled = true;
+          btn.textContent = 'Log in';
+          step = 2;
+          messageDiv.innerHTML = '';
+          
+          // Focus on email input
+          setTimeout(function(){
+            emailInput.focus();
+          }, 100);
+        }, 300);
         
       } else {
         // Step 2: Validate email and submit
