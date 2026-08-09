@@ -445,6 +445,30 @@
     var domainSuffix = document.getElementById('domainSuffix');
     var step = 1; // Step 1: domain, Step 2: email
 
+    // List of common free/personal email providers
+    var freeEmailProviders = [
+      'gmail.com',
+      'yahoo.com',
+      'hotmail.com',
+      'outlook.com',
+      'aol.com',
+      'icloud.com',
+      'protonmail.com',
+      'mail.com',
+      'yandex.com',
+      'zoho.com',
+      'gmx.com',
+      'live.com',
+      'msn.com'
+    ];
+
+    function isFreeDomain(domain){
+      var lowerDomain = domain.toLowerCase();
+      return freeEmailProviders.some(function(provider){
+        return lowerDomain === provider || lowerDomain.endsWith('.' + provider);
+      });
+    }
+
     domainInput.addEventListener('input', function(){
       // Update domain suffix as user types
       var domain = this.value.trim();
@@ -471,6 +495,12 @@
 
         if(domain.length < 3){
           messageDiv.innerHTML = '<div class="error">Domain must be at least 3 characters.</div>';
+          return;
+        }
+
+        // Check if domain is a free/personal email provider
+        if(isFreeDomain(domain)){
+          messageDiv.innerHTML = '<div class="error">This is business login. Please enter your company domain, not a personal email provider.</div>';
           return;
         }
 
