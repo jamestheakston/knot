@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="description" content="Knot development has been discontinued">
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23C4432A' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><circle cx='12' cy='12' r='10'></circle><line x1='15' y1='9' x2='9' y2='15'></line><line x1='9' y1='9' x2='15' y2='15'></line></svg>">
+<title>Knot — Discontinued</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Work+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@latest"></script>
+<style>
+  :root {
+    --bg: #F7F8FB;
+    --bg-2: #FFFFFF;
+    --bg-3: #EEF1F6;
+    --ink: #151922;
+    --muted: #5B6472;
+    --muted-2: #8890A0;
+    --blue: #2A4BD7;
+    --blue-bright: #1B37AE;
+    --blue-soft: #EAEFFF;
+    --red: #C4432A;
+    --line: rgba(21,25,34,0.10);
+    --line-strong: rgba(21,25,34,0.18);
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'Work Sans', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    line-height: 1.5;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+  h1, h2, h3 {
+    font-family: 'Instrument Serif', serif;
+    font-weight: 400;
+    margin: 0;
+    letter-spacing: -0.01em;
+  }
+  a { color: inherit; text-decoration: none; }
+  ::selection { background: var(--blue); color: #fff; }
+  :focus-visible {
+    outline: 2px solid var(--blue);
+    outline-offset: 3px;
+    border-radius: 4px;
+  }
+  nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    background: var(--bg-2);
+    border-bottom: 1px solid var(--line);
+    z-index: 100;
+  }
+  .nav-inner {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 16px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: 'Instrument Serif', serif;
+    font-size: 22px;
+    font-weight: 400;
+  }
+  .logo-mark {
+    width: 20px;
+    height: 20px;
+  }
+  .discontinued-page {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 120px 24px 40px;
+  }
+  .discontinued-container {
+    width: 100%;
+    max-width: 520px;
+    text-align: center;
+  }
+  .discontinued-icon {
+    width: 64px;
+    height: 64px;
+    background: #fcf0ee;
+    border: 1px solid rgba(196, 67, 42, 0.2);
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 24px;
+    color: var(--red);
+  }
+  .discontinued-icon i {
+    width: 32px;
+    height: 32px;
+  }
+  .discontinued-header h1 {
+    font-size: 42px;
+    margin-bottom: 12px;
+  }
+  .discontinued-header p {
+    color: var(--muted);
+    font-size: 15px;
+    line-height: 1.6;
+    margin-bottom: 0;
+  }
+  .info-section {
+    margin-top: 32px;
+    text-align: left;
+    background: var(--bg-2);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 24px;
+  }
+  .info-section h2 {
+    font-size: 18px;
+    margin-bottom: 16px;
+    color: var(--ink);
+  }
+  .info-section ul {
+    margin: 0;
+    padding-left: 20px;
+    color: var(--muted);
+    font-size: 14px;
+    line-height: 1.7;
+  }
+  .info-section li {
+    margin-bottom: 8px;
+  }
+  .info-section li:last-child {
+    margin-bottom: 0;
+  }
+  .contact-section {
+    margin-top: 24px;
+    padding: 16px;
+    background: var(--bg-3);
+    border-radius: 8px;
+    font-size: 14px;
+    color: var(--muted);
+  }
+  .contact-section a {
+    color: var(--blue);
+    text-decoration: underline;
+  }
+  @media (max-width: 640px) {
+    .discontinued-page {
+      padding: 100px 20px 40px;
+    }
+    .discontinued-header h1 {
+      font-size: 32px;
+    }
+    .discontinued-container {
+      max-width: 100%;
+    }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <div class="logo">
+      <i data-lucide="link" class="logo-mark" style="color: #2A4BD7;"></i>
+      Knot
+    </div>
+  </div>
+</nav>
+
+<div class="discontinued-page">
+  <div class="discontinued-container">
+    <div class="discontinued-icon">
+      <i data-lucide="ban"></i>
+    </div>
+    <div class="discontinued-header">
+      <h1>Development has concluded</h1>
+      <p>Active work on Knot has officially ended. Thank you to everyone who followed and supported the project along the way.</p>
+    </div>
+
+    <div class="info-section">
+      <h2>What this means</h2>
+      <ul>
+        <li>All user data has been permanently deleted in accordance with our privacy policy</li>
+        <li>No new accounts can be created</li>
+        <li>Existing accounts cannot be accessed or recovered</li>
+        <li>All features and services have been discontinued</li>
+        <li>The codebase remains open source for reference</li>
+      </ul>
+    </div>
+
+    <div class="contact-section">
+      If you have questions or need assistance, please contact us at <a href="mailto:jamestheakston2@gmail.com">jamestheakston2@gmail.com</a>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function(){
+    if(typeof lucide !== 'undefined'){
+      lucide.createIcons();
+    }
+  });
+</script>
+
+</body>
+</html>
