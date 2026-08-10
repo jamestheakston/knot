@@ -32,7 +32,7 @@ serve(async (req) => {
       template_params: {
         toemail: email,
         fromname: 'Knot',
-        subject: 'Welcome to Knot',
+        subject: 'Knot has ceased operations',
         email_content: emailContent
       }
     }
@@ -118,12 +118,9 @@ function generateWelcomeEmailHTML(): string {
             <a href="https://knotapp.pages.dev" class="logo">Knot</a>
           </div>
           <div class="content">
-            <h1>Welcome to <em>Knot</em>.</h1>
-            <p>A habit is easier to keep than a promise, when both are shared. Thank you for joining Knot — we're excited to have you as part of our community.</p>
-            <p>Whether you're starting a new pod or joining an existing one, you're now part of a network of people committed to showing up for each other, every single day.</p>
-            <div style="text-align: center;">
-              <a href="https://knotapp.pages.dev/dashboard.html" class="btn-primary">Go to Dashboard</a>
-            </div>
+            <h1><em>Knot</em> has ceased operations.</h1>
+            <p>We regret to inform you that Knot has permanently ceased operations. Thank you for being part of our community.</p>
+            <p>All user data has been permanently deleted in accordance with our privacy policy. If you have any questions or concerns, please contact us.</p>
           </div>
           <div class="footer">
             <p>You received this email because you're a member of Knot.</p>
